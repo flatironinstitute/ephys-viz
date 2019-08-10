@@ -4,6 +4,13 @@ Neurophysiology visualization components deployable to the notebook, web, or des
 
 ## Installation
 
+Prerequisites:
+
+* Linux or OS X
+* Python >= 3.6
+* NodeJS >= 8
+* Yarn
+
 This project uses [reactopya](https://github.com/flatironinstitute/reactopya) and involves code generation. First install reactopya:
 
 ```
