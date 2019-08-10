@@ -2,10 +2,9 @@
 
 Ben Dichter
 
-You can organize visualizations by what data goes into them. For any one plot, you could have 1, 2, or 3 (or maybe more) different types of data that are used to generate that plot each of those data types might be neural recordings, stimuli, or behavior. There are standard ways to visualizesingle data types and some combinations of data types. A common trend across data type is "trial-aligned" visualizations. Experiments are usually (but not always) split up into small "trials," which are controlled repetitions of a certain task (e.g. runs of a maze, presentations of a sound, arm reaches to a target, etc.), where some controlled variable is being repeated or precisely varied to study how that changes the response. To analyze trials, you generally take a window (e.g. -.5 to 1 second) of data around a certain time of each trial and stack these windows. Now you often average across trials that are the same trial condition (e.g. sound A vs sound B). Most visualization can be done across real-time or trial-time.
+You can organize visualizations by what data goes into them. For any one plot, you could have 1, 2, or 3 (or maybe more) different types of data that are used to generate that plot. Those data might be neural recordings, stimuli, or behavior. There are standard ways to visualize single data types and some combinations of data types. A common trend across data type is "trial-aligned" visualizations. Experiments are usually (but not always) split up into small "trials," which are controlled repetitions of a certain task (e.g. runs of a maze, presentations of a sound, arm reaches to a target, etc.), where some controlled variable is being repeated or precisely varied to study how that changes the response. To analyze trials, you generally take a window (e.g. -.5 to 1 second) of data around a certain time of each trial and stack these windows. Now you often average across trials that are the same trial condition (e.g. sound A vs sound B). Most visualization can be done across real-time or trial-time.
 
 ## 1 data type
-Neural Data
 
 ### Local field potential (LFP).
 
@@ -28,11 +27,9 @@ Action potentials are firings of neurons that you can detect from the voltage si
 
 * Spike waveforms. The waveform of the spikes of a neuron are sometimes of interest andare shown as traces.
 
-### Neural activity.
+### Neural activity
 
 For many types of recordings, you get a signal that indirectly measures "neural activity," such as calcium fluctuations, BOLD responds, or high gamma of LFP. These are generally continuous valued and temporally continuous and can be presented as traces.
-
-Sensory stimulus
 
 ### Sound
 

@@ -1,0 +1,11 @@
+{
+  "name": "ephys_viz",
+  "dependencies": {
+    "@material-ui/core": "^4.2.0",
+    "@material-ui/icons": "^4.2.1",
+    "@material-ui/styles": "^4.2.0",
+    "plotly.js": "^1.49.1",
+    "react-icons": "^3.7.0",
+    "react-plotly.js": "^2.3.0"
+  }
+}
