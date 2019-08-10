@@ -1,5 +1,5 @@
 {
-    "extension_name": "ephys_viz",
+    "project_name": "ephys_viz",
     "version": "0.1.0",
     "description": "Neurophysiology visualization widgets",
     "author": "Jeremy Magland",
