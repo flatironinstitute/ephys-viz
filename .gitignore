@@ -1,5 +1,6 @@
 generated
 
+.ipynb_checkpoints
 .mypy_cache
 .vscode
 *.egg-info
