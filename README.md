@@ -23,7 +23,7 @@ Now you should be able to `import ephys_viz_jup` from a jupyter notebook. See th
 
 ### Electron development mode
 
-To open a desktop (electron) window showing a gallery view of all the widgets in this project, with hot module reload:
+To open a desktop (electron) window showing a gallery view of all the widgets in this project, with hot module reload (convenient for widget development):
 
 ```
 cd [directory-of-this-repo]
@@ -36,7 +36,7 @@ Then to start the development server and open the window:
 reactopya start-electron-dev
 ```
 
-If you modify any of the source code inside `widgets/`, you can then update the generated code via:
+If you modify any of the source code inside `widgets/`, you can then update the generated code via the following command:
 
 ```
 reactopya generate
