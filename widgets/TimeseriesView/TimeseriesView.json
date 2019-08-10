@@ -1,0 +1,11 @@
+{
+    "componentName": "TimeseriesView",
+    "description": "Timeseries view",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["recordingPath", "download_from", "segmentSize", "segmentsRequested"],
+    "pythonStateKeys": ["status", "statusMessage", "numChannels", "numTimepoints", "samplerate"],
+    "galleryProps": {
+        "recordingPath": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec",
+        "download_from": "spikeforest.public"
+    }
+}

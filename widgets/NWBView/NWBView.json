@@ -1,0 +1,34 @@
+{
+    "componentName": "NWBView",
+    "description": "NWB view",
+    "propsKeys": ["path"],
+    "javaScriptStateKeys": ["path", "download_from"],
+    "pythonStateKeys": ["object", "status", "status_message"],
+    "galleryProps": {
+        "path": "sha1://ee3264cbd2ad0db9e4ea12db5902bc788cc934c5/bon03.nwb.json",
+        "download_from": "spikeforest.public"
+    },
+    "nextGalleryProps": [
+        {
+            "name": "bon03",
+            "props": {
+                "path": "sha1://ee3264cbd2ad0db9e4ea12db5902bc788cc934c5/bon03.nwb.json",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "bon04",
+            "props": {
+                "path": "sha1://6ceb6d34de6c74cd42093e100205abf993367fb5/bon04.nwb.json",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "ger05",
+            "props": {
+                "path": "sha1://aece07f7207ff3552fb1819291398609788aac2f/ger05.nwb.json",
+                "download_from": "spikeforest.public"
+            }
+        }
+    ]
+}
