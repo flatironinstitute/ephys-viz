@@ -1,0 +1,44 @@
+FROM ubuntu:18.04
+
+#########################################
+### Python                                                               
+RUN apt-get update && apt-get -y install git wget build-essential
+RUN apt-get install -y python3 python3-pip
+RUN ln -s python3 /usr/bin/python
+RUN ln -s pip3 /usr/bin/pip
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-tk
+
+#########################################
+### Node and yarn
+RUN apt-get update && apt-get install -y curl
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && apt-get update && apt-get install -y nodejs
+RUN npm install -g yarn
+
+#########################################
+### Numpy
+RUN pip install numpy
+
+#########################################
+### Reactopya
+RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya@64e999bf450c5a720bad77b032d075f0d79da3cf
+
+#########################################
+### Copy the project files into the container
+RUN mkdir /project
+COPY widgets /project/widgets
+COPY reactopya.config.json /project/reactopya.config.json
+WORKDIR /project
+
+#########################################
+### Build the jupyter extension
+RUN reactopya install-jupyter-extension
+
+#########################################
+### Electron installation
+# RUN reactopya install-electron
+
+#########################################
+### Copy example notebooks
+COPY example_notebooks /example_notebooks
+
+CMD cd /example_notebooks && jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser --allow-root

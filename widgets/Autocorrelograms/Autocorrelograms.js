@@ -97,11 +97,11 @@ class CorrelogramPlot extends Component {
                     xaxis: {
                         autorange: false,
                         range: [bin_edges[0], bin_edges[bin_edges.length - 1]],
-                        showgrid: false,
+                        showgrid: true,
                         zeroline: false,
-                        showline: false,
-                        ticks: '',
-                        showticklabels: false
+                        showline: true,
+                        // ticks: '',
+                        showticklabels: true
                     },
                     yaxis: {
                         autorange: true,
@@ -112,7 +112,7 @@ class CorrelogramPlot extends Component {
                         showticklabels: false
                     },
                     margin: {
-                        l: 20, r: 20, b: 0, t: 0
+                        l: 20, r: 20, b: 50, t: 0
                     }
                 }}
                 config={(

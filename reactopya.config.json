@@ -1,7 +1,25 @@
 {
     "project_name": "ephys_viz",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Neurophysiology visualization widgets",
     "author": "Jeremy Magland",
-    "license": "Apache-2.0"
+    "license": "Apache-2.0",
+    "package_json": {
+        "dependencies": {
+            "@material-ui/core": "^4.2.0",
+            "@material-ui/icons": "^4.2.1",
+            "@material-ui/styles": "^4.2.0",
+            "plotly.js": "^1.49.1",
+            "react-icons": "^3.7.0",
+            "react-plotly.js": "^2.3.0"
+        }
+    },
+    "setup_py": {
+        "install_requires": [
+            "jupyter",
+            "numpy",
+            "mountaintools",
+            "spikeforest"
+        ]
+    }
 }

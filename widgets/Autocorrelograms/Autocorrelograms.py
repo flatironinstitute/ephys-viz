@@ -64,7 +64,7 @@ def serialize_np(x):
 
 class ComputeAutocorrelograms(mlpr.Processor):
     NAME = 'ComputeAutocorrelograms'
-    VERSION = '0.1.4'
+    VERSION = '0.1.5'
 
     # Inputs
     firings_path = mlpr.Input()
@@ -80,9 +80,7 @@ class ComputeAutocorrelograms(mlpr.Processor):
 
     def run(self):
         from spikeforest import SFMdaRecordingExtractor, SFMdaSortingExtractor
-
-        print('test1', self.firings_path, self.samplerate)
-
+        
         sorting = SFMdaSortingExtractor(firings_file=self.firings_path)
         samplerate = self.samplerate
         max_samples = self.max_samples
@@ -96,6 +94,7 @@ class ComputeAutocorrelograms(mlpr.Processor):
         for unit_id in sorting.get_unit_ids():
             print('Unit::g {}'.format(unit_id))
             (bin_counts, bin_edges) = compute_autocorrelogram(sorting.get_unit_spike_train(unit_id), max_dt_tp=max_dt_tp, bin_size_tp=bin_size_tp, max_samples=max_samples)
+            bin_edges = bin_edges / samplerate *1000  # milliseconds
             autocorrelograms.append(dict(
                 unit_id=unit_id,
                 bin_counts=bin_counts,
