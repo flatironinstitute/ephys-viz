@@ -1,6 +1,8 @@
 # ephys-viz
 
-Neurophysiology visualization components deployable to the notebook, web, or desktop
+Neurophysiology visualization components deployable to the notebook, web, or desktop.
+
+A live preview of these widgets can be found [here](http://50.116.50.203:8080/).
 
 ## Installation
 
@@ -19,7 +21,7 @@ pip install --upgrade git+https://github.com/flatironinstitute/reactopya
 
 ### Jupyter notebook extension
 
-To install the jupyter notebook extension
+To install the jupyter notebook extension (after upgrading reactopya as above):
 
 ```
 cd [directory-of-this-repo]
@@ -53,4 +55,13 @@ Or to continuously watch and regenerate on change:
 
 ```
 reactopya watch
+```
+
+### Stand-alone server
+
+To use the standalone server (as in the live preview):
+
+```
+reactopya install-server
+reactopya start-server
 ```
