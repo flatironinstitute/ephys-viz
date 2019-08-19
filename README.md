@@ -48,3 +48,9 @@ If you modify any of the source code inside `widgets/`, you can then update the 
 ```
 reactopya generate
 ```
+
+Or to continuously watch and regenerate on change:
+
+```
+reactopya watch
+```
