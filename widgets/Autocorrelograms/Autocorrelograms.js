@@ -9,7 +9,6 @@ export default class Autocorrelograms extends Component {
     static reactopyaConfig = config;
     constructor(props) {
         super(props);
-        console.log(props);
         this.state = {
             firingsPath: props.firingsPath,
             samplerate: props.samplerate,
@@ -50,7 +49,7 @@ export default class Autocorrelograms extends Component {
                                     bin_edges={ac.bin_edges}
                                     title={`Unit ${ac.unit_id}`}
                                     width={150}
-                                    height={150}
+                                    height={200}
                                 />
                             </Grid>
                         ))
@@ -112,7 +111,7 @@ class CorrelogramPlot extends Component {
                         showticklabels: false
                     },
                     margin: {
-                        l: 20, r: 20, b: 50, t: 0
+                        l: 20, r: 20, b: 50, t: 40
                     }
                 }}
                 config={(

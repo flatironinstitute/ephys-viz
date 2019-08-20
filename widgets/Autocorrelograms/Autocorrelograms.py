@@ -3,6 +3,7 @@ import numpy as np
 from mountaintools import client as mt
 import mlprocessors as mlpr
 import json
+import simplejson
 
 def compute_autocorrelogram(times, *, max_dt_tp, bin_size_tp, max_samples=None):
     num_bins_left = int(max_dt_tp / bin_size_tp)  # number of bins to the left of the origin
@@ -104,7 +105,7 @@ class ComputeAutocorrelograms(mlpr.Processor):
             autocorrelograms=autocorrelograms
         )
         with open(self.json_out, 'w') as f:
-            json.dump(serialize_np(ret), f)
+            simplejson.dump(serialize_np(ret), f, ignore_nan=True)
 
 
 class Autocorrelograms(Component):

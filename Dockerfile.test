@@ -20,7 +20,7 @@ RUN pip install numpy
 
 #########################################
 ### Reactopya
-RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya@64e999bf450c5a720bad77b032d075f0d79da3cf
+RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya@d7976f499680c700785ff500d9f65998747dc7ad
 
 #########################################
 ### Copy the project files into the container

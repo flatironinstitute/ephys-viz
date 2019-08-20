@@ -11,7 +11,8 @@
             "@material-ui/styles": "^4.2.0",
             "plotly.js": "^1.49.1",
             "react-icons": "^3.7.0",
-            "react-plotly.js": "^2.3.0"
+            "react-plotly.js": "^2.3.0",
+            "styled-components": "^4.3.2"
         }
     },
     "setup_py": {
@@ -21,5 +22,55 @@
             "mountaintools",
             "spikeforest"
         ]
-    }
+    },
+    "gallery_widgets": [
+        {
+            "name": "NWBBrowser",
+            "title": "NWBBrowser for najafi-2018-nwb example",
+            "props": {
+                "path": "sha1://2abdf308b02b0997f5057231e4632b538f3968d9/najafi-2018-nwb/mouse1_fni16_150817_001_ch2-PnevPanResults-170808-190057.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "NWBBrowser",
+            "title": "NWBBrowser for bon03.nwb",
+            "props": {
+                "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "NWBView",
+            "title": "NWBView for bon03.nwb",
+            "props": {
+                "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "ElectrodeGeometry",
+            "title": "Electrode geometry from geom.csv",
+            "props": {
+                "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "ElectrodeGeometry",
+            "title": "Electrode geometry from locations",
+            "props": {
+                "locations": [[0,0], [2,0], [1,1], [3,1], [0,2], [2,2]],
+                "labels": [1,2,3,4,5,6]
+            }
+        },
+        {
+            "name": "Autocorrelograms"
+        },
+        {
+            "name": "TimeseriesView"
+        }
+    ],
+    "gallery_widgets_save": [
+    ]
 }

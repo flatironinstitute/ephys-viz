@@ -121,7 +121,7 @@ class ElectrodesView extends Component {
     render() {
         const { electrodes } = this.props;
         const columns = [
-            { name: 'id', label: 'Epoch' },
+            { name: 'id', label: 'Electrode' },
             { name: 'x', label: 'X' },
             { name: 'y', label: 'Y' },
             { name: 'z', label: 'Z' },
@@ -145,7 +145,7 @@ class UnitsView extends Component {
     render() {
         const { units } = this.props;
         const columns = [
-            { name: 'id', label: 'Epoch' },
+            { name: 'id', label: 'Unit' },
             { name: 'cluster_name', label: 'Cluster name' },
             { name: 'sorting_metric', label: 'Sorting metric' },
             { name: 'electrodes', label: 'Electrodes' },
@@ -277,13 +277,14 @@ export default class NWBView extends Component {
     _updateParams() {
     }
     render() {
-        const { locations, labels } = this.state;
+        const { locations, labels, object } = this.state;
+        console.log('--- render', locations, labels, object);
         return (
             <RespectStatus {...this.state}>
                 <React.Fragment>
                     <Sha1PathLink path={this.state.path} canCopy={true} abbreviate={true}></Sha1PathLink>
                     <NWBViewSwitchboard
-                        object={this.state.object}
+                        object={object}
                     />
                 </React.Fragment>
             </RespectStatus>
