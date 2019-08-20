@@ -2,7 +2,6 @@ from reactopya import Component
 import numpy as np
 from mountaintools import client as mt
 import spikeextractors as se
-import franklabnwb
 
 
 class ElectrodeGeometry(Component):
