@@ -33,6 +33,15 @@
             }
         },
         {
+            "name": "AnimalPosition",
+            "title": "Animal position",
+            "props": {
+                "nwb_path2": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+                "nwb_path": "sha1://d09ea629553da1045490fd242ba30a1587c56a4d/bon04.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
             "name": "NWBBrowser",
             "title": "NWBBrowser for bon03.nwb",
             "props": {

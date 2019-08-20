@@ -1,0 +1,11 @@
+{
+    "componentName": "AnimalPosition",
+    "description": "Animal position",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["nwb_path", "download_from", "downsample_factor"],
+    "pythonStateKeys": ["positions", "timestamps", "status", "status_message"],
+    "galleryProps": {
+        "nwb_path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+        "download_from": "spikeforest.public"
+    }
+}

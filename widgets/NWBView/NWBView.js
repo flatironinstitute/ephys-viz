@@ -278,7 +278,6 @@ export default class NWBView extends Component {
     }
     render() {
         const { locations, labels, object } = this.state;
-        console.log('--- render', locations, labels, object);
         return (
             <RespectStatus {...this.state}>
                 <React.Fragment>

@@ -33,7 +33,6 @@ export default class NWBBrowser extends Component {
     }
     render() {
         const { object } = this.state;
-        console.log('---object', object);
         return (
             <RespectStatus {...this.state}>
                 <React.Fragment>

@@ -48,7 +48,7 @@ const getNodeLabel = (node) => {
   if (node.type === 'value') {
     if (typeof(node.data.value) == 'string') {
       if ((node.data.value.startsWith('sha1://')) || (node.data.value.startsWith('sha1dir://'))) {
-        return <Sha1PathLink path={node.data.value} canCopy={true} abbreviate={true} />;
+        return <span>{`${node.name || '/'}: `}<Sha1PathLink path={node.data.value} canCopy={true} abbreviate={true} /></span>;
       }
     }
     return `${node.name || '/'}: ${abbreviate(node.data.value, 30)}`;

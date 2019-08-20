@@ -21,7 +21,6 @@ const HistoryLine = styled.div`
 
 class NodeCreator {
     createObjectNode(obj, name, basepath, part_of_list) {
-        console.log('---- createObjectNode', obj);
         const max_array_children = 20;
         let childNodes = [];
         let path0 = this.joinPaths(basepath, name, '.', part_of_list);
@@ -35,7 +34,6 @@ class NodeCreator {
             for (let key of keys) {
                 let val = obj[key];
                 if ((val) && (typeof (val) == 'object')) {
-                    console.log('----test1', val);
                     childNodes.push(this.createObjectNode(val, key, path0));
                 }
                 else {
@@ -60,7 +58,6 @@ class NodeCreator {
             for (let ii = i1; ii < i2; ii++) {
                 let val = X[ii];
                 if ((val) && (typeof (val) == 'object')) {
-                    console.log('--- test A', val);
                     childNodes.push(this.createObjectNode(val, '' + ii, path0, true));
                 }
                 else {
@@ -180,7 +177,6 @@ export class TreeData {
                 this.status = STATUS_FAILED_TO_LOAD;
                 return;
             }
-            console.log('--- test B', A);
             this.rootNode = this.nodeCreator.createObjectNode(A, '');
             this.status = STATUS_LOADED;
         }
@@ -195,7 +191,6 @@ export class TreeData {
         }
     }
     async updateContentFromObject(obj) {
-        console.log('---- updateContentFromObject', obj);
         this.rootNode = this.nodeCreator.createObjectNode(obj, '');
         this.status = STATUS_LOADED;
     }
