@@ -6,3 +6,4 @@ from .TimeseriesView import TimeseriesView
 from .AnimalPosition import AnimalPosition
 
 from .SpikeForestAnalysis import SpikeForestAnalysis
+from .AnimalPosition2 import AnimalPosition2

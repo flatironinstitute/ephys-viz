@@ -5,3 +5,4 @@ export { default as NWBBrowser } from './NWBBrowser/NWBBrowser';
 export { default as Autocorrelograms } from './Autocorrelograms/Autocorrelograms';
 export { default as AnimalPosition } from './AnimalPosition/AnimalPosition';
 export { default as SpikeForestAnalysis } from './SpikeForestAnalysis/SpikeForestAnalysis';
+export { default as AnimalPosition2 } from './AnimalPosition2/AnimalPosition2';

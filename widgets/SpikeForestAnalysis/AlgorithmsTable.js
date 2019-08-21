@@ -10,21 +10,18 @@ export default class AlgorithmsTable extends Component {
     }
 
     componentDidMount() {
-        console.log('--- 1', this.props);
         if (this.props.algorithms && this.props.algorithms.length) {
             this.filterActives();
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log('--- 2', this.props);
         if (this.props.algorithms !== prevProps.algorithms) {
             this.filterActives();
         }
     }
 
     filterActives() {
-        console.log('--- 3', this.props);
         let rows = this.props.algorithms.map(alg => {
             let row = {
                 raw_label: alg.label,
@@ -71,12 +68,10 @@ export default class AlgorithmsTable extends Component {
         rows.forEach(row => {
             row.isActive = true;
         });
-        console.log('--- setting rows', rows);
         this.setState({ rows: rows });
     }
 
     render() {
-        console.log('---render', this.state);
         const algosColumns = [
             {
                 accessor: "label",

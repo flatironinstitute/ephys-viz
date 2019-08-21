@@ -30,7 +30,6 @@ export default class SpikeForestAnalysis extends Component {
     }
     render() {
         const { object } = this.state;
-        console.log('--- object', object);
         return (
             <React.Fragment>
                 <RespectStatus {...this.state}>

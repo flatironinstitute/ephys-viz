@@ -12,7 +12,17 @@
             "spikeforest"
         ]
     },
+    "gallery_widgets_dev": [
+        {
+            "name": "AnimalPosition2",
+            "title": "Animal position v2"
+        }
+    ],
     "gallery_widgets": [
+        {
+            "name": "AnimalPosition2",
+            "title": "Animal position v2"
+        },
         {
             "name": "SpikeForestAnalysis",
             "title": "SpikeForest analysis"
