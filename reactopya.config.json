@@ -9,16 +9,21 @@
             "jupyter",
             "numpy",
             "mountaintools",
-            "spikeforest"
+            "spikeforest",
+            "scipy"
         ]
     },
-    "gallery_widgets_dev": [
+    "gallery_widgets": [
+        {
+            "name": "PlaceField",
+            "title": "Place field"
+        },
         {
             "name": "AnimalPosition2",
             "title": "Animal position v2"
         }
     ],
-    "gallery_widgets": [
+    "gallery_widgets2": [
         {
             "name": "AnimalPosition2",
             "title": "Animal position v2"

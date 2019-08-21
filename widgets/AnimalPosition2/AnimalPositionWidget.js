@@ -44,7 +44,7 @@ class AnimalPositionWidgetInner extends Component {
                         min={0} max={N - 1} value={this.currentTimepointController.value()}
                         stepsPerSec={80}
                         onChange={(evt, val) => { this.currentTimepointController.setValue(val); }}
-                        running={true}
+                        running={false}
                     />
                 </Grid>
             </Grid>
