@@ -20,13 +20,14 @@ RUN pip install numpy
 
 #########################################
 ### Reactopya
-RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya@d7976f499680c700785ff500d9f65998747dc7ad
+RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya@217629d5e6c045feecf6d153929117ab30a055ca
 
 #########################################
 ### Copy the project files into the container
 RUN mkdir /project
 COPY widgets /project/widgets
 COPY reactopya.config.json /project/reactopya.config.json
+COPY package.json /project/package.json
 WORKDIR /project
 
 #########################################

@@ -4,3 +4,5 @@ from .NWBView import NWBView
 from .NWBBrowser import NWBBrowser
 from .TimeseriesView import TimeseriesView
 from .AnimalPosition import AnimalPosition
+
+from .SpikeForestAnalysis import SpikeForestAnalysis
