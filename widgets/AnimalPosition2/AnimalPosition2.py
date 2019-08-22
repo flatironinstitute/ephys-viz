@@ -1,6 +1,6 @@
 from reactopya import Component
 from mountaintools import client as mt
-from .h5_to_dict import h5_to_dict
+from ..pycommon.nwb_to_dict import nwb_to_dict
 import numpy as np
 
 
@@ -14,12 +14,8 @@ class AnimalPosition2(Component):
         nwb_path = state.get('nwb_path', None)
         downsample_factor = state.get('downsample_factor', 1)
         if nwb_path:
-            if nwb_path.endswith('.nwb'):
-                self.set_python_state(dict(status_message='Realizing object from nwb file: {}'.format(nwb_path)))
-                obj = h5_to_dict(nwb_path, use_cache=True)
-            else:
-                self.set_python_state(dict(status_message='Realizing object: {}'.format(nwb_path)))
-                obj = mt.loadObject(path=nwb_path)
+            self.set_python_state(dict(status_message='Realizing nwb object: {}'.format(nwb_path)))
+            obj = nwb_to_dict(nwb_path, use_cache=True)
             if not obj:
                 self.set_python_state(dict(
                     status='error',

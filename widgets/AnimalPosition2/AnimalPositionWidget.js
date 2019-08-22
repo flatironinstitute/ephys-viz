@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
-import CanvasWidget from './CanvasWidget';
-import AutoSizer from './AutoSizer';
+import CanvasWidget from '../jscommon/CanvasWidget';
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 import { FaPlay, FaStop } from 'react-icons/fa';
 import { Grid, Slider, IconButton } from '@material-ui/core';
 
 export default class AnimalPositionWidget extends Component {
     render() {
         return (
-            <AutoSizer>
+            <AutoDetermineWidth>
                 <AnimalPositionWidgetInner {...this.props} />
-            </AutoSizer>
+            </AutoDetermineWidth>
         );
     }
 }
@@ -42,8 +42,8 @@ class AnimalPositionWidgetInner extends Component {
                 <Grid item xs={12}>
                     <PlayableSlider
                         min={0} max={N - 1} value={this.currentTimepointController.value()}
-                        stepsPerSec={80}
                         onChange={(evt, val) => { this.currentTimepointController.setValue(val); }}
+                        stepsPerSec={80}
                         running={false}
                     />
                 </Grid>
@@ -53,15 +53,11 @@ class AnimalPositionWidgetInner extends Component {
 }
 
 class PlayableSlider extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            running: false
-        }
-        this._frameId = null;
-        this._animationTimer = null;
-        
+    state = {
+        running: false
     }
+    _frameId = null
+    _animationTimer = null
     componentDidMount() {
         if ((this.props.running) && (!this.state.running)) {
             this.handleToggleStart();
@@ -109,7 +105,7 @@ class PlayableSlider extends Component {
                     </IconButton>
                 </Grid>
                 <Grid item style={{flexGrow: 1}}>
-                    <Slider {...this.props} />
+                    <Slider min={this.props.min} max={this.props.max} value={this.props.value} onChange={this.props.onChange} />
                 </Grid>
             </Grid>
         )

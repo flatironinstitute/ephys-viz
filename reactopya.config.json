@@ -13,7 +13,7 @@
             "scipy"
         ]
     },
-    "gallery_widgets_dev": [
+    "gallery_widgets": [
         {
             "name": "PlaceField",
             "title": "Place field"
@@ -23,7 +23,7 @@
             "title": "Animal position v2"
         }
     ],
-    "gallery_widgets": [
+    "gallery_widgets2": [
         {
             "name": "PlaceField",
             "title": "Place field"

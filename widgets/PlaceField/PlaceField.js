@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { PythonInterface } from 'reactopya';
-import Sha1PathLink from './Sha1PathLink.js';
+import Sha1PathLink from '../jscommon/Sha1PathLink.js';
 import PlaceFieldWidget from './PlaceFieldWidget';
 import IntInput from './IntInput';
-import { Button } from '@material-ui/core'
+import { Button, Grid } from '@material-ui/core'
 const config = require('./PlaceField.json');
 
 export default class PlaceField extends Component {
@@ -13,7 +13,7 @@ export default class PlaceField extends Component {
         super(props);
         const default_downsample_factor = 10;
         this.state = {
-            nwb_path: props.nwb_path,
+            nwb_query: props.nwb_query,
             download_from: props.download_from,
             status: '',
             status_message: '',
@@ -38,10 +38,17 @@ export default class PlaceField extends Component {
         });
     }
     render() {
-        const { positions, spike_time_indices, spike_labels, all_unit_ids, downsample_factor } = this.state;
+        const {
+            positions,
+            spike_time_indices,
+            spike_labels,
+            all_unit_ids,
+            cluster_names,
+            downsample_factor
+        } = this.state;
         return (
             <React.Fragment>
-                <Sha1PathLink path={this.props.nwb_path} canCopy={true} abbreviate={true}></Sha1PathLink>
+                <NwbQueryView nwb_query={this.props.nwb_query} />
                 <div>
                     <IntInput
                         label='Downsample factor'
@@ -58,10 +65,36 @@ export default class PlaceField extends Component {
                         spike_time_indices={spike_time_indices}
                         spike_labels={spike_labels}
                         all_unit_ids={all_unit_ids}
+                        cluster_names={cluster_names}
                     />
                 </RespectStatus>
             </React.Fragment>
         )
+    }
+}
+
+class NwbQueryView extends Component {
+    state = {  }
+    render() { 
+        const { nwb_query } = this.props;
+        if (typeof(nwb_query) === 'string') {
+            return <Sha1PathLink path={nwb_query} abbreviate={true} canCopy={true} />
+        }
+        else if (nwb_query.path) {
+            return (
+                <Grid container alignItems="center" spacing={2}>
+                    <Grid item>
+                        <Sha1PathLink path={nwb_query.path} abbreviate={true} canCopy={true} />
+                    </Grid>
+                    <Grid item>
+                        <pre>epochs: {JSON.stringify(nwb_query.epochs || [])}</pre>
+                    </Grid>
+                </Grid>
+            )
+        }
+        else {
+            return <span>Unable to display unrecognized query</span>
+        }
     }
 }
 

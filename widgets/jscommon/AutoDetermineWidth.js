@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class AutoSizer extends Component {
+export default class AutoDetermineWidth extends Component {
     constructor(props) {
         super(props);
         this.state = {

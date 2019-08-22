@@ -5,18 +5,20 @@ from spikeforest import mdaio
 import tempfile
 import shutil
 import mlprocessors as mlpr
-import json
 import simplejson
 
-def h5_to_dict(fname, *, upload_to=None, use_cache=False):
+def nwb_to_dict(fname, *, upload_to=None, use_cache=False):
+    if fname.endswith('.json'):
+        with open(fname, 'r') as f:
+            return simplejson.load(f)
     if use_cache:
-        result = H5ToDict.execute(
+        result = NWBToDict.execute(
             h5_in=fname,
             upload_to=upload_to or '',
             json_out={'ext': '.json'}
         )
         if result.retcode != 0:
-            raise Exception('Problem running H5ToDict.')
+            raise Exception('Problem running NWBToDict.')
         return mt.loadObject(path=result.outputs['json_out'])
 
     fname = mt.realizeFile(path=fname)
@@ -25,7 +27,7 @@ def h5_to_dict(fname, *, upload_to=None, use_cache=False):
     )
     with h5py.File(fname, 'r') as f:
         opts['file'] = f
-        return _h5_to_dict(f, opts=opts, name=None)
+        return _nwb_to_dict(f, opts=opts, name=None)
 
 
 
@@ -144,13 +146,13 @@ def _get_attrs(f, *, opts, name):
     return attrs
 
 
-def _h5_to_dict(f, *, opts, name):
+def _nwb_to_dict(f, *, opts, name):
     _attrs = _get_attrs(f, opts=opts, name=name)
     _datasets = {}
     ret = {}
     for name0, item in f.items():
         if isinstance(item, h5py.Group):
-            ret[name0] = _h5_to_dict(item, opts=opts, name=name0)
+            ret[name0] = _nwb_to_dict(item, opts=opts, name=name0)
         elif isinstance(item, h5py.Dataset):
             _datasets[name0] = _handle_dataset(item, opts=opts, name=name0)
         else:
@@ -162,8 +164,8 @@ def _h5_to_dict(f, *, opts, name):
     return ret
 
 
-class H5ToDict(mlpr.Processor):
-    NAME = 'H5ToDict'
+class NWBToDict(mlpr.Processor):
+    NAME = 'NWBToDict'
     VERSION = '0.1.1'
 
     # Inputs
@@ -179,6 +181,6 @@ class H5ToDict(mlpr.Processor):
         upload_to = self.upload_to
         if not upload_to:
             upload_to = None
-        x = h5_to_dict(self.h5_in, upload_to=upload_to)
+        x = nwb_to_dict(self.h5_in, upload_to=upload_to)
         with open(self.json_out, 'w') as f:
             simplejson.dump(x, f, ignore_nan=True)

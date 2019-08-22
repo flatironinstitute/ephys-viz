@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { PythonInterface } from 'reactopya';
-import Sha1PathLink from './Sha1PathLink.js';
+import Sha1PathLink from '../jscommon/Sha1PathLink.js';
 import AnimalPositionWidget from './AnimalPositionWidget';
 import IntInput from './IntInput';
 import { Button } from '@material-ui/core'
