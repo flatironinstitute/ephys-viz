@@ -1,0 +1,6 @@
+To publish the colab package on pypi
+
+reactopya build-colab
+cd generated/{project_name}_colab
+python setup.py sdist
+twine upload dist/*
