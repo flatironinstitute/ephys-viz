@@ -2,6 +2,8 @@
 
 Neurophysiology visualization components deployable to the notebook, web, or desktop.
 
+This project is at an early stage of development.
+
 A live preview of these widgets can be found [here](http://50.116.50.203:8080/).
 
 ## Installation
