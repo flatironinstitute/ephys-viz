@@ -2,10 +2,11 @@
     "componentName": "SpikeForestAnalysis",
     "description": "View of a SpikeForest analysis",
     "propsKeys": [],
-    "javaScriptStateKeys": ["path", "download_from"],
+    "javaScriptStateKeys": ["path", "download_from", "include_results"],
     "pythonStateKeys": ["object", "status", "status_message"],
     "galleryProps": {
         "path": "sha1://c5ad0ae29162d170c751eb44be1772f70360f826/analysis.json",
-        "download_from": "spikeforest.public"
+        "download_from": "spikeforest.public",
+        "include_results": false
     }
 }

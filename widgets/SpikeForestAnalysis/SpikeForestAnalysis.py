@@ -28,7 +28,8 @@ class SpikeForestAnalysis(Component):
             ))
             return
         
-        obj['StudyAnalysisResults'] = None
+        if not state.get('include_results', False):
+            obj['StudyAnalysisResults'] = None
 
         self.set_python_state(dict(
             status='finished',

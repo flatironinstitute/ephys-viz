@@ -13,6 +13,23 @@
             "scipy"
         ]
     },
+    "gallery_widgets": [
+        {
+            "name": "SpikeForestAnalysis",
+            "title": "SpikeForest analysis",
+            "props": {
+                "path": "sha1://c5ad0ae29162d170c751eb44be1772f70360f826/analysis.json",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "name": "HelloWorld",
+            "title": "Hello World example",
+            "props": {
+                "name": "james"
+            }
+        }
+    ],
     "gallery_widgets_dev": [
         {
             "name": "PlaceField",
@@ -23,7 +40,7 @@
             "title": "Animal position v2"
         }
     ],
-    "gallery_widgets": [
+    "gallery_widgets2": [
         {
             "name": "PlaceField",
             "title": "Place field"
