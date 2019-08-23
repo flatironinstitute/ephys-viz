@@ -10,56 +10,105 @@ Prerequisites:
 
 * Linux or OS X
 * Python >= 3.6
+
+**JupyterLab**
+
+Use JupyterLab >= 1.0.9
+
+```
+pip install --upgrade ephys_viz_jup
+jupyter labextension install ephyz_viz_jup
+```
+
+And if you haven't already installed the ipywidgets lab extension, you should also install:
+
+```
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+```
+
+**Jupyter notebook**
+
+```
+pip install --upgrade ephys_viz_jup
+```
+
+(Note: I think this doesn't quite work yet -- working on it)
+
+**Google Colaboratory**
+
+At the top of the colab notebook:
+
+```
+!pip install ephys_viz_colab=={explicit_version}
+```
+
+Note that it is a good idea to give the explicit version so that the notebooks continue to work into the future.
+
+**On the desktop (electron)**
+
+[Instructions coming soon]
+
+**In the browser**
+
+[Instructions coming soon]
+
+## Development installation
+
+A development installation has the following additional prerequisites
+
 * NodeJS >= 8
 * Yarn
+* reactopya
 
-This project uses [reactopya](https://github.com/flatironinstitute/reactopya) and involves code generation. First install reactopya:
-
-```
-pip install --upgrade git+https://github.com/flatironinstitute/reactopya
-```
-
-### Jupyter notebook extension
-
-To install the jupyter notebook extension (after upgrading reactopya as above):
+First install [reactopya](https://github.com/flatironinstitute/reactopya):
 
 ```
-cd [directory-of-this-repo]
+pip install reactopya
+```
+
+Now clone this repo:
+
+```
+git clone [this_repo]
+cd [directory-of-the-repo]
+```
+
+**Electron development mode**
+
+This following is the best way to develop the widgets
+
+```
+# you only need to run this once:
+reactopya install-electron
+
+# The following will open the gallery of widgets in development mode
+# with hot module reloading whenever the source code changes
+reactopya start-gallery-dev
+```
+
+**JupyterLab (development installation)**
+
+```
+reactopya install-jupyter-labextension
+```
+
+**Jupyter notebook (development installation)**
+
+```
 reactopya install-jupyter-extension
 ```
 
-Now you should be able to `import ephys_viz_jup` from a jupyter notebook. See the example in the `example_notebooks/` directory.
-
-### Electron development mode
-
-To open a desktop (electron) window showing a gallery view of all the widgets in this project, with hot module reload (convenient for widget development):
+**Google colab (development installation)**
 
 ```
-cd [directory-of-this-repo]
-reactopya install-electron
+reactopya build-colab
 ```
 
-Then to start the development server and open the window:
+Then you can tell google colab to connect to a local runtime. However, there is one more trick you need to play to get it to work, and I will tell you about it if you ask.
 
-```
-reactopya start-electron-dev
-```
+**Web server**
 
-If you modify any of the source code inside `widgets/`, you can then update the generated code via the following command:
-
-```
-reactopya generate
-```
-
-Or to continuously watch and regenerate on change:
-
-```
-reactopya watch
-```
-
-### Stand-alone server
-
-To use the standalone server (as in the live preview):
+To open the gallery as a web server
 
 ```
 reactopya install-server
