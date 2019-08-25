@@ -1,0 +1,10 @@
+{
+    "componentName": "HelloWorld",
+    "description": "helloworld example",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["name"],
+    "pythonStateKeys": ["status", "status_message"],
+    "galleryProps": {
+        "name": "James"
+    }
+}

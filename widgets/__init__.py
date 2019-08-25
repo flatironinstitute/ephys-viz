@@ -10,3 +10,4 @@ from .AnimalPosition import AnimalPosition
 from .SpikeForestAnalysis import SpikeForestAnalysis
 from .AnimalPosition2 import AnimalPosition2
 from .PlaceField import PlaceField
+from .HelloWorld import HelloWorld
