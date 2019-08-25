@@ -25,6 +25,10 @@
     ],
     "gallery_widgets": [
         {
+            "name": "HelloWorld",
+            "title": "Hello World example"
+        },
+        {
             "name": "PlaceField",
             "title": "Place field"
         },
