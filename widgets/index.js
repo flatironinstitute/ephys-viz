@@ -7,3 +7,5 @@ export { default as AnimalPosition } from './AnimalPosition/AnimalPosition';
 export { default as SpikeForestAnalysis } from './SpikeForestAnalysis/SpikeForestAnalysis';
 export { default as AnimalPosition2 } from './AnimalPosition2/AnimalPosition2';
 export { default as PlaceField } from './PlaceField/PlaceField';
+export { default as HBox } from './HBox/HBox';
+export { default as VBox } from './VBox/VBox';

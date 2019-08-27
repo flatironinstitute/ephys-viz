@@ -37,7 +37,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.mainLayer = this.addCanvasLayer(this.paintMainLayer);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.computeSize();
         this.repaint();
     }
@@ -52,22 +52,34 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
 
         let W = this.props.width;
         if (!W) W=400;
+        
         let H = this.props.height;
+        let x1 = this.xmin - this.mindist, x2 = this.xmax + this.mindist;
+        let y1 = this.ymin - this.mindist, y2 = this.ymax + this.mindist;
+        let w0 = x2 - x1, h0 = y2 - y1;
+        if (this.transpose) {
+            let w0_tmp = w0;
+            w0 = h0;
+            h0 = w0_tmp;
+        }
+
         if (!H) {
-            let x1 = this.xmin - this.mindist, x2 = this.xmax + this.mindist;
-            let y1 = this.ymin - this.mindist, y2 = this.ymax + this.mindist;
-            let w0 = x2 - x1, h0 = y2 - y1;
-            if (this.transpose) {
-                let w0_tmp = w0;
-                w0 = h0;
-                h0 = w0_tmp;
-            }
             if (!w0) {
                 H = 100;
             }
             else {
                 H = h0 / w0 * W;
             }
+        }
+        const maxWidth = this.props.maxWidth || 500;
+        const maxHeight = this.props.maxHeight || 500;
+        if (W > maxWidth) {
+            W = maxWidth;
+            H = h0 * W / w0;
+        }
+        if (H > maxHeight) {
+            H = maxHeight;
+            W = w0 * H / h0;
         }
         this.setSize(W, H);
     }

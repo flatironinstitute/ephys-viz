@@ -69,7 +69,7 @@ export default class CanvasWidget extends Component {
         setTimeout(this.repaint, 100);
 
         return (
-            <div style={{position: 'relative'}}>
+            <div style={{position: 'relative', height: this.height()}}>
                 {
                     this._canvasLayers.map((L, index) => (
                         <canvas

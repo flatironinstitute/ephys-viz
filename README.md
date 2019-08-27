@@ -65,7 +65,7 @@ A development installation has the following additional prerequisites
 First install [reactopya](https://github.com/flatironinstitute/reactopya):
 
 ```
-pip install reactopya
+pip install --upgrade reactopya
 ```
 
 Now clone this repo:
