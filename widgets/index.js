@@ -9,3 +9,5 @@ export { default as AnimalPosition2 } from './AnimalPosition2/AnimalPosition2';
 export { default as PlaceField } from './PlaceField/PlaceField';
 export { default as HBox } from './HBox/HBox';
 export { default as VBox } from './VBox/VBox';
+export { default as Tabs } from './Tabs/Tabs';
+export { default as Accordion } from './Accordion/Accordion';

@@ -12,3 +12,5 @@ from .AnimalPosition2 import AnimalPosition2
 from .PlaceField import PlaceField
 from .HBox import HBox
 from .VBox import VBox
+from .Tabs import Tabs
+from .Accordion import Accordion

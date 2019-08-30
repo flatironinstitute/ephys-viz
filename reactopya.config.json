@@ -15,164 +15,32 @@
     },
     "gallery_widgets": [
         {
-            "type": "HBox",
-            "key": "test-sync",
-            "title": "Test sync",
+            "type": "Accordion",
+            "key": "accordion",
+            "title": "Accordion",
+            "props": {
+                "panels": [
+                    {
+                        "label": "Elec Geom"
+                    },
+                    {
+                        "label": "Autocorrelograms"
+                    }
+                ]
+            },
             "children": [
                 {
                     "type": "ElectrodeGeometry",
-                    "key": "ElectrodeGeometry1",
+                    "key": "ElectrodeGeometry",
                     "title": "Electrode geometry from geom.csv",
-                    "props": {
-                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                        "download_from": "spikeforest.public",
-                        "sync": [
-                            {
-                                "id": "sync1",
-                                "syncState": {
-                                    "selectedElectrodeIds": "selectedElectrodeIds",
-                                    "currentElectrodeId": "currentElectrodeId"
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "type": "ElectrodeGeometry",
-                    "key": "ElectrodeGeometry2",
-                    "title": "Electrode geometry from geom.csv",
-                    "props": {
-                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                        "download_from": "spikeforest.public",
-                        "sync": [
-                            {
-                                "id": "sync1",
-                                "syncState": {
-                                    "selectedElectrodeIds": "selectedElectrodeIds",
-                                    "currentElectrodeId": "currentElectrodeId"
-                                }
-                            }
-                        ]
-                    }
-                }        
-            ]
-        },
-        {
-            "type": "VBox",
-            "key": "test-sync",
-            "title": "Test sync",
-            "children": [
-                {
-                    "type": "ElectrodeGeometry",
-                    "key": "ElectrodeGeometry1",
-                    "title": "Electrode geometry from geom.csv",
-                    "props": {
-                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                        "download_from": "spikeforest.public",
-                        "sync": [
-                            {
-                                "id": "sync2",
-                                "syncState": {
-                                    "selectedElectrodeIds": "selectedElectrodeIds",
-                                    "currentElectrodeId": "currentElectrodeId"
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "type": "ElectrodeGeometry",
-                    "key": "ElectrodeGeometry2",
-                    "title": "Electrode geometry from geom.csv",
-                    "props": {
-                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                        "download_from": "spikeforest.public",
-                        "sync": [
-                            {
-                                "id": "sync2",
-                                "syncState": {
-                                    "selectedElectrodeIds": "selectedElectrodeIds",
-                                    "currentElectrodeId": "currentElectrodeId"
-                                }
-                            }
-                        ]
-                    }
-                }        
-            ]
-        }
-    ],
-    "gallery_widgets_hold": [
-        {
-            "type": "HBox",
-            "key": "HBox",
-            "title": "HBox",
-            "children": [
-                {
-                    "key": "ElectrodeGeometry1",
-                    "type": "ElectrodeGeometry",
                     "props": {
                         "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
                         "download_from": "spikeforest.public"
                     }
                 },
                 {
-                    "key": "ElectrodeGeometry2",
-                    "type": "ElectrodeGeometry",
-                    "props": {
-                        "locations": [
-                            [
-                                0,
-                                0
-                            ],
-                            [
-                                2,
-                                0
-                            ],
-                            [
-                                1,
-                                1
-                            ],
-                            [
-                                3,
-                                1
-                            ],
-                            [
-                                0,
-                                2
-                            ],
-                            [
-                                2,
-                                2
-                            ]
-                        ],
-                        "labels": [
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "key": "VBox",
-            "type": "VBox",
-            "title": "VBox",
-            "children": [
-                {
-                    "key": "NWBBrowser",
-                    "type": "NWBBrowser",
-                    "props": {
-                        "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
-                        "download_from": "spikeforest.public"
-                    }
-                },
-                {
+                    "type": "Autocorrelograms",
                     "key": "Autocorrelograms",
-                    "type": "Autocorrelogram",
                     "props": {
                         "firingsPath": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
                         "samplerate": 30000,
@@ -183,9 +51,141 @@
                     }
                 }
             ]
-        }
-    ],
-    "widgets_to_convert": [
+        },
+        {
+            "type": "Tabs",
+            "key": "test-tabs",
+            "title": "Tabs",
+            "props": {
+                "tabs": [
+                    {
+                        "label": "Tab1"
+                    },
+                    {
+                        "label": "Tab2"
+                    }
+                ]
+            },
+            "children": [
+                {
+                    "type": "ElectrodeGeometry",
+                    "key": "ElectrodeGeometry1",
+                    "title": "Electrode geometry from geom.csv",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public",
+                        "sync": [
+                            {
+                                "id": "sync3",
+                                "syncState": {
+                                    "selectedElectrodeIds": "selectedElectrodeIds",
+                                    "currentElectrodeId": "currentElectrodeId"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "PlaceField",
+                    "title": "Place field",
+                    "props": {
+                        "nwb_query": {
+                            "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+                            "epochs": [
+                                1
+                            ]
+                        },
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "HBox",
+            "key": "test-sync-hbox",
+            "title": "Test sync hbox",
+            "children": [
+                {
+                    "type": "ElectrodeGeometry",
+                    "key": "ElectrodeGeometry1",
+                    "title": "Electrode geometry from geom.csv",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public",
+                        "sync": [
+                            {
+                                "id": "sync1",
+                                "syncState": {
+                                    "selectedElectrodeIds": "selectedElectrodeIds",
+                                    "currentElectrodeId": "currentElectrodeId"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "ElectrodeGeometry",
+                    "key": "ElectrodeGeometry2",
+                    "title": "Electrode geometry from geom.csv",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public",
+                        "sync": [
+                            {
+                                "id": "sync1",
+                                "syncState": {
+                                    "selectedElectrodeIds": "selectedElectrodeIds",
+                                    "currentElectrodeId": "currentElectrodeId"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "VBox",
+            "key": "test-sync-vbox",
+            "title": "Test sync vbox",
+            "children": [
+                {
+                    "type": "ElectrodeGeometry",
+                    "key": "ElectrodeGeometry1",
+                    "title": "Electrode geometry from geom.csv",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public",
+                        "sync": [
+                            {
+                                "id": "sync2",
+                                "syncState": {
+                                    "selectedElectrodeIds": "selectedElectrodeIds",
+                                    "currentElectrodeId": "currentElectrodeId"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "ElectrodeGeometry",
+                    "key": "ElectrodeGeometry2",
+                    "title": "Electrode geometry from geom.csv",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public",
+                        "sync": [
+                            {
+                                "id": "sync2",
+                                "syncState": {
+                                    "selectedElectrodeIds": "selectedElectrodeIds",
+                                    "currentElectrodeId": "currentElectrodeId"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         {
             "type": "PlaceField",
             "title": "Place field"
@@ -237,46 +237,6 @@
             "props": {
                 "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
                 "download_from": "spikeforest.public"
-            }
-        },
-        {
-            "type": "ElectrodeGeometry",
-            "title": "Electrode geometry from locations",
-            "props": {
-                "locations": [
-                    [
-                        0,
-                        0
-                    ],
-                    [
-                        2,
-                        0
-                    ],
-                    [
-                        1,
-                        1
-                    ],
-                    [
-                        3,
-                        1
-                    ],
-                    [
-                        0,
-                        2
-                    ],
-                    [
-                        2,
-                        2
-                    ]
-                ],
-                "labels": [
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                ]
             }
         },
         {
