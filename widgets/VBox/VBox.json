@@ -1,6 +1,6 @@
 {
-    "componentName": "HBox",
-    "description": "Horizontal layout",
+    "type": "VBox",
+    "description": "Vertical layout",
     "propsKeys": [],
     "javaScriptStateKeys": [],
     "pythonStateKeys": [],

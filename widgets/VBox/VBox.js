@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
-import { Table, TableBody, TableRow, TableCell } from '@material-ui/core';
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 const config = require('./VBox.json');
 
 export default class VBox extends Component {
-    static title = 'Vertical layout'
+    static title = 'Horizontal layout'
     static reactopyaConfig = config
     constructor(props) {
         super(props);
-        this.state = {
-            status: '',
-            status_message: ''
-        }
     }
     componentDidMount() {
     }
@@ -20,21 +16,38 @@ export default class VBox extends Component {
     }
     render() {
         return (
-            <React.Fragment>
-                <Table>
-                    <TableBody>
-                        {
-                            (this.props.children || []).map((Child) => (
-                                <TableRow>
-                                    <TableCell>
-                                        {Child}
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        }
-                    </TableBody>
-                </Table>
-            </React.Fragment>
+            <AutoDetermineWidth>
+                <VBoxInner {...this.props} />
+            </AutoDetermineWidth>
+        )
+    }
+}
+
+class VBoxInner extends Component {
+    constructor(props) {
+        super(props);
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate() {
+    }
+    componentWillUnmount() {
+    }
+    render() {
+        const { width } = this.props;
+
+        return (
+            <table>
+                <tbody>
+                    {
+                        (this.props.children || []).map((Child, ii) => (
+                            <tr key={ii}>
+                                <td><Child.type {...Child.props} width={width} /></td>
+                            </tr>
+                        ))
+                    }    
+                </tbody>
+            </table>
         )
     }
 }

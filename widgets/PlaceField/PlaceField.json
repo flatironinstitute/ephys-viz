@@ -1,5 +1,5 @@
 {
-    "componentName": "PlaceField",
+    "type": "PlaceField",
     "description": "Place field for spikes and animal position",
     "propsKeys": [],
     "javaScriptStateKeys": [

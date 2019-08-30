@@ -30,6 +30,7 @@ export default class AutoDetermineWidth extends Component {
     }
 
     updateDimensions() {
+        if (!this.container) return;
         if (this.state.width !== this.container.offsetWidth) {
             this.setState({
                 width: this.container.offsetWidth // see render()
@@ -38,10 +39,13 @@ export default class AutoDetermineWidth extends Component {
     }
 
     render() {
+        const elmt = React.Children.only(this.props.children)
+        if (elmt.props.width) {
+            return elmt;
+        }
+
         let { width } = this.state;
         if (!width) width = 300;
-
-        const elmt = React.Children.only(this.props.children)
 
         return (
             <div
@@ -49,7 +53,7 @@ export default class AutoDetermineWidth extends Component {
                 ref={el => (this.container = el)}
                 style={{ position: 'relative', left: 0, right: 0, top: 0, bottom: 0 }}
             >
-                <elmt.type {...elmt.props} width={width}>{elmt.children}</elmt.type>
+                <elmt.type {...elmt.props} width={width} />
             </div>
         );
     }

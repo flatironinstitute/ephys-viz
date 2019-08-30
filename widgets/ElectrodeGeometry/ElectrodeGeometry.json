@@ -1,5 +1,5 @@
 {
-    "componentName": "ElectrodeGeometry",
+    "type": "ElectrodeGeometry",
     "description": "Electrode geometry",
     "javaScriptStateKeys": ["path", "download_from"],
     "pythonStateKeys": ["locations", "labels", "status", "status_message"],

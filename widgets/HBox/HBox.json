@@ -1,5 +1,5 @@
 {
-    "componentName": "HBox",
+    "type": "HBox",
     "description": "Horizontal layout",
     "propsKeys": [],
     "javaScriptStateKeys": [],

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, TableBody, TableRow, TableCell } from '@material-ui/core';
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 const config = require('./HBox.json');
 
 export default class HBox extends Component {
@@ -7,10 +7,6 @@ export default class HBox extends Component {
     static reactopyaConfig = config
     constructor(props) {
         super(props);
-        this.state = {
-            status: '',
-            status_message: ''
-        }
     }
     componentDidMount() {
     }
@@ -20,21 +16,42 @@ export default class HBox extends Component {
     }
     render() {
         return (
-            <React.Fragment>
-                <Table>
-                    <TableBody>
-                        <TableRow>
-                            {
-                                (this.props.children || []).map((Child, ii) => (
-                                    <TableCell key={ii}>
-                                        {Child}
-                                    </TableCell>
-                                ))
-                            }    
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </React.Fragment>
+            <AutoDetermineWidth>
+                <HBoxInner {...this.props} />
+            </AutoDetermineWidth>
+        )
+    }
+}
+
+class HBoxInner extends Component {
+    constructor(props) {
+        super(props);
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate() {
+    }
+    componentWillUnmount() {
+    }
+    render() {
+        const { width } = this.props;
+        const num = this.props.children.length;
+
+        let width0 = width / num;
+        return (
+            <table>
+                <tbody>
+                    <tr>
+                        {
+                            (this.props.children || []).map((Child, ii) => (
+                                <td key={ii}>
+                                    <Child.type {...Child.props} width={width0} />
+                                </td>
+                            ))
+                        }    
+                    </tr>
+                </tbody>
+            </table>
         )
     }
 }

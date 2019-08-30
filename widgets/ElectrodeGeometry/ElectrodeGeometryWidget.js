@@ -1,13 +1,14 @@
 import React, { Component } from "react";
-import CanvasWidget from './CanvasWidget';
+import CanvasWidget from '../jscommon/CanvasWidget';
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 const stable_stringify = require('json-stable-stringify');
 
 export default class ElectrodeGeometryWidget extends Component {
     render() {
         return (
-            <AutoSizer>
+            <AutoDetermineWidth>
                 <ElectrodeGeometryWidgetInner {...this.props} />
-            </AutoSizer>
+            </AutoDetermineWidth>
         );
     }
 }
@@ -22,10 +23,13 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.transpose = false;
         this.margins = { top: 15, bottom: 15, left: 15, right: 15 };
         this.channel_rects = {};
-        this.hovered_electrode_indices = {};
-        this.current_electrode_index = -1;
-        this.selected_electrode_indices = {};
         this.dragSelectRect = null;
+
+        this.state = {
+            selectedElectrodeIds: {},
+            hoveredElectrodeIds: {},
+            currentElectrodeId: null
+        }
 
         this.mouseHandler().onMousePress(this.handleMousePress);
         this.mouseHandler().onMouseRelease(this.handleMouseRelease);
@@ -38,13 +42,37 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     }
 
     componentDidMount() {
+        if (this.props.sync) {
+            this.props.sync.start(this);
+        }
         this.computeSize();
         this.repaint();
     }
 
-    componentDidUpdate() {
-        this.computeSize();
-        this.repaint();
+    componentWillUnmount() {
+        if (this.props.sync) {
+            this.props.sync.stop(this);
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (
+            (this.props.locations != prevProps.locations) ||
+            (this.props.ids != prevProps.ids) ||
+            (this.props.width != prevProps.width) ||
+            (this.props.height != prevProps.height) ||
+            (this.props.maxWidth != prevProps.maxWidth) ||
+            (this.props.maxHeight != prevProps.maxHeight)
+        ) {
+            this.computeSize();
+            this.repaint();
+        }
+        else {
+            this.repaint();
+        }
+        if (this.props.sync) {
+            this.props.sync.update(this);
+        }
     }
 
     computeSize() {
@@ -91,7 +119,25 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         }
     }
 
+    ids() {
+        if (this.props.ids) {
+            return this.props.ids;
+        }
+        else if (this.props.locations) {
+            let ids = [];
+            for (let i=0; i<this.props.locations.length; i++) {
+                ids.push(i);
+            }
+            return ids;
+        }
+        else {
+            return [];
+        }
+    }
+
     paintMainLayer = (painter) => {
+        let ids = this.ids();
+
         const W = this.width();
         const H = this.height();
 
@@ -117,6 +163,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.channel_rects = {};
         if (this.props.locations) {
             for (let i in this.props.locations) {
+                let id0 = ids[i];
                 let pt0 = this.props.locations[i];
                 let x = pt0[0] * scale + offset[0];
                 let y = pt0[1] * scale + offset[1];
@@ -126,22 +173,13 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
                     x1 = y;
                     y1 = x;
                 }
-                let col = this.getChannelColor(i);
+                let col = this.getElectrodeColor(id0);
                 let rect0 = [x1 - rad, y1 - rad, rad * 2, rad * 2];
                 painter.fillEllipse(rect0, col);
                 this.channel_rects[i] = rect0;
-                let label0;
-                if (this.props.labels) {
-                    label0 = this.props.labels[i] || '';
-                }
-                else {
-                    label0 = '';
-                }
-                if ((label0) || (label0 === 0)) {
-                    painter.setBrush({ color: 'white' });
-                    painter.setFont({ 'pixel-size': rad });
-                    painter.drawText(rect0, { AlignCenter: true, AlignVCenter: true }, label0);
-                }
+                painter.setBrush({ color: 'white' });
+                painter.setFont({ 'pixel-size': rad });
+                painter.drawText(rect0, { AlignCenter: true, AlignVCenter: true }, id0);
             }
         }
     }
@@ -189,7 +227,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.mindist = avg_mindist;
     }
 
-    getChannelColor(ind) {
+    getElectrodeColor(id) {
         let color = 'rgb(0, 0, 255)';
         let color_hover = 'rgb(100, 100, 255)';
         let color_current = 'rgb(200, 200, 100)';
@@ -197,16 +235,16 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         let color_selected = 'rgb(180, 180, 150)';
         let color_selected_hover = 'rgb(200, 200, 150)';
 
-        if (ind === this.current_electrode_index) {
-            if (ind in this.hovered_electrode_indices) {
+        if (id === this.state.currentElectrodeId) {
+            if (id in this.state.hoveredElectrodeIds) {
                 return color_current_hover;
             }
             else {
                 return color_current;
             }
         }
-        else if (this.selected_electrode_indices[ind]) {
-            if (ind in this.hovered_electrode_indices) {
+        else if (this.state.selectedElectrodeIds[id]) {
+            if (id in this.state.hoveredElectrodeIds) {
                 return color_selected_hover;
             }
             else {
@@ -214,7 +252,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
             }
         }
         else {
-            if (ind in this.hovered_electrode_indices) {
+            if (id in this.state.hoveredElectrodeIds) {
                 return color_hover;
             }
             else {
@@ -223,88 +261,97 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         }
     }
 
-    electrodeIndexAtPixel(pos) {
+    electrodeIdAtPixel(pos) {
+        const ids = this.ids();
         for (let i in this.channel_rects) {
             let rect0 = this.channel_rects[i];
             if ((rect0[0] <= pos[0]) && (pos[0] <= rect0[0] + rect0[2])) {
                 if ((rect0[1] <= pos[1]) && (pos[1] <= rect0[1] + rect0[2])) {
-                    return i;
+                    return ids[i];
                 }
             }
         }
-        return -1;
+        return null;
     }
 
-    electrodeIndicesInRect(rect) {
+    electrodeIdsInRect(rect) {
+        const ids = this.ids();
         let ret = [];
         for (let i in this.channel_rects) {
             let rect0 = this.channel_rects[i];
             if (rects_intersect(rect, rect0)) {
-                ret.push(i);
+                ret.push(ids[i]);
             }
         }
         return ret;
     }
 
-    setHoveredElectrodeIndex(ind) {
-        this.setHoveredElectrodeIndices([ind]);
+    setHoveredElectrodeId(id) {
+        this.setHoveredElectrodeIds([id]);
     }
 
-    setHoveredElectrodeIndices(inds) {
+    setHoveredElectrodeIds(ids) {
         let tmp = {};
-        for (let ind of inds)
-            tmp[ind] = true;
-        if (JSON.parse(stable_stringify(tmp)) === this.hovered_electrode_indices)
+        for (let id of ids)
+            tmp[id] = true;
+        if (JSON.parse(stable_stringify(tmp)) === this.state.hoveredElectrodeIds)
             return;
-        this.hovered_electrode_indices = tmp;
-        this.repaint();
+        this.setState({
+            hoveredElectrodeIds: tmp
+        });
     }
 
-    setCurrentElectrodeIndex(ind) {
-        if (ind === this.current_electrode_index)
+    setCurrentElectrodeId(id) {
+        if (id === this.state.currentElectrodeId)
             return;
-        this.current_electrode_index = ind;
-        this.repaint()
+        this.setState({
+            currentElectrodeId: id
+        });
     }
 
-    setSelectedElectrodeIndices(inds) {
+    setSelectedElectrodeIds(ids) {
         let newsel = {};
-        for (let ind of inds) {
-            newsel[ind] = true;
+        for (let id of ids) {
+            newsel[id] = true;
         }
-        if (stable_stringify(newsel) === stable_stringify(this.selected_electrode_indices)) {
+        if (stable_stringify(newsel) === stable_stringify(this.state.selectedElectrodeIds)) {
             return;
         }
-        this.selected_electrode_indices = newsel;
-        this.repaint()
+        this.setState({
+            selectedElectrodeIds: newsel
+        });
     }
 
-    selectElectrodeIndex(ind) {
-        let x = JSON.parse(JSON.stringify(this.selected_electrode_indices));
-        x[ind] = true;
-        this.setSelectedElectrodeIndices(Object.keys(x));
+    selectElectrodeId(id) {
+        let x = JSON.parse(JSON.stringify(this.state.selectedElectrodeIds));
+        x[id] = true;
+        let ids = [];
+        for (let id0 in x) ids.push(id0);
+        this.setSelectedElectrodeIds(ids);
     }
 
-    deselectElectrodeIndex(ind) {
-        let x = JSON.parse(JSON.stringify(this.selected_electrode_indices));
-        delete x[ind];
-        this.setSelectedElectrodeIndices(Object.keys(x));
+    deselectElectrodeId(id) {
+        let x = JSON.parse(JSON.stringify(this.state.selectedElectrodeIds));
+        delete x[id];
+        let ids = [];
+        for (let id0 in x) ids.push(id0);
+        this.setSelectedElectrodeIds(ids);
     }
 
     handleMousePress = (X) => {
         if (!X) return;
-        let elec_ind = this.electrodeIndexAtPixel(X.pos);
+        let elec_id = this.electrodeIdAtPixel(X.pos);
         if ((X.modifiers.ctrlKey) || (X.modifiers.shiftKey)) {
-            if (elec_ind in this.selected_electrode_indices) {
-                this.deselectElectrodeIndex(elec_ind);
+            if (elec_id in this.state.selectedElectrodeIds) {
+                this.deselectElectrodeId(elec_id);
             }
             else {
-                this.selectElectrodeIndex(elec_ind);
+                this.selectElectrodeId(elec_id);
             }
         }
         else {
-            this.setCurrentElectrodeIndex(elec_ind);
-            this.setSelectedElectrodeIndices([elec_ind]);
+            this.setCurrentElectrodeId(elec_id);
+            this.setSelectedElectrodeIds([elec_id]);
         }
     }
 
@@ -314,29 +361,29 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     handleMouseMove = (X) => {
         if (!X) return;
         if (!this.dragSelectRect) {
-            let elec_ind = this.electrodeIndexAtPixel(X.pos);
-            this.setHoveredElectrodeIndex(elec_ind);
+            let elec_id = this.electrodeIdAtPixel(X.pos);
+            this.setHoveredElectrodeId(elec_id);
         }
     }
 
     handleMouseDrag = (X) => {
         if (JSON.stringify(X.rect) !== JSON.stringify(this.dragSelectRect)) {
             this.dragSelectRect = X.rect;
-            this.setHoveredElectrodeIndices(this.electrodeIndicesInRect(this.dragSelectRect));
-            this.repaint();
+            this.setHoveredElectrodeIds(this.electrodeIdsInRect(this.dragSelectRect));
         }
     }
 
     handleMouseDragRelease = (X) => {
-        let inds = this.electrodeIndicesInRect(X.rect);
-        this.setCurrentElectrodeIndex(null);
-        this.setSelectedElectrodeIndices(inds);
-        if (inds.length === 1) {
-            this.setCurrentElectrodeIndex(inds[0]);
+        let ids = this.electrodeIdsInRect(X.rect);
+        this.setCurrentElectrodeId(null);
+        this.setSelectedElectrodeIds(ids);
+        if (ids.length === 1) {
+            this.setCurrentElectrodeId(ids[0]);
         }
         this.dragSelectRect = null;
-        this.hovered_electrode_indices = {};
-        this.repaint();
+        this.setState({
+            hoveredElectrodeIds: {}
+        });
     }
 
     render() {
@@ -352,57 +399,6 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         }
 
         return this.renderCanvasWidget();
-    }
-}
-
-class AutoSizer extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            width: null
-        };
-    }
-
-    async componentDidMount() {
-        this.updateDimensions();
-        window.addEventListener("resize", this.resetWidth);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.resetWidth);
-    }
-
-    resetWidth = () => {
-        this.setState({
-            width: null
-        });
-    }
-
-    async componentDidUpdate(prevProps, prevState) {
-        if (!this.state.width) {
-            this.updateDimensions();
-        }
-    }
-
-    updateDimensions() {
-        if (this.state.width !== this.container.offsetWidth) {
-            this.setState({
-                width: this.container.offsetWidth // see render()
-            });
-        }
-    }
-
-    render() {
-        let { width } = this.state;
-        if (!width) width=300;
-
-        const elmt = React.Children.only(this.props.children)
-
-        return (
-            <div className="determiningWidth" ref={el => (this.container = el)}>
-                <elmt.type {...elmt.props} width={this.state.width}>{elmt.children}</elmt.type>
-            </div>
-        );
     }
 }
 

@@ -1,5 +1,5 @@
 {
-    "componentName": "SpikeForestAnalysis",
+    "type": "SpikeForestAnalysis",
     "description": "View of a SpikeForest analysis",
     "propsKeys": [],
     "javaScriptStateKeys": ["path", "download_from"],

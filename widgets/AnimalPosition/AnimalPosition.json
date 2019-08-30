@@ -1,5 +1,5 @@
 {
-    "componentName": "AnimalPosition",
+    "type": "AnimalPosition",
     "description": "Animal position",
     "propsKeys": [],
     "javaScriptStateKeys": ["nwb_path", "download_from", "downsample_factor"],

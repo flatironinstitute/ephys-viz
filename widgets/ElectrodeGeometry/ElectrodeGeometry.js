@@ -1,18 +1,18 @@
 import { PythonInterface } from 'reactopya';
 import React, { Component } from 'react';
 import ElectrodeGeometryWidget from './ElectrodeGeometryWidget';
+import { createSync } from '../jscommon/sync'
 const config = require('./ElectrodeGeometry.json');
-
 
 export default class ElectrodeGeometry extends Component {
     static title = 'Electrode geometry'
     static reactopyaConfig = config;
     constructor(props) {
         super(props);
-        if ((props.locations) && (props.labels)) {
+        if ((props.locations) && (props.ids || props.labels)) {
             this.state = {
                 locations: props.locations,
-                labels: props.labels,
+                ids: props.ids || props.labels,
                 status: 'finished'
             }
         }
@@ -23,7 +23,7 @@ export default class ElectrodeGeometry extends Component {
                 status: '',
                 status_message: '',
                 locations: null,
-                labels: null
+                ids: null
             }
             this.use_python = true;
         }
@@ -51,12 +51,15 @@ export default class ElectrodeGeometry extends Component {
         }
     }
     render() {
-        const { locations, labels } = this.state;
+        const { locations, ids } = this.state;
+        let sync = createSync(this.props.sync);
         return (
             <RespectStatus {...this.state}>
                 <ElectrodeGeometryWidget
                     locations={locations}
-                    labels={labels}
+                    ids={ids}
+                    sync={sync}
+                    width={this.props.width}
                 />
             </RespectStatus>
         )

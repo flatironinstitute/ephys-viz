@@ -1,5 +1,5 @@
 {
-    "componentName": "NWBView",
+    "type": "NWBView",
     "description": "NWB view",
     "propsKeys": ["path"],
     "javaScriptStateKeys": ["path", "download_from"],

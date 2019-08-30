@@ -1,5 +1,5 @@
 {
-    "componentName": "Autocorrelograms",
+    "type": "Autocorrelograms",
     "description": "Autocorrelograms view",
     "propsKeys": [],
     "javaScriptStateKeys": ["firingsPath", "samplerate", "download_from", "max_samples", "bin_size_msec", "max_dt_msec"],

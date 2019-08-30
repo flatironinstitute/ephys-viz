@@ -46,7 +46,7 @@ export function CanvasPainter(context2d, canvasWidget) {
         if (typeof(x) === 'object') {
             let rect2 = x;
             let brush2 = y;
-            this.fillRect(rect2[0], rect2[1], rect2[2], rect2[3], brush2);
+            that.fillRect(rect2[0], rect2[1], rect2[2], rect2[3], brush2);
             return;
         }
         if (typeof brush === 'string') brush = { color: brush };

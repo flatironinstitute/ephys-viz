@@ -1,5 +1,5 @@
 {
-    "componentName": "NWBBrowser",
+    "type": "NWBBrowser",
     "description": "NWB brwoser",
     "propsKeys": [],
     "javaScriptStateKeys": ["path", "download_from"],

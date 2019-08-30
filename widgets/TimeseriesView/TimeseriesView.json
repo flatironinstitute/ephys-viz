@@ -1,5 +1,5 @@
 {
-    "componentName": "TimeseriesView",
+    "type": "TimeseriesView",
     "description": "Timeseries view",
     "propsKeys": [],
     "javaScriptStateKeys": ["recordingPath", "download_from", "segmentSize", "segmentsRequested"],
