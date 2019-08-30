@@ -22,7 +22,7 @@ RUN pip install numpy
 
 #########################################
 ### Reactopya
-RUN echo "24 August 2019"
+RUN echo "30 August 2019"
 RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya
 
 #########################################
