@@ -30,6 +30,7 @@ RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya
 RUN mkdir /project
 COPY widgets /project/widgets
 COPY reactopya.config.json /project/reactopya.config.json
+COPY gallery.json /project/gallery.json
 COPY package.json /project/package.json
 WORKDIR /project
 
