@@ -17,28 +17,27 @@ Prerequisites:
 
 Use JupyterLab >= 1.0.9
 
-```
-pip install --upgrade ephys_viz_jup
-jupyter labextension install ephyz_viz_jup
-```
-
-And if you haven't already installed the ipywidgets lab extension, you should also install:
+First install the reactopya_jup python package and JupyterLab extension, if not already installed:
 
 ```
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install reactopya_jup
+pip install --upgrade reactopya_jup
+```
+
+Then install ephys_viz_jup:
+
+```
+pip install --upgrade ephys_viz_jup
 ```
 
 **Jupyter notebook**
 
-```
-pip install --upgrade ephys_viz_jup
-```
-
-(Note: I think this doesn't quite work yet -- working on it)
+(Note working quite yet)
 
 **Google Colaboratory**
 
-At the top of the colab notebook:
+Not working quite yet, but in the future:
 
 ```
 !pip install ephys_viz_colab=={explicit_version}
@@ -90,17 +89,21 @@ reactopya start-gallery-dev
 
 **JupyterLab (development installation)**
 
+First install the reactopya_jup Python package and JupyterLab extension as above
+
+Then:
+
 ```
-reactopya install-jupyter-labextension
+reactopya install-jupyter
 ```
 
 **Jupyter notebook (development installation)**
 
-```
-reactopya install-jupyter-extension
-```
+[Not quite ready]
 
 **Google colab (development installation)**
+
+Not quite ready, but in the future:
 
 ```
 reactopya build-colab

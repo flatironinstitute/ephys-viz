@@ -1,2 +1,0 @@
-docker build -f Dockerfile.test -t ephys_viz_jupyter .
-docker run -p 8888:8888 -it ephys_viz_jupyter
