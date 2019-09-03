@@ -2,8 +2,30 @@ import React, { Component } from 'react';
 const config = require('./Accordion.json');
 import { Accordion as Accordion2, AccordionItem, AccordionItemHeading, AccordionItemPanel, AccordionItemButton} from 'react-accessible-accordion';
 import './AccordionStyle.css';
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 
 export default class Accordion extends Component {
+    static title = 'Accordion'
+    static reactopyaConfig = config
+    constructor(props) {
+        super(props);
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate() {
+    }
+    componentWillUnmount() {
+    }
+    render() {
+        return (
+            <AutoDetermineWidth>
+                <AccordionInner {...this.props} />
+            </AutoDetermineWidth>
+        )
+    }
+}
+
+class AccordionInner extends Component {
     static title = 'Accordion'
     static reactopyaConfig = config
     constructor(props) {
@@ -54,7 +76,7 @@ export default class Accordion extends Component {
                         </AccordionItemHeading>
                         <AccordionItemPanel>
                             {
-                                this.state.indicesSelected[i] ? Child : <span>Waiting</span>
+                                this.state.indicesSelected[i] ? <Child.type width={this.props.width} {...Child.props} /> : <span>Waiting</span>
                             }
                         </AccordionItemPanel>
                     </AccordionItem>

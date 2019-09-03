@@ -31,6 +31,13 @@ export function CanvasPainter(context2d, canvasWidget) {
         return _clearRect(0, 0, m_width, m_height);
     }
     this.clearRect = function (x, y, W, H) {
+        if (typeof(x) === 'object') {
+            let a = x;
+            x = a[0];
+            y = a[1];
+            W = a[2];
+            H = a[3];
+        }
         let a = transformXYWH(x, y, W, H);
         return _clearRect(a[0], a[1], a[2], a[3]);
     };
@@ -39,6 +46,14 @@ export function CanvasPainter(context2d, canvasWidget) {
     }
 
     this.fillRect = function (x, y, W, H, brush) {
+        if (typeof(x) === 'object') {
+            let a = x;
+            brush = y;
+            x = a[0];
+            y = a[1];
+            W = a[2];
+            H = a[3];
+        }
         let a = transformXYWH(x, y, W, H);
         return _fillRect(a[0], a[1], a[2], a[3], brush);
     }
@@ -56,6 +71,13 @@ export function CanvasPainter(context2d, canvasWidget) {
     };
 
     this.drawRect = function (x, y, W, H) {
+        if (typeof(x) === 'object') {
+            let a = x;
+            x = a[0];
+            y = a[1];
+            W = a[2];
+            H = a[3];
+        }
         let a = transformXYWH(x, y, W, H);
         return _drawRect(a[0], a[1], a[2], a[3]);
     }
@@ -113,9 +135,10 @@ export function CanvasPainter(context2d, canvasWidget) {
         ctx.fillStyle = to_color(m_brush.color);
         ctx.fillText(txt, x, y);
     }
-    this.drawMarker = function(x, y, radius, shape) {
+    this.drawMarker = function(x, y, radius, shape, opts) {
+        opts = opts || {};
         let pt = transformXY(x, y);
-        _drawMarker(pt[0], pt[1], radius, shape);
+        _drawMarker(pt[0], pt[1], radius, shape, opts);
     }
     function _drawMarker(x, y, radius, shape, opts) {
         shape = shape || 'circle';
@@ -198,25 +221,28 @@ export function CanvasPainter(context2d, canvasWidget) {
     function transformXYWH(x, y, W, H) {
         let pt1 = transformXY(x, y);
         let pt2 = transformXY(x + W, y + H);
-        return [pt1[0], pt1[1], pt2[0] - pt1[0], pt2[1] - pt1[1]];
+        return [Math.min(pt1[0], pt2[0]), Math.min(pt1[1], pt2[1]), Math.abs(pt2[0] - pt1[0]), Math.abs(pt2[1] - pt1[1])];
     }
     function transformXY(x, y) {
         if (m_use_coords) {
             const xr = canvasWidget.coordXRange();
             const yr = canvasWidget.coordYRange();
-            let W = canvasWidget.width();
-            let H = canvasWidget.height();
+            const margins = canvasWidget.margins();
+            let W = canvasWidget.width() - margins[0] - margins[1];
+            let H = canvasWidget.height() - margins[2] - margins[3];
             const xextent = xr[1] - xr[0];
             const yextent = yr[1] - yr[0];
-            if ((W * yextent > H * xextent) && (yextent)) {
-                W = H * xextent / yextent;
-            }
-            else if ((H * xextent > W * yextent) && (xextent)) {
-                H = W * yextent / xextent;
+            if (canvasWidget.preserveAspectRatio()) {
+                if ((W * yextent > H * xextent) && (yextent)) {
+                    W = H * xextent / yextent;
+                }
+                else if ((H * xextent > W * yextent) && (xextent)) {
+                    H = W * yextent / xextent;
+                }
             }
             const xpct = (x - xr[0]) / (xr[1] - xr[0]);
             const ypct = 1 - (y - yr[0]) / (yr[1] - yr[0]);
-            return [W * xpct, H * ypct];
+            return [margins[0] + W * xpct, margins[2] + H * ypct];
         }
         else {
             return [x, y];
@@ -341,7 +367,7 @@ export function MouseHandler() {
     }
 
     function mouse_event(e) {
-        if (!m_element) return null;
+        if (!m_element) return {};
         //var parentOffset = $(this).parent().offset(); 
         //var offset=m_element.offset(); //if you really just want the current element's offset
         var rect = m_element.getBoundingClientRect();

@@ -1,7 +1,8 @@
 import { PythonInterface } from 'reactopya';
 import React, { Component } from 'react';
 import { Grid } from '@material-ui/core';
-import Plot from 'react-plotly.js';
+// import Plot from 'react-plotly.js';
+import { Plot } from '../jscommon/PlotlyPatched';
 const config = require('./Autocorrelograms.json');
 
 export default class Autocorrelograms extends Component {
@@ -36,12 +37,13 @@ export default class Autocorrelograms extends Component {
     }
     render() {
         const { output } = this.state;
+        let autocorrelograms = (output || {}).autocorrelograms || [];
 
         return (
             <RespectStatus {...this.state}>
                 <Grid container>
                     {
-                        ((output || {}).autocorrelograms || []).map((ac) => (
+                        autocorrelograms.map((ac) => (
                             <Grid item key={ac.unit_id}>
                                 <CorrelogramPlot
                                     key={ac.unit_id}
@@ -111,7 +113,7 @@ class CorrelogramPlot extends Component {
                         showticklabels: false
                     },
                     margin: {
-                        l: 20, r: 20, b: 50, t: 40
+                        l: 20, r: 20, b: 40, t: 40
                     }
                 }}
                 config={(

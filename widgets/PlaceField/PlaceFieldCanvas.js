@@ -45,10 +45,12 @@ export default class PlaceFieldCanvas extends CanvasWidget {
             let xmax = compute_max(positions[0]);
             let ymin = compute_min(positions[1]);
             let ymax = compute_max(positions[1]);
+            this.setPreserveAspectRatio(true);
             this.setCoordXRange(xmin, xmax);
             this.setCoordYRange(ymin, ymax);
         }
         else {
+            this.setPreserveAspectRatio(true);
             this.setCoordXRange(0, 1);
             this.setCoordYRange(0, 1);
         }

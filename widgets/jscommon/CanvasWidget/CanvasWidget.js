@@ -40,7 +40,9 @@ export default class CanvasWidget extends Component {
             canvasWidgetWidth: 100,
             canvasWidgetHeight: 100,
             coordXRange: [0, 1],
-            coordYRange: [0, 1]
+            coordYRange: [0, 1],
+            preserveAspectRatio: false,
+            margins: [0, 0, 0, 0]
         };
         this._canvasLayers = [];
         this._mouseHandler = new MouseHandler();
@@ -98,11 +100,32 @@ export default class CanvasWidget extends Component {
             coordYRange: [ymin, ymax]
         });
     }
+    setPreserveAspectRatio(val) {
+        if (this.state.preserveAspectRatio === val)
+            return;
+        this.setState({
+            preserveAspectRatio: val
+        });
+    }
+    setMargins(l, r, t, b) {
+        const lrtb = [l, r, t, b];
+        if (JSON.stringify(lrtb) === JSON.stringify(this.state.margins))
+            return
+        this.setState({
+            margins: lrtb
+        });
+    }
     coordXRange() {
         return [this.state.coordXRange[0], this.state.coordXRange[1]];
     }
     coordYRange() {
         return [this.state.coordYRange[0], this.state.coordYRange[1]];
+    }
+    preserveAspectRatio() {
+        return this.state.preserveAspectRatio;
+    }
+    margins() {
+        return JSON.parse(JSON.stringify(this.state.margins));
     }
     mouseHandler() {
         return this._mouseHandler;

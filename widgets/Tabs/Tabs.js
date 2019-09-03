@@ -2,8 +2,31 @@ import React, { Component } from 'react';
 const config = require('./Tabs.json');
 import { Tabs as Tabs2 } from 'react-tabs';
 import { Tab, TabList, TabPanel } from 'react-tabs';
+import "react-tabs/style/react-tabs.css";
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth.js';
 
 export default class Tabs extends Component {
+    static title = 'Accordion'
+    static reactopyaConfig = config
+    constructor(props) {
+        super(props);
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate() {
+    }
+    componentWillUnmount() {
+    }
+    render() {
+        return (
+            <AutoDetermineWidth>
+                <TabsInner {...this.props} />
+            </AutoDetermineWidth>
+        )
+    }
+}
+
+class TabsInner extends Component {
     static title = 'Tabs'
     static reactopyaConfig = config
     constructor(props) {
@@ -45,7 +68,7 @@ export default class Tabs extends Component {
                 {this.props.children.map((Child, i) => (
                     <TabPanel key={tabs[i].label}>
                         {
-                            this.state.indicesSelected[i] ? Child : <span>Waiting</span>
+                            this.state.indicesSelected[i] ? <Child.type width={this.props.width} {...Child.props} /> : <span>Waiting</span>
                         }
                     </TabPanel>
                 ))}

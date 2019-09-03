@@ -1,0 +1,9 @@
+I set up the nbstripout git filter by running
+
+```
+pip install --upgrade nbstripout
+nbstripout --install --attributes .gitattributes
+```
+
+So I believe this will automatically strip the output of any .ipynb files when changes are added to the git repo.
+

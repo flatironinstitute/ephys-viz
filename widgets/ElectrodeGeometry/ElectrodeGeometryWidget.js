@@ -26,9 +26,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.dragSelectRect = null;
 
         this.state = {
-            selectedElectrodeIds: {},
-            hoveredElectrodeIds: {},
-            currentElectrodeId: null
+            hoveredElectrodeIds: {}
         }
 
         this.mouseHandler().onMousePress(this.handleMousePress);
@@ -42,17 +40,11 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     }
 
     componentDidMount() {
-        if (this.props.sync) {
-            this.props.sync.start(this);
-        }
         this.computeSize();
         this.repaint();
     }
 
     componentWillUnmount() {
-        if (this.props.sync) {
-            this.props.sync.stop(this);
-        }
     }
 
     componentDidUpdate(prevProps) {
@@ -69,9 +61,6 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         }
         else {
             this.repaint();
-        }
-        if (this.props.sync) {
-            this.props.sync.update(this);
         }
     }
 
@@ -235,7 +224,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         let color_selected = 'rgb(180, 180, 150)';
         let color_selected_hover = 'rgb(200, 200, 150)';
 
-        if (id === this.state.currentElectrodeId) {
+        if (id === this.props.currentElectrodeId) {
             if (id in this.state.hoveredElectrodeIds) {
                 return color_current_hover;
             }
@@ -243,7 +232,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
                 return color_current;
             }
         }
-        else if (this.state.selectedElectrodeIds[id]) {
+        else if ((this.props.selectedElectrodeIds || {})[id]) {
             if (id in this.state.hoveredElectrodeIds) {
                 return color_selected_hover;
             }
@@ -302,11 +291,9 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     }
 
     setCurrentElectrodeId(id) {
-        if (id === this.state.currentElectrodeId)
+        if (id === this.props.currentElectrodeId)
             return;
-        this.setState({
-            currentElectrodeId: id
-        });
+        this.props.onCurrentElectrodeIdChanged && this.props.onCurrentElectrodeIdChanged(id);
     }
 
     setSelectedElectrodeIds(ids) {
@@ -314,16 +301,14 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         for (let id of ids) {
             newsel[id] = true;
         }
-        if (stable_stringify(newsel) === stable_stringify(this.state.selectedElectrodeIds)) {
+        if (stable_stringify(newsel) === stable_stringify(this.props.selectedElectrodeIds || {})) {
             return;
         }
-        this.setState({
-            selectedElectrodeIds: newsel
-        });
+        this.props.onSelectedElectrodeIdsChanged && this.props.onSelectedElectrodeIdsChanged(newsel);
     }
 
     selectElectrodeId(id) {
-        let x = JSON.parse(JSON.stringify(this.state.selectedElectrodeIds));
+        let x = JSON.parse(JSON.stringify(this.props.selectedElectrodeIds || {}));
         x[id] = true;
         let ids = [];
         for (let id0 in x) ids.push(id0);
@@ -331,7 +316,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     }
 
     deselectElectrodeId(id) {
-        let x = JSON.parse(JSON.stringify(this.state.selectedElectrodeIds));
+        let x = JSON.parse(JSON.stringify(this.props.selectedElectrodeIds || {}));
         delete x[id];
         let ids = [];
         for (let id0 in x) ids.push(id0);
@@ -342,7 +327,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         if (!X) return;
         let elec_id = this.electrodeIdAtPixel(X.pos);
         if ((X.modifiers.ctrlKey) || (X.modifiers.shiftKey)) {
-            if (elec_id in this.state.selectedElectrodeIds) {
+            if (elec_id in (this.props.selectedElectrodeIds || {})) {
                 this.deselectElectrodeId(elec_id);
             }
             else {

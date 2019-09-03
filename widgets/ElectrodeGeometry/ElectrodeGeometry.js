@@ -1,7 +1,7 @@
 import { PythonInterface } from 'reactopya';
 import React, { Component } from 'react';
 import ElectrodeGeometryWidget from './ElectrodeGeometryWidget';
-import { createSync } from '../jscommon/sync'
+import Sync from '../jscommon/sync'
 const config = require('./ElectrodeGeometry.json');
 
 export default class ElectrodeGeometry extends Component {
@@ -9,6 +9,10 @@ export default class ElectrodeGeometry extends Component {
     static reactopyaConfig = config;
     constructor(props) {
         super(props);
+        this.state = {
+            currentElectrodeId: null,
+            selectedElectrodeIds: {}
+        };
         if ((props.locations) && (props.ids || props.labels)) {
             this.state = {
                 locations: props.locations,
@@ -39,27 +43,33 @@ export default class ElectrodeGeometry extends Component {
             this.pythonInterface = new PythonInterface(this, config);
             this.pythonInterface.start();
         }
+        this.sync = new Sync(this, this.props.sync);
+        this.sync.start();
     }
     componentDidUpdate() {
         if (this.use_python) {
             this.pythonInterface.update();
         }
+        this.sync.update();
     }
     componentWillUnmount() {
         if (this.use_python) {
             this.pythonInterface.stop();
         }
+        this.sync.stop();
     }
     render() {
-        const { locations, ids } = this.state;
-        let sync = createSync(this.props.sync);
+        const { locations, ids, currentElectrodeId, selectedElectrodeIds } = this.state;
         return (
             <RespectStatus {...this.state}>
                 <ElectrodeGeometryWidget
                     locations={locations}
                     ids={ids}
-                    sync={sync}
                     width={this.props.width}
+                    currentElectrodeId={currentElectrodeId}
+                    selectedElectrodeIds={selectedElectrodeIds}
+                    onCurrentElectrodeIdChanged={(id) => {this.setState({currentElectrodeId: id})}}
+                    onSelectedElectrodeIdsChanged={(ids) => {this.setState({selectedElectrodeIds: ids})}}
                 />
             </RespectStatus>
         )

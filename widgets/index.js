@@ -2,12 +2,10 @@ export { default as ElectrodeGeometry } from './ElectrodeGeometry/ElectrodeGeome
 export { default as TimeseriesView } from './TimeseriesView/TimeseriesView';
 export { default as NWBView } from './NWBView/NWBView';
 export { default as NWBBrowser } from './NWBBrowser/NWBBrowser';
-// export { default as Autocorrelograms } from './Autocorrelograms/Autocorrelograms';
-// export { default as AnimalPosition } from './AnimalPosition/AnimalPosition';
 export { default as SpikeForestAnalysis } from './SpikeForestAnalysis/SpikeForestAnalysis';
-export { default as AnimalPosition2 } from './AnimalPosition2/AnimalPosition2';
 export { default as PlaceField } from './PlaceField/PlaceField';
 export { default as HBox } from './HBox/HBox';
 export { default as VBox } from './VBox/VBox';
 export { default as Tabs } from './Tabs/Tabs';
 export { default as Accordion } from './Accordion/Accordion';
+export { default as Autocorrelograms } from './Autocorrelograms/Autocorrelograms';
