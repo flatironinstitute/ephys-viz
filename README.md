@@ -12,7 +12,9 @@ See [installation instructions](generated/docs/install.md).
 
 ## Usage
 
-See the [example_notebooks](example_notebooks) directory for usage examples.
+See the [notebook_examples](notebook_examples) and [desktop_examples](desktop_examples) directories for usage examples.
+
+It is possible to view the widgets in JupyterLab, Jupyter Notebook, Google Colaboratory, or on a hosted webpage. See the installation instructions for more information on enabling these methods.
 
 ## Tests
 
