@@ -22,8 +22,7 @@ RUN pip install numpy
 
 #########################################
 ### Reactopya
-RUN echo "30 August 2019"
-RUN pip install --upgrade git+https://github.com/flatironinstitute/reactopya
+RUN pip install reactopya==0.5.0
 
 #########################################
 ### Copy the project files into the container
