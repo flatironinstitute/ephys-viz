@@ -1,4 +1,6 @@
 generated
+_watching
+temp
 
 .ipynb_checkpoints
 .mypy_cache

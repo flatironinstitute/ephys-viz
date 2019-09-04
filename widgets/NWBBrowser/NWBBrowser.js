@@ -64,7 +64,7 @@ class RespectStatus extends Component {
             case 'finished':
                 return this.props.children;
             default:
-                return <div>Unknown status: {this.props.status}</div>
+                return <div>Loading: {this.props.status}</div>
         }
     }
 }

@@ -283,7 +283,7 @@ class BrowserTree extends Component {
                     </React.Fragment>
                 );
             default:
-                return <div>Unknown status: {status}</div>;
+                return <div>Loading: {status}</div>;
         }
     }
 }

@@ -25,13 +25,13 @@ RUN pip install jupyterlab
 #########################################
 ### Install reactopya_jup
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-RUN pip install --upgrade reactopya_jup==0.5.0
-RUN jupyter labextension install reactopya_jup@0.5.0
+RUN pip install --upgrade reactopya_jup==0.5.1
+RUN jupyter labextension install reactopya_jup@0.5.1
 RUN jupyter nbextension install --sys-prefix --py reactopya_jup
 RUN jupyter nbextension enable reactopya_jup --py --sys-prefix
 
 #########################################
-### Install ephys_viz_jup
-RUN pip install --upgrade ephys_viz_jup==0.4.0
+### Install ephys_viz
+RUN pip install ephys_viz==0.4.1
 
 CMD echo "See instructions.txt on how to run this container"
