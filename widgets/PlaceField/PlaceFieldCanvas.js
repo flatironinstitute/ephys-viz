@@ -85,18 +85,35 @@ export default class PlaceFieldCanvas extends CanvasWidget {
 
         if (spike_time_indices) {
             painter.useCoords();
-            for (let i = 0; i < spike_time_indices.length; i++) {
-                if (spike_labels[i] in selectedUnits) {
-                    let color = colorForUnitId(unitColorArray, spike_labels[i]);
-                    painter.setPen({ color: color });
-                    painter.setBrush({ color: color });
-                    let j = spike_time_indices[i];
-                    let x = positions[0][j];
-                    let y = positions[1][j];
-                    let radius = 2;
-                    if ((j <= currentTimepoint) && (currentTimepoint <= (j+20)))
-                        radius = 8;
-                    painter.fillMarker(x, y, radius);
+            for (let pass = 1; pass <= 2; pass++) {
+                for (let i = 0; i < spike_time_indices.length; i++) {
+                    if (spike_labels[i] in selectedUnits) {
+                        let j = spike_time_indices[i];
+                        let x = positions[0][j];
+                        let y = positions[1][j];
+                        let radius;
+                        let color = colorForUnitId(unitColorArray, spike_labels[i]);
+                        if ((j <= currentTimepoint) && (currentTimepoint <= (j+20))) {
+                            if (pass == 2) {
+                                radius = 5;
+                                painter.setPen({ color: 'black' });
+                                painter.setBrush({ color: 'black' });
+                                painter.fillMarker(x, y, radius + 2);
+
+                                painter.setPen({ color: color });
+                                painter.setBrush({ color: color });
+                                painter.fillMarker(x, y, radius);
+                            }
+                        }
+                        else {
+                            if (pass == 1) {
+                                radius = 2;
+                                painter.setPen({ color: color });
+                                painter.setBrush({ color: color });
+                                painter.fillMarker(x, y, radius);
+                            }
+                        }
+                    }
                 }
             }
         }

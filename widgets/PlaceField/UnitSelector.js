@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
+import { FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox, Radio } from '@material-ui/core';
 
 export default class UnitSelector extends Component {
     constructor(props) {
@@ -42,7 +42,7 @@ export default class UnitSelector extends Component {
                         all_unit_ids.map((id, ind) => (
                             <FormControlLabel
                                 key={id}
-                                control={<Checkbox checked={this.state.selectedUnits[id] ? true : false} onChange={(evt, checked) => {this.handleChange(id, checked);}} color="primary" />}
+                                control={<Radio checked={this.state.selectedUnits[id] ? true : false} onChange={(evt, checked) => {this.handleChange(id, checked);}} color="primary" />}
                                 label={cluster_names && cluster_names[ind] ? `${id} (${cluster_names[ind]})` : id}
                                 labelPlacement="end"
                             />
