@@ -15,6 +15,10 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && apt-get update &&
 RUN npm install -g yarn
 
 #########################################
+### opengl
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+
+#########################################
 ### Numpy
 RUN pip install numpy
 
@@ -25,14 +29,14 @@ RUN pip install jupyterlab
 #########################################
 ### Install reactopya_jup
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-RUN pip install --upgrade reactopya_jup==0.5.1
-RUN jupyter labextension install reactopya_jup@0.5.1
+RUN pip install --upgrade reactopya_jup==0.6.0
+RUN jupyter labextension install reactopya_jup@0.6.0
 RUN pip install ipywidgets
 RUN jupyter nbextension install --sys-prefix --py reactopya_jup
 RUN jupyter nbextension enable reactopya_jup --py --sys-prefix
 
 #########################################
 ### Install ephys_viz
-RUN pip install ephys_viz==0.4.1
+RUN pip install ephys_viz==0.5.0
 
 CMD echo "See instructions.txt on how to run this container"

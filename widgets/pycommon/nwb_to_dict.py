@@ -62,7 +62,8 @@ def npy_dtype_to_string(dt):
         "i4": 'int32',
         "i8": 'int32',  # note that mda does not support int64 (I believe)
         "u2": 'uint16',
-        "u4": 'uint32'
+        "u4": 'uint32',
+        "u8": 'uint32'
     }
     return map[str]
 
@@ -81,7 +82,7 @@ def _handle_val(val, *, opts, name):
     elif type(val) == bytes:
         return val.decode('utf-8')
     elif type(val) == np.ndarray:
-        if name in ['data', 'timestamps', 'spike_times', 'image_mask']:
+        if name in ['data', 'timestamps', 'spike_times', 'image_mask', 'faces', 'vertices']:
             print('Using snapshot for', name, val.shape)
             snapshot = True
         else:

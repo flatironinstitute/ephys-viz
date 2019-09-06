@@ -1,6 +1,6 @@
 from reactopya import Component
 from mountaintools import client as mt
-from .h5_to_dict import h5_to_dict
+from ..pycommon.nwb_to_dict import nwb_to_dict
 
 
 class NWBBrowser(Component):
@@ -14,7 +14,7 @@ class NWBBrowser(Component):
         if path:
             if path.endswith('.nwb'):
                 self.set_python_state(dict(status_message='Realizing object from nwb file: {}'.format(path)))
-                obj = h5_to_dict(path, use_cache=True)
+                obj = nwb_to_dict(path, use_cache=True)
             else:
                 self.set_python_state(dict(status_message='Realizing object: {}'.format(path)))
                 obj = mt.loadObject(path=path)
