@@ -37,6 +37,6 @@ RUN jupyter nbextension enable reactopya_jup --py --sys-prefix
 
 #########################################
 ### Install ephys_viz
-RUN pip install ephys_viz==0.5.0
+RUN pip install ephys_viz==0.5.1
 
 CMD echo "See instructions.txt on how to run this container"
