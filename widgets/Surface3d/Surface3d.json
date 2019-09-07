@@ -1,0 +1,11 @@
+{
+    "type": "Surface3d",
+    "description": "Vtk surface rendering",
+    "propsKeys": [],
+    "javaScriptStateKeys": [],
+    "pythonStateKeys": [],
+    "defaultProps": {
+        "vertices": [[0, 0, 0], [0, 1, 0], [1, 0, 0]],
+        "faces": [3, 0, 1, 2]
+    }
+}

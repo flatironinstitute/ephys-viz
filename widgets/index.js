@@ -9,3 +9,5 @@ export { default as VBox } from './VBox/VBox';
 export { default as Tabs } from './Tabs/Tabs';
 export { default as Accordion } from './Accordion/Accordion';
 export { default as Autocorrelograms } from './Autocorrelograms/Autocorrelograms';
+export { default as Surface3d } from './Surface3d/Surface3d';
+export { default as CorticalSurface } from './CorticalSurface/CorticalSurface';

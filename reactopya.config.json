@@ -10,10 +10,15 @@
             "numpy",
             "mountaintools",
             "spikeforest",
-            "scipy"
+            "scipy",
+            "vtk"
         ]
     },
     "additional_jupyter_imports": [
         "from .widgets.jupyter import *"
+    ],
+    "adjust_webpack_rules": [
+        "var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;",
+        "rules = rules.concat(vtkRules);"
     ]
 }

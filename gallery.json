@@ -1,6 +1,15 @@
 {
     "widgets": [
         {
+            "type": "CorticalSurface",
+            "title": "Cortical surface from EC2",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public",
+                "name": "EC2_lh_pial"
+            }
+        },
+        {
             "type": "ElectrodeGeometry",
             "title": "Electrode geometry from geom.csv",
             "props": {
@@ -57,6 +66,14 @@
             }
         },
         {
+            "type": "NWBBrowser",
+            "title": "NWBBrowser for EC2.nwb",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
             "type": "NWBView",
             "title": "NWBView for bon03.nwb",
             "props": {
@@ -70,6 +87,16 @@
             "props": {
                 "recordingPath": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec",
                 "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "Surface3d",
+            "title": "Simple vtk.js example",
+            "key": "surface3d-triangle",
+            "props": {
+                "vertices": [[0, 0, 0], [0, 1, 0], [1, 0, 0]],
+                "faces": [3, 0, 1, 2],
+                "scalars": [0, 1, 2]
             }
         }
     ]

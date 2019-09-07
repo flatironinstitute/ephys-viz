@@ -9,3 +9,5 @@ from .VBox import VBox
 from .Tabs import Tabs
 from .Accordion import Accordion
 from .Autocorrelograms import Autocorrelograms
+from .Surface3d import Surface3d
+from .CorticalSurface import CorticalSurface
