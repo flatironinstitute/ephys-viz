@@ -1,0 +1,9 @@
+{
+    "type": "TwoPhotonSeries",
+    "description": "Display move corresponding to a two photon data series",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["nwb_path", "download_from"],
+    "pythonStateKeys": ["status", "status_message", "video_url"],
+    "galleryProps": {
+    }
+}

@@ -1,6 +1,40 @@
 {
     "widgets": [
         {
+            "type": "TwoPhotonSeries",
+            "title": "TwoPhotonSeries",
+            "key": "two-photon-series",
+            "props": {
+                "nwb_path": "sha1://3ea5732ebfca7fe2e3cd2ec7b731f3a492f06e6c/Sue_2x_3000_40_-46.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from sha1:// file",
+            "key": "video-sha1-file",
+            "props": {
+                "path": "sha1://8e52ba7d81d2964e1509ec492ef3831d90a5fa8c/trailer.mp4",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from file",
+            "key": "video-file",
+            "props": {
+                "path": "/tmp/trailer.mp4"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from url",
+            "key": "video-url",
+            "props": {
+                "url": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
+            }
+        },
+        {
             "type": "CorticalSurface",
             "title": "Cortical surface from EC2",
             "props": {

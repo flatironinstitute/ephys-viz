@@ -1,0 +1,9 @@
+{
+    "type": "Video",
+    "description": "Play a video (from url or from file)",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["path", "download_froms"],
+    "pythonStateKeys": ["status", "status_message", "video_data_b64"],
+    "galleryProps": {
+    }
+}

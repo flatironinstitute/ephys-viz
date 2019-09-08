@@ -1,6 +1,6 @@
 {
     "project_name": "ephys_viz",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "description": "Neurophysiology visualization widgets",
     "author": "Jeremy Magland",
     "license": "Apache-2.0",
@@ -11,7 +11,9 @@
             "mountaintools",
             "spikeforest",
             "scipy",
-            "vtk"
+            "vtk",
+            "imageio",
+            "imageio-ffmpeg"
         ]
     },
     "additional_jupyter_imports": [

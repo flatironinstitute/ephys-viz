@@ -11,3 +11,5 @@ from .Accordion import Accordion
 from .Autocorrelograms import Autocorrelograms
 from .Surface3d import Surface3d
 from .CorticalSurface import CorticalSurface
+from .Video import Video
+from .TwoPhotonSeries import TwoPhotonSeries
