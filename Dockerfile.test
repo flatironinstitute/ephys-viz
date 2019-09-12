@@ -33,7 +33,7 @@ WORKDIR /project
 
 #########################################
 ### Build the jupyter extension
-RUN reactopya install-jupyter-extension
+RUN reactopya install-jupyter
 
 #########################################
 ### Electron installation
