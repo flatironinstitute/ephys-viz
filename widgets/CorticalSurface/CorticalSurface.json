@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "CorticalSurface",
     "description": "Render cortical surface in 3D from .nwb file",
     "propsKeys": [],

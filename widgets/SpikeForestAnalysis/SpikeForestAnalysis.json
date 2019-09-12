@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "SpikeForestAnalysis",
     "description": "View of a SpikeForest analysis",
     "propsKeys": [],

@@ -1,6 +1,15 @@
 {
     "widgets": [
         {
+            "type": "NWBFile",
+            "title": "NWBFile",
+            "key": "nwb-file",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
             "type": "TwoPhotonSeries",
             "title": "TwoPhotonSeries",
             "key": "two-photon-series",

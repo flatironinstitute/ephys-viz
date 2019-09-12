@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFile, FaFolder, FaFolderOpen, FaChevronDown, FaChevronRight, FaBed, FaBullhorn } from 'react-icons/fa';
+import { FaFile, FaFolder, FaFolderOpen, FaChevronDown, FaChevronRight, FaBed, FaBullhorn, FaBullseye } from 'react-icons/fa';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import Sha1PathLink from './Sha1PathLink';
@@ -66,14 +66,15 @@ const TreeNode = (props) => {
   }
 
   let isExpanded = expandedNodePaths[node.path];
+  let canExpand = getChildNodes(node).length > 0;
 
   return (
     <React.Fragment>
       <StyledTreeNode level={level} type={node.type} className={(node.path === selectedNodePath ) ? 'selected' : '' } onClick={() => onNodeSelect(node)}>
-        <NodeIcon key={'expanded-icon'} onClick={(e) => {e.stopPropagation(); onToggle(node)}}>
-          { node.type === 'dir' && (isExpanded ? <FaChevronDown /> : <FaChevronRight />) }
-          { node.type === 'object' && (isExpanded ? <FaChevronDown /> : <FaChevronRight />) }
-          { node.type === 'array-parent' && (isExpanded ? <FaChevronDown /> : <FaChevronRight />) }
+        <NodeIcon key={'expanded-icon'} onClick={(e) => {e.stopPropagation(); canExpand && onToggle(node)}}>
+          { node.type === 'dir' && (isExpanded ? <FaChevronDown /> : canExpand ? <FaChevronRight /> : <FaBullseye />) }
+          { node.type === 'object' && (isExpanded ? <FaChevronDown /> : canExpand ? <FaChevronRight /> : <FaBullseye />) }
+          { node.type === 'array-parent' && (isExpanded ? <FaChevronDown /> : canExpand ? <FaChevronRight /> : <FaBullseye />) }
         </NodeIcon>
         
         <NodeIcon key={'item-icon'} marginRight={10}>

@@ -13,3 +13,4 @@ export { default as Surface3d } from './Surface3d/Surface3d';
 export { default as CorticalSurface } from './CorticalSurface/CorticalSurface';
 export { default as Video } from './Video/Video';
 export { default as TwoPhotonSeries } from './TwoPhotonSeries/TwoPhotonSeries';
+export { default as NWBFile } from './NWBFile/NWBFile';

@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "NWBView",
     "description": "NWB view",
     "propsKeys": ["path"],

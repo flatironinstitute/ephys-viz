@@ -5,16 +5,71 @@ import VtkComponent from './VtkComponent';
 const config = require('./Surface3d.json');
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 
-export default class Surface3d extends VtkComponent {
+export default class Surface3d extends Component {
     static title = 'Vtk demo'
     static reactopyaConfig = config
     render() {
+        if (typeof(this.props.faces) == 'string') {
+            return (
+                <AutoDetermineWidth>
+                    <Surface3dFromPaths
+                        {...this.props}
+                    />
+                </AutoDetermineWidth>
+            );
+        }
+        else {
+            return (
+                <AutoDetermineWidth>
+                    <Surface3dInner
+                        {...this.props}
+                    />
+                </AutoDetermineWidth>
+            );
+        }
+        
+    }
+}
+
+class Surface3dFromPaths extends Component {
+    constructor(props) {
+        console.log('====== 1. Surface3dFromPaths', props);
+        super(props);
+        this.state = {
+            // javascript state
+            faces_path: props.faces,
+            vertices_path: props.vertices,
+            scalars_path: props.scalars,
+
+            // python state
+            faces: null,
+            vertices: null,
+            scalars: null
+        };
+
+    }
+    componentDidMount() {
+        this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.start();
+    }
+    componentDidUpdate(prevProps) {
+        this.pythonInterface.update();
+    }
+    componentWillUnmount() {
+        this.pythonInterface.stop();
+    }
+    render() {
+        let props = {};
+        for (let key in this.props) {
+            props[key] = this.props[key];
+        }
+        props.faces = this.state.faces;
+        props.vertices = this.state.vertices;
+        props.scalars = this.state.scalars;
         return (
-            <AutoDetermineWidth>
-                <Surface3dInner
-                    {...this.props}
-                />
-            </AutoDetermineWidth>
+            <RespectStatus {...this.state}>
+                <Surface3dInner {...props}/>
+            </RespectStatus>
         );
     }
 }
@@ -23,18 +78,13 @@ class Surface3dInner extends VtkComponent {
     constructor(props) {
         super(props);
         this.state = {
-            status: '',
-            status_message: '',
             surface: null
         };
     }
     componentDidMount() {
-        this.pythonInterface = new PythonInterface(this, config);
-        this.pythonInterface.start();
         this.updateSurface();
     }
     componentDidUpdate(prevProps) {
-        this.pythonInterface.update();
         if (
             (this.props.vertices !== prevProps.vertices) ||
             (this.props.faces !== prevProps.faces) ||
@@ -63,7 +113,6 @@ class Surface3dInner extends VtkComponent {
         }
     }
     componentWillUnmount() {
-        this.pythonInterface.stop();
     }
     vtkSize(div) {
         let width = this.props.width;
@@ -81,5 +130,21 @@ class Surface3dInner extends VtkComponent {
     }
     render() {
         return super.render();
+    }
+}
+
+class RespectStatus extends Component {
+    state = {}
+    render() {
+        switch (this.props.status) {
+            case 'running':
+                return <div>Running: {this.props.status_message}</div>
+            case 'error':
+                return <div>Error: {this.props.status_message}</div>
+            case 'finished':
+                return this.props.children;
+            default:
+                return <div>Unknown status: {this.props.status}</div>
+        }
     }
 }
