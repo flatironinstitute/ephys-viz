@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "TwoPhotonSeries",
     "description": "Display move corresponding to a two photon data series",
     "propsKeys": [],

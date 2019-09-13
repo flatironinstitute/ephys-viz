@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "NWBBrowser",
     "description": "NWB brwoser",
     "propsKeys": [],

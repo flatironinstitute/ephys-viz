@@ -1,0 +1,10 @@
+{
+    "project_name": "ephys_viz",
+    "type": "NWBFile",
+    "description": "View a .nwb file",
+    "propsKeys": [],
+    "javaScriptStateKeys": ["path"],
+    "pythonStateKeys": ["status", "status_message", "object"],
+    "galleryProps": {
+    }
+}

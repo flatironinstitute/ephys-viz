@@ -1,37 +1,46 @@
 {
     "widgets": [
         {
-            "type": "TwoPhotonSeries",
-            "title": "TwoPhotonSeries",
-            "key": "two-photon-series",
+            "type": "NWBFile",
+            "title": "NWBFile",
+            "key": "nwb-file",
             "props": {
-                "nwb_path": "sha1://3ea5732ebfca7fe2e3cd2ec7b731f3a492f06e6c/Sue_2x_3000_40_-46.nwb",
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
                 "download_from": "spikeforest.public"
             }
+        }
+    ],
+    "widgets3": [
+        {
+            "type": "HBox",
+            "title": "HBox",
+            "children": [
+                {
+                    "type": "ElectrodeGeometry",
+                    "title": "Electrode geometry from geom.csv",
+                    "key": "key-1",
+                    "props": {
+                        "path": "sha1dir://51570fce195942dcb9d6228880310e1f4ca1395b.paired_kampff/2014_11_25_Pair_3_0/geom.csv",
+                        "download_from": "spikeforest.public"
+                    }
+                },
+                {
+                    "type": "ElectrodeGeometry",
+                    "title": "Electrode geometry from geom.csv",
+                    "key": "key-2",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            ]
         },
         {
-            "type": "Video",
-            "title": "Video from sha1:// file",
-            "key": "video-sha1-file",
+            "type": "ElectrodeGeometry",
+            "title": "Electrode geometry from geom.csv",
             "props": {
-                "path": "sha1://8e52ba7d81d2964e1509ec492ef3831d90a5fa8c/trailer.mp4",
+                "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
                 "download_from": "spikeforest.public"
-            }
-        },
-        {
-            "type": "Video",
-            "title": "Video from file",
-            "key": "video-file",
-            "props": {
-                "path": "/tmp/trailer.mp4"
-            }
-        },
-        {
-            "type": "Video",
-            "title": "Video from url",
-            "key": "video-url",
-            "props": {
-                "url": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
             }
         },
         {
@@ -41,14 +50,6 @@
                 "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
                 "download_from": "spikeforest.public",
                 "name": "EC2_lh_pial"
-            }
-        },
-        {
-            "type": "ElectrodeGeometry",
-            "title": "Electrode geometry from geom.csv",
-            "props": {
-                "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                "download_from": "spikeforest.public"
             }
         },
         {
@@ -81,6 +82,51 @@
             "props": {
                 "path": "sha1://c5ad0ae29162d170c751eb44be1772f70360f826/analysis.json",
                 "download_from": "spikeforest.public"
+            }
+        }
+    ],
+    "widgets2": [
+        {
+            "type": "NWBFile",
+            "title": "NWBFile",
+            "key": "nwb-file",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "TwoPhotonSeries",
+            "title": "TwoPhotonSeries",
+            "key": "two-photon-series",
+            "props": {
+                "nwb_path": "sha1://3ea5732ebfca7fe2e3cd2ec7b731f3a492f06e6c/Sue_2x_3000_40_-46.nwb",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from sha1:// file",
+            "key": "video-sha1-file",
+            "props": {
+                "path": "sha1://8e52ba7d81d2964e1509ec492ef3831d90a5fa8c/trailer.mp4",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from file",
+            "key": "video-file",
+            "props": {
+                "path": "/tmp/trailer.mp4"
+            }
+        },
+        {
+            "type": "Video",
+            "title": "Video from url",
+            "key": "video-url",
+            "props": {
+                "url": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
             }
         },
         {

@@ -13,3 +13,4 @@ from .Surface3d import Surface3d
 from .CorticalSurface import CorticalSurface
 from .Video import Video
 from .TwoPhotonSeries import TwoPhotonSeries
+from .NWBFile import NWBFile

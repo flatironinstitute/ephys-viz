@@ -10,33 +10,43 @@ export default class NWBBrowser extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            path: props.path,
+            path: props.path || null,
             download_from: props.download_from,
             status: '',
             status_message: '',
-            object: null
+            object: props.object || null
         }
         this.treeData = new TreeData;
     }
     componentDidMount() {
-        this.pythonInterface = new PythonInterface(this, config);
-        this.pythonInterface.start();
-        this._updateParams();
+        if (!this.props.object) {
+            this.pythonInterface = new PythonInterface(this, config);
+            this.pythonInterface.start();
+        }
+        else {
+            this.setState({status: 'finished'});
+        }
     }
     componentDidUpdate() {
-        this.pythonInterface.update();
+        if (!this.props.object) {
+            this.pythonInterface.update();
+        }
     }
     componentWillUnmount() {
-        this.pythonInterface.stop();
-    }
-    _updateParams() {
+        if (!this.props.object) {
+            this.pythonInterface.stop();
+        }
     }
     render() {
         const { object } = this.state;
         return (
             <RespectStatus {...this.state}>
                 <React.Fragment>
-                    <Sha1PathLink path={this.state.path} canCopy={true} abbreviate={true}></Sha1PathLink>
+                    {
+                        this.state.path ? (
+                            <Sha1PathLink path={this.state.path} canCopy={true} abbreviate={true}></Sha1PathLink>
+                        ) : <span />
+                    }
                     <BrowserTree
                         path={null}
                         object={object}

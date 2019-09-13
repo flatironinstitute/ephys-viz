@@ -34,6 +34,9 @@ class TabsInner extends Component {
         this.state={
             indicesSelected: {
                 0: true
+            },
+            refreshCodes: {
+                0: 0
             }
         }
     }
@@ -45,10 +48,13 @@ class TabsInner extends Component {
     }
     _handleSelect = (index) => {
         let a = this.state.indicesSelected;
-        if (a[index]) return;
+        let rc = this.state.refreshCodes;
         a[index] = true;
+        // see note below about refresh_code
+        rc[index] = (rc[index] || 0) + 1;
         this.setState({
-            indicesSelected: a
+            indicesSelected: a,
+            refreshCodes: rc
         });
     }
     render() {
@@ -68,7 +74,11 @@ class TabsInner extends Component {
                 {this.props.children.map((Child, i) => (
                     <TabPanel key={tabs[i].label}>
                         {
-                            this.state.indicesSelected[i] ? <Child.type width={this.props.width} {...Child.props} /> : <span>Waiting</span>
+                            this.state.indicesSelected[i] ? (
+                                // Probably we can do the refresh_code thing better - we just want to trigger a refresh
+                                // esp. for vtk elements
+                                <Child.type width={this.props.width} {...Child.props} _tabs_refresh_code={this.state.refreshCodes[i]} />
+                            ) : ( <span>Waiting</span> )
                         }
                     </TabPanel>
                 ))}

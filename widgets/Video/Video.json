@@ -1,4 +1,5 @@
 {
+    "project_name": "ephys_viz",
     "type": "Video",
     "description": "Play a video (from url or from file)",
     "propsKeys": [],

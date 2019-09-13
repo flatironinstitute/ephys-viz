@@ -1,6 +1,11 @@
 generated
 _watching
 temp
+notebook_examples/Untitled*.ipynb
+notebook_examples/*-Copy*.ipynb
+notebook_examples/*.html
+test.json
+desktop_examples/test1.py
 
 .ipynb_checkpoints
 .mypy_cache
