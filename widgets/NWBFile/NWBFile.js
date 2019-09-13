@@ -113,10 +113,10 @@ class CorticalSurfaces extends Component {
                         let datasets = data[name]._datasets;
                         return (
                             <Surface3d
-                                {...this.props}
+                                reactopyaParent={this.props.reactopyaParent}
+                                reactopyaChildId={this.props.reactopyaChildId+'-'+name}
                                 faces={datasets.faces._data}
                                 vertices={datasets.vertices._data}
-                                parentJavaScriptPythonStateModel={this.props.parentJavaScriptPythonStateModel}
                                 key={name}
                             />
                         );

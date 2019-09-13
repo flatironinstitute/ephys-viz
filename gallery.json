@@ -8,6 +8,92 @@
                 "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
                 "download_from": "spikeforest.public"
             }
+        }
+    ],
+    "widgets3": [
+        {
+            "type": "HBox",
+            "title": "HBox",
+            "children": [
+                {
+                    "type": "ElectrodeGeometry",
+                    "title": "Electrode geometry from geom.csv",
+                    "key": "key-1",
+                    "props": {
+                        "path": "sha1dir://51570fce195942dcb9d6228880310e1f4ca1395b.paired_kampff/2014_11_25_Pair_3_0/geom.csv",
+                        "download_from": "spikeforest.public"
+                    }
+                },
+                {
+                    "type": "ElectrodeGeometry",
+                    "title": "Electrode geometry from geom.csv",
+                    "key": "key-2",
+                    "props": {
+                        "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ElectrodeGeometry",
+            "title": "Electrode geometry from geom.csv",
+            "props": {
+                "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "CorticalSurface",
+            "title": "Cortical surface from EC2",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public",
+                "name": "EC2_lh_pial"
+            }
+        },
+        {
+            "type": "Autocorrelograms",
+            "title": "Autocorrelograms",
+            "key": "Autocorrelograms",
+            "props": {
+                "firingsPath": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
+                "samplerate": 30000,
+                "download_from": "spikeforest.public",
+                "max_samples": 10000,
+                "max_dt_msec": 150,
+                "bin_size_msec": 2
+            }
+        },
+        {
+            "type": "PlaceField",
+            "title": "Place field",
+            "props": {
+                "nwb_query": {
+                    "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
+                    "epochs": [1]
+                },
+                "download_from": "spikeforest.public"
+            }
+        },
+        {
+            "type": "SpikeForestAnalysis",
+            "title": "SpikeForest analysis",
+            "props": {
+                "path": "sha1://c5ad0ae29162d170c751eb44be1772f70360f826/analysis.json",
+                "download_from": "spikeforest.public"
+            }
+        }
+    ],
+    "widgets2": [
+        {
+            "type": "NWBFile",
+            "title": "NWBFile",
+            "key": "nwb-file",
+            "props": {
+                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                "download_from": "spikeforest.public"
+            }
         },
         {
             "type": "TwoPhotonSeries",
@@ -41,55 +127,6 @@
             "key": "video-url",
             "props": {
                 "url": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
-            }
-        },
-        {
-            "type": "CorticalSurface",
-            "title": "Cortical surface from EC2",
-            "props": {
-                "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
-                "download_from": "spikeforest.public",
-                "name": "EC2_lh_pial"
-            }
-        },
-        {
-            "type": "ElectrodeGeometry",
-            "title": "Electrode geometry from geom.csv",
-            "props": {
-                "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
-                "download_from": "spikeforest.public"
-            }
-        },
-        {
-            "type": "Autocorrelograms",
-            "title": "Autocorrelograms",
-            "key": "Autocorrelograms",
-            "props": {
-                "firingsPath": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
-                "samplerate": 30000,
-                "download_from": "spikeforest.public",
-                "max_samples": 10000,
-                "max_dt_msec": 150,
-                "bin_size_msec": 2
-            }
-        },
-        {
-            "type": "PlaceField",
-            "title": "Place field",
-            "props": {
-                "nwb_query": {
-                    "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
-                    "epochs": [1]
-                },
-                "download_from": "spikeforest.public"
-            }
-        },
-        {
-            "type": "SpikeForestAnalysis",
-            "title": "SpikeForest analysis",
-            "props": {
-                "path": "sha1://c5ad0ae29162d170c751eb44be1772f70360f826/analysis.json",
-                "download_from": "spikeforest.public"
             }
         },
         {

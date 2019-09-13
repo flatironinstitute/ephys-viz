@@ -33,7 +33,6 @@ export default class Surface3d extends Component {
 
 class Surface3dFromPaths extends Component {
     constructor(props) {
-        console.log('====== 1. Surface3dFromPaths', props);
         super(props);
         this.state = {
             // javascript state
