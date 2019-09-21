@@ -1,4 +1,3 @@
-from reactopya import Component
 from mountaintools import client as mt
 import spikeextractors as se
 import numpy as np
@@ -8,7 +7,7 @@ from spikeforest import SFMdaRecordingExtractor, mdaio
 from spikeforest import EfficientAccessRecordingExtractor
 
 
-class TimeseriesView(Component):
+class TimeseriesView:
     def __init__(self):
         super().__init__()
         self._recording = None

@@ -256,8 +256,11 @@ export default class NWBView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            path: props.path,
-            download_from: props.download_from,
+            // javascript state
+            path: null,
+            download_from: null,
+
+            // python state
             status: '',
             status_message: '',
             object: null
@@ -265,11 +268,12 @@ export default class NWBView extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            path: this.props.path,
+            download_from: this.props.download_from
+        });
         this.pythonInterface.start();
         this._updateParams();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

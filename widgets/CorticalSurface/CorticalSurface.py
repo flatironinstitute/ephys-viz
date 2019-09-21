@@ -1,11 +1,10 @@
-from reactopya import Component
 from vtk import vtkXMLPolyDataReader
 from ..pycommon.nwb_to_dict import nwb_to_dict
 from mountaintools import client as mt
 import numpy as np
 
 
-class CorticalSurface(Component):
+class CorticalSurface:
     def __init__(self):
         super().__init__()
 

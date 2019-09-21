@@ -11,12 +11,15 @@ export default class Autocorrelograms extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            firingsPath: props.firingsPath,
-            samplerate: props.samplerate,
-            max_samples: props.max_samples || 10000,
-            bin_size_msec: props.bin_sec_msec || 2,
-            max_dt_msec: props.max_dt_msec || 50,
-            download_from: props.download_from,
+            // javascript state
+            firingsPath: null,
+            samplerate: null,
+            max_samples: null,
+            bin_size_msec: null,
+            max_dt_msec: null,
+            download_from: null,
+
+            // python state
             status: '',
             status_message: '',
             output: null
@@ -24,11 +27,16 @@ export default class Autocorrelograms extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            firingsPath: this.props.firingsPath,
+            samplerate: this.props.samplerate,
+            max_samples: this.props.max_samples || 10000,
+            bin_size_msec: this.props.bin_sec_msec || 2,
+            max_dt_msec: this.props.max_dt_msec || 50,
+            download_from: this.props.download_from
+        });
         this.pythonInterface.start();
         this._updateParams();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

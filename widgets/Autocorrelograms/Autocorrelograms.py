@@ -1,4 +1,3 @@
-from reactopya import Component
 import numpy as np
 from mountaintools import client as mt
 import mlprocessors as mlpr
@@ -108,7 +107,7 @@ class ComputeAutocorrelograms(mlpr.Processor):
             simplejson.dump(serialize_np(ret), f, ignore_nan=True)
 
 
-class Autocorrelograms(Component):
+class Autocorrelograms:
     def __init__(self):
         super().__init__()
 

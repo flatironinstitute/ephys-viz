@@ -1,9 +1,8 @@
-from reactopya import Component
 import base64
 from mountaintools import client as mt
 
 
-class Video(Component):
+class Video:
     def __init__(self):
         super().__init__()
 

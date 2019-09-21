@@ -11,19 +11,23 @@ export default class SpikeForestAnalysis extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            // javascript state
+            path: null,
+            download_from: null,
+
+            // python state
             status: '',
             status_message: '',
-            path: props.path,
-            download_from: props.download_from,
             output: null
         }
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            path: this.props.path,
+            download_from: this.props.download_from,
+        });
         this.pythonInterface.start();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

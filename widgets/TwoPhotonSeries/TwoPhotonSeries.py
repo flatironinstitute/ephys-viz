@@ -1,4 +1,3 @@
-from reactopya import Component
 from mountaintools import client as mt
 import mlprocessors as mlpr
 from ..pycommon.nwb_to_dict import nwb_to_dict
@@ -36,7 +35,7 @@ class ExtractTwoPhotonSeriesMp4(mlpr.Processor):
 
         imageio.mimwrite(self.mp4_out, X, format='mp4', fps=10)
 
-class TwoPhotonSeries(Component):
+class TwoPhotonSeries:
     def __init__(self):
         super().__init__()
 

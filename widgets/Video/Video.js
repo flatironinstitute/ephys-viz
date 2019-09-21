@@ -33,8 +33,8 @@ class VideoInner extends Component {
             url: props.url || null,
 
             // javascript state
-            path: props.path || null,
-            download_from: props.download_from || null,
+            path: null,
+            download_from: null,
 
             // python state
             status: '',
@@ -44,13 +44,16 @@ class VideoInner extends Component {
         }
     }
     componentDidMount() {
-        this.pythonInterface = new PythonInterface(this, config);
         if (!this.props.url) {
+            this.pythonInterface = new PythonInterface(this, config);
+            this.pythonInterface.setState({
+                path: this.props.path || null,
+                download_from: this.props.download_from || null
+            });
             this.pythonInterface.start();
         }
     }
     componentDidUpdate() {
-        this.pythonInterface.update();
         if (this.state.video_data_b64) {
             let url = 'data:video/mp4;base64,' + this.state.video_data_b64;
             if (this.state.url !== url) { 
@@ -61,7 +64,9 @@ class VideoInner extends Component {
         }
     }
     componentWillUnmount() {
-        this.pythonInterface.stop();
+        if (this.pythonInterface) {
+            this.pythonInterface.stop();
+        }
     }
     _handleTimeUpdate = (a, b) => {
     }

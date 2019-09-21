@@ -17,8 +17,8 @@ export default class TwoPhotonSeries extends Component {
         super(props);
         this.state = {
             // javascript state
-            nwb_path: props.nwb_path,
-            download_from: props.download_from,
+            nwb_path: null,
+            download_from: null,
 
             // python state
             status: '',
@@ -28,10 +28,11 @@ export default class TwoPhotonSeries extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            nwb_path: this.props.nwb_path,
+            download_from: this.props.download_from
+        });
         this.pythonInterface.start();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

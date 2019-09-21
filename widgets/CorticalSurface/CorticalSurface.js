@@ -10,9 +10,9 @@ export default class CorticalSurface extends Component {
         super(props);
         this.state = {
             // javascript state
-            path: props.path,
-            download_from: props.download_from,
-            name: props.name,
+            path: null,
+            download_from: null,
+            name: null,
 
             // python state (returned from python backend)
             status: '',
@@ -26,10 +26,12 @@ export default class CorticalSurface extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            path: this.props.path,
+            download_from: this.props.download_from,
+            name: this.props.name
+        });
         this.pythonInterface.start();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

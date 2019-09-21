@@ -36,9 +36,9 @@ class Surface3dFromPaths extends Component {
         super(props);
         this.state = {
             // javascript state
-            faces_path: props.faces,
-            vertices_path: props.vertices,
-            scalars_path: props.scalars,
+            faces_path: null,
+            vertices_path: null,
+            scalars_path: null,
 
             // python state
             faces: null,
@@ -49,10 +49,12 @@ class Surface3dFromPaths extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            faces_path: this.props.faces,
+            vertices_path: this.props.vertices,
+            scalars_path: this.props.scalars
+        });
         this.pythonInterface.start();
-    }
-    componentDidUpdate(prevProps) {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

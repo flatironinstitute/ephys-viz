@@ -13,7 +13,7 @@ export default class NWBFile extends Component {
         super(props);
         this.state = {
             // javascript state
-            path: props.path,
+            path: null,
             
             // python state
             status: '',
@@ -26,11 +26,13 @@ export default class NWBFile extends Component {
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            path: this.props.path
+        });
         this.pythonInterface.start();
         this._updatePanels()
     }
     componentDidUpdate(prevProps, prevState) {
-        this.pythonInterface.update();
         if (this.state.object !== prevState.object) {
             this._updatePanels();
         }

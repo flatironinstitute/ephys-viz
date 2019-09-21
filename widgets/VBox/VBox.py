@@ -1,7 +1,4 @@
-from reactopya import Component
-
-
-class VBox(Component):
+class VBox:
     def __init__(self):
         super().__init__()
 

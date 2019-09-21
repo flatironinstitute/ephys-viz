@@ -1,10 +1,9 @@
-from reactopya import Component
 from mountaintools import client as mt
 from mountaintools import client as mt
 import numpy as np
 
 
-class Surface3d(Component):
+class Surface3d:
     def __init__(self):
         super().__init__()
 

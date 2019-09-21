@@ -1,7 +1,4 @@
-from reactopya import Component
-
-
-class Accordion(Component):
+class Accordion:
     def __init__(self):
         super().__init__()
 

@@ -1,10 +1,9 @@
-from reactopya import Component
 import numpy as np
 from mountaintools import client as mt
 import spikeextractors as se
 
 
-class ElectrodeGeometry(Component):
+class ElectrodeGeometry:
     def __init__(self):
         super().__init__()
 

@@ -11,49 +11,45 @@ export default class ElectrodeGeometry extends Component {
         super(props);
         this.state = {
             currentElectrodeId: null,
-            selectedElectrodeIds: {}
+            selectedElectrodeIds: {},
+            status: '',
+            status_message: '',
+            locations: null,
+            ids: null
         };
+    }
+    componentDidMount() {
+        let props = this.props;
         if ((props.locations) && (props.ids || props.labels)) {
-            this.state = {
+            this.setState({
                 locations: props.locations,
                 ids: props.ids || props.labels,
                 status: 'finished'
-            }
+            });
         }
         else if (props.path) {
-            this.state = {
+            this.pythonInterface = new PythonInterface(this, config);
+            this.pythonInterface.setState({
                 path: props.path,
                 download_from: props.download_from || [],
-                status: '',
-                status_message: '',
-                locations: null,
-                ids: null
-            }
-            this.use_python = true;
-        }
-        else {
-            this.state = {
-                status: 'error',
-                status_message: 'Insufficient props'
-            }
-        }
-    }
-    componentDidMount() {
-        if (this.use_python) {
-            this.pythonInterface = new PythonInterface(this, config);
+                
+            });
             this.pythonInterface.start();
         }
-        this.sync = new Sync(this, this.props.sync);
+        else {
+            this.setState({
+                status: 'error',
+                status_message: 'Insufficient props'
+            });
+        }
+        this.sync = new Sync(this, props.sync);
         this.sync.start();
     }
     componentDidUpdate() {
-        if (this.use_python) {
-            this.pythonInterface.update();
-        }
         this.sync.update();
     }
     componentWillUnmount() {
-        if (this.use_python) {
+        if (this.pythonInterface) {
             this.pythonInterface.stop();
         }
         this.sync.stop();

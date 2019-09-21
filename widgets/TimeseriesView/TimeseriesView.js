@@ -22,25 +22,33 @@ class TimeseriesViewInner extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            recordingPath: props.recordingPath,
-            timeseriesModelSet: false,
+            // javascript state
+            recordingPath: null,
+            download_from: null,
+            
+            // python state
             numChannels: null, // from python state
             numTimepoints: null, // from python state
             samplerate: null, // from python state
             segmentSize: 1000,
             status_message: '', // from python state
-            download_from: props.download_from
+
+            // other - for triggering refresh
+            timeseriesModelSet: false,
         }
         this.timeseriesModel = null;
     }
 
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            recordingPath: this.props.recordingPath,
+            download_from: this.props.download_from
+        });
         this.pythonInterface.start();
         this.updateData();
     }
     componentDidUpdate() {
-        this.pythonInterface.update();
         this.updateData();
     }
     componentWillUnmount() {

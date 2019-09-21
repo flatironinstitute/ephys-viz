@@ -10,8 +10,11 @@ export default class NWBBrowser extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            path: props.path || null,
-            download_from: props.download_from,
+            // javascript state
+            path: null,
+            download_from: null,
+
+            // python state
             status: '',
             status_message: '',
             object: props.object || null
@@ -19,21 +22,20 @@ export default class NWBBrowser extends Component {
         this.treeData = new TreeData;
     }
     componentDidMount() {
-        if (!this.props.object) {
-            this.pythonInterface = new PythonInterface(this, config);
-            this.pythonInterface.start();
-        }
-        else {
+        if (this.props.object) {
             this.setState({status: 'finished'});
         }
-    }
-    componentDidUpdate() {
-        if (!this.props.object) {
-            this.pythonInterface.update();
+        else {
+            this.pythonInterface = new PythonInterface(this, config);
+            this.pythonInterface.setState({
+                path: this.props.path || null,
+                download_from: this.props.download_from,
+            });
+            this.pythonInterface.start();
         }
     }
     componentWillUnmount() {
-        if (!this.props.object) {
+        if (this.pythonInterface) {
             this.pythonInterface.stop();
         }
     }

@@ -1,9 +1,8 @@
-from reactopya import Component
 from mountaintools import client as mt
 from ..pycommon.nwb_to_dict import nwb_to_dict
 
 
-class NWBBrowser(Component):
+class NWBBrowser:
     def __init__(self):
         super().__init__()
 

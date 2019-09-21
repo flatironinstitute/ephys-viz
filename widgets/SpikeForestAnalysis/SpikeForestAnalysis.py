@@ -1,8 +1,7 @@
-from reactopya import Component
 from mountaintools import client as mt
 
 
-class SpikeForestAnalysis(Component):
+class SpikeForestAnalysis:
     def __init__(self):
         super().__init__()
 

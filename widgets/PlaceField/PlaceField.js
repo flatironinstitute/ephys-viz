@@ -11,29 +11,36 @@ export default class PlaceField extends Component {
     static reactopyaConfig = config
     constructor(props) {
         super(props);
-        const default_downsample_factor = 10;
+        this.default_downsample_factor = 10;
         this.state = {
-            nwb_query: props.nwb_query,
-            download_from: props.download_from,
+            // javascript state
+            nwb_query: null,
+            download_from: null,
+            downsample_factor: null,
+
+            // python state
             status: '',
             status_message: '',
-            inp_downsample_factor: default_downsample_factor,
-            downsample_factor: default_downsample_factor,
-            object: null
+            object: null,
+
+            // other
+            inp_downsample_factor: this.default_downsample_factor
         }
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.setState({
+            nwb_query: this.props.nwb_query,
+            download_from: this.props.download_from,
+            downsample_factor: this.default_downsample_factor
+        });
         this.pythonInterface.start();
-    }
-    componentDidUpdate() {
-        this.pythonInterface.update();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();
     }
     handleUpdate = () => {
-        this.setState({
+        this.pythonInterface.setState({
             downsample_factor: this.state.inp_downsample_factor
         });
     }

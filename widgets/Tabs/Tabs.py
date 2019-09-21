@@ -1,7 +1,4 @@
-from reactopya import Component
-
-
-class Tabs(Component):
+class Tabs:
     def __init__(self):
         super().__init__()
 

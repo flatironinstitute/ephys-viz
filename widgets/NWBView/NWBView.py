@@ -1,9 +1,8 @@
-from reactopya import Component
 from mountaintools import client as mt
 from .h5_to_dict import h5_to_dict
 
 
-class NWBView(Component):
+class NWBView:
     def __init__(self):
         super().__init__()
 

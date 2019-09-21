@@ -1,4 +1,3 @@
-from reactopya import Component
 from mountaintools import client as mt
 from ..pycommon.nwb_to_dict import nwb_to_dict
 import numpy as np
@@ -8,7 +7,7 @@ import tempfile
 import os
 
 
-class PlaceField(Component):
+class PlaceField:
     def __init__(self):
         super().__init__()
 

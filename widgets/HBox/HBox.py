@@ -1,7 +1,4 @@
-from reactopya import Component
-
-
-class HBox(Component):
+class HBox:
     def __init__(self):
         super().__init__()
 
