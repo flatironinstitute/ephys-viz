@@ -12,7 +12,6 @@ class ElectrodeGeometry:
         mt.configDownloadFrom(state.get('download_from', []))
         path = state.get('path', None)
         if path:
-            print('--- test1', path)
             self.set_python_state(dict(status_message='Realizing file: {}'.format(path)))
             if path.endswith('.csv'):
                 path2 = mt.realizeFile(path)
@@ -29,7 +28,6 @@ class ElectrodeGeometry:
                 labels = ['{}'.format(a) for a in range(1, num_elec + 1)]
             else:
                 raise Exception('Unexpected file type for {}'.format(path))
-            print('--- test2', path)
         else:
             locations = [[0, 0], [1, 0], [1, 1], [2, 1]]
             labels = ['1', '2', '3', '4']

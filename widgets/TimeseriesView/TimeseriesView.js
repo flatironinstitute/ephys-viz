@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Mda from './Mda';
 import TimeseriesWidget from "./TimeseriesWidget";
 import TimeseriesModel from "./TimeseriesModel";
+import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 const config = require('./TimeseriesView.json');
 
 
@@ -11,9 +12,9 @@ export default class TimeseriesView extends Component {
     static reactopyaConfig = config;
     render() {
         return (
-            <AutoSizer>
+            <AutoDetermineWidth>
                 <TimeseriesViewInner {...this.props} />
-            </AutoSizer>
+            </AutoDetermineWidth>
         );
     }
 }
@@ -23,28 +24,32 @@ class TimeseriesViewInner extends Component {
         super(props)
         this.state = {
             // javascript state
-            recordingPath: null,
-            download_from: null,
-            
-            // python state
-            numChannels: null, // from python state
-            numTimepoints: null, // from python state
-            samplerate: null, // from python state
-            segmentSize: 1000,
-            status_message: '', // from python state
+            recording: null,
+            segmentsRequested: null,
 
-            // other - for triggering refresh
-            timeseriesModelSet: false,
+            // python state
+            num_channels: null,
+            num_timepoints: null,
+            channel_ids: null,
+            samplerate: null,
+            y_offsets: null,
+            y_scale_factor: null,
+            segment_size: null,
+            status_message: '',
+
+            // other
+            timeseriesModelSet: false // to trigger re-render
         }
         this.timeseriesModel = null;
+        this.segmentsRequested = {};
     }
 
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
         this.pythonInterface.setState({
-            recordingPath: this.props.recordingPath,
-            download_from: this.props.download_from
+            recording: this.props.recording
         });
+
         this.pythonInterface.start();
         this.updateData();
     }
@@ -56,35 +61,36 @@ class TimeseriesViewInner extends Component {
     }
 
     updateData() {
-        if (!this.state.numChannels) return;
+        if (!this.state.num_channels) return;
         if (!this.timeseriesModel) {
             if (!this.state.samplerate) {
                 return;
             }
             const params = {
                 samplerate: this.state.samplerate,
-                num_channels: this.state.numChannels,
-                num_timepoints: this.state.numTimepoints,
-                segment_size: this.state.segmentSize
+                num_channels: this.state.num_channels,
+                num_timepoints: this.state.num_timepoints,
+                segment_size: this.state.segment_size
             };
             this.timeseriesModel = new TimeseriesModel(params);
-            this.setState({
-                timeseriesModelSet: true
-            });
             this.timeseriesModel.onRequestDataSegment((ds_factor, segment_num) => {
-                let sr = this.pythonInterface.getJavaScriptState('segmentsRequested') || {};
+                let sr = this.segmentsRequested;
                 let code = `${ds_factor}-${segment_num}`;
                 sr[code] = { ds: ds_factor, ss: segment_num };
-                this.pythonInterface.setJavaScriptState({
+                this.segmentsRequested = sr;
+                this.pythonInterface.setState({
                     segmentsRequested: sr
                 });
             });
+            this.setState({
+                timeseriesModelSet: true
+            });
         }
-        let SR = this.pythonInterface.getJavaScriptState('segmentsRequested') || {};
+        let SR = this.segmentsRequested;
         let keys = Object.keys(SR);
         let something_changed = false;
         for (let key of keys) {
-            let aa = this.pythonInterface.getPythonState(key) || null;
+            let aa = this.state[key] || null;
             if ((aa) && (aa.data)) {
                 let X = new Mda();
                 X.setFromBase64(aa.data);
@@ -95,21 +101,26 @@ class TimeseriesViewInner extends Component {
             }
         }
         if (something_changed) {
-            this.pythonInterface.setJavaScriptState({
+            this.segmentsRequested = SR;
+            this.pythonInterface.setState({
                 segmentsRequested: SR
             });
         }
     }
     render() {
-        if (this.state.timeseriesModelSet) {
+        if (this.timeseriesModel) {
             return (
                 <div>
                     <TimeseriesWidget
                         timeseriesModel={this.timeseriesModel}
+                        num_channels={this.state.num_channels}
+                        num_timepoints={this.state.num_timepoints}
+                        channel_ids={this.state.channel_ids}
+                        y_offsets={this.state.y_offsets}
+                        y_scale_factor={this.state.y_scale_factor}
                         width={this.props.width}
                         height={this.props.height || 500}
                     />
-                    <div>{this.state.status_message}</div>
                 </div>
             )
         }
@@ -118,64 +129,5 @@ class TimeseriesViewInner extends Component {
                 <div>{this.state.status_message}</div>
             );
         }
-    }
-}
-
-class AutoSizer extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            width: null
-        };
-    }
-
-    async componentDidMount() {
-        if (this.props.width) return;
-        this.updateDimensions();
-        window.addEventListener("resize", this.resetWidth);
-    }
-
-    componentWillUnmount() {
-        if (this.props.width) return;
-        window.removeEventListener("resize", this.resetWidth);
-    }
-
-    resetWidth = () => {
-        if (this.props.width) return;
-        this.setState({
-            width: null
-        });
-    }
-
-    async componentDidUpdate(prevProps, prevState) {
-        if (this.props.width) return;
-        if (!this.state.width) {
-            this.updateDimensions();
-        }
-    }
-
-    updateDimensions() {
-        if (this.props.width) return;
-        if (this.state.width !== this.container.offsetWidth) {
-            this.setState({
-                width: this.container.offsetWidth // see render()
-            });
-        }
-    }
-
-    render() {
-        if (this.props.width) {
-            return this.props.children;
-        }
-        let { width } = this.state;
-        if (!width) width=300;
-
-        const elmt = React.Children.only(this.props.children);
-
-        return (
-            <div className="determiningWidth" ref={el => (this.container = el)}>
-                <elmt.type {...elmt.props} width={this.state.width}>{elmt.children}</elmt.type>
-            </div>
-        );
     }
 }

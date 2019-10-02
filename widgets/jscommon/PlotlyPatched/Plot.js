@@ -15,6 +15,7 @@ export class LightPlot extends CanvasWidget {
 
     componentDidMount() {
         this.updateSize();
+        this.initializeCanvasWidget();
     }
 
     componentWillUnmount() {
@@ -26,7 +27,7 @@ export class LightPlot extends CanvasWidget {
 
     updateSize() {
         const { data, layout } = this.props;
-        this.setSize(layout.width, layout.height);
+        this.setCanvasSize(layout.width, layout.height);
         let margin = layout.margin || {};
         this.setMargins(margin.l || 0, margin.r || 0, margin.t || 0, margin.b || 0);
 

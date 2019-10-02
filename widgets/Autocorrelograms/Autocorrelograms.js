@@ -12,8 +12,7 @@ export default class Autocorrelograms extends Component {
         super(props);
         this.state = {
             // javascript state
-            firingsPath: null,
-            samplerate: null,
+            sorting: null,
             max_samples: null,
             bin_size_msec: null,
             max_dt_msec: null,
@@ -28,8 +27,7 @@ export default class Autocorrelograms extends Component {
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
         this.pythonInterface.setState({
-            firingsPath: this.props.firingsPath,
-            samplerate: this.props.samplerate,
+            sorting: this.props.sorting,
             max_samples: this.props.max_samples || 10000,
             bin_size_msec: this.props.bin_sec_msec || 2,
             max_dt_msec: this.props.max_dt_msec || 50,

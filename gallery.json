@@ -1,6 +1,21 @@
 {
     "widgets": [
         {
+            "type": "Autocorrelograms",
+            "title": "Autocorrelograms",
+            "key": "Autocorrelograms",
+            "props": {
+                "sorting": {
+                    "path": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
+                    "samplerate": 30000,
+                    "download_from": "spikeforest.public"
+                },
+                "max_samples": 10000,
+                "max_dt_msec": 150,
+                "bin_size_msec": 2
+            }
+        },
+        {
             "type": "NWBFile",
             "title": "NWBFile",
             "key": "nwb-file",
@@ -48,19 +63,6 @@
                 "path": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
                 "download_from": "spikeforest.public",
                 "name": "EC2_lh_pial"
-            }
-        },
-        {
-            "type": "Autocorrelograms",
-            "title": "Autocorrelograms",
-            "key": "Autocorrelograms",
-            "props": {
-                "firingsPath": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
-                "samplerate": 30000,
-                "download_from": "spikeforest.public",
-                "max_samples": 10000,
-                "max_dt_msec": 150,
-                "bin_size_msec": 2
             }
         },
         {
@@ -163,8 +165,11 @@
             "type": "TimeseriesView",
             "title": "Timeseries view",
             "props": {
-                "recordingPath": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec",
-                "download_from": "spikeforest.public"
+                "recording": {
+                    "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
+                    "samplerate": 30000,
+                    "download_from": "spikeforest.public"
+                }
             }
         },
         {

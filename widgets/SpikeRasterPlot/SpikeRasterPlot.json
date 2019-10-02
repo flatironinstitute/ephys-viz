@@ -1,0 +1,6 @@
+{
+    "project_name": "ephys_viz",
+    "type": "SpikeRasterPlot",
+    "description": "Spike raster plot",
+    "defaultProps": {}
+}

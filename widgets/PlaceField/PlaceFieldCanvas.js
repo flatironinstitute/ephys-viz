@@ -4,6 +4,7 @@ import CanvasWidget from '../jscommon/CanvasWidget';
 export default class PlaceFieldCanvas extends CanvasWidget {
     constructor(props) {
         super(props);
+        this.state = {};
 
         // this.mouseHandler().onMousePress(this.handleMousePress);
         // this.mouseHandler().onMouseRelease(this.handleMouseRelease);
@@ -39,7 +40,7 @@ export default class PlaceFieldCanvas extends CanvasWidget {
         const W = width;
         if (!W) W = 500;
         let H = Math.min(600, W);
-        this.setSize(W, H);
+        this.setCanvasSize(W, H);
         if (positions) {
             let xmin = compute_min(positions[0]);
             let xmax = compute_max(positions[0]);
@@ -125,8 +126,8 @@ export default class PlaceFieldCanvas extends CanvasWidget {
 
         const { positions } = this.props;
 
-        const W = this.width();
-        const H = this.height();
+        const W = this.canvasWidgetWidth();
+        const H = this.canvasWidgetHeight();
 
         painter.clear();
 

@@ -52,8 +52,8 @@ export default class AutoDetermineWidth extends Component {
             return elmt;
         }
         else {
-            let width = this.props.width ||  this.state.width || undefined;
-            if (!width) width = 300;
+            let width = this.state.width || undefined;
+            if (!width) width = 312;
 
             let new_props = {};
             for (let key in elmt.props) {

@@ -2,13 +2,12 @@
     "project_name": "ephys_viz",
     "type": "Autocorrelograms",
     "description": "Autocorrelograms view",
-    "propsKeys": [],
-    "javaScriptStateKeys": ["firingsPath", "samplerate", "download_from", "max_samples", "bin_size_msec", "max_dt_msec"],
-    "pythonStateKeys": ["output", "status", "status_message"],
-    "galleryProps": {
-        "firingsPath": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
-        "samplerate": 30000,
-        "download_from": "spikeforest.public",
+    "defaultProps": {
+        "sorting": {
+            "firings_path": "sha1dir://ed0fe4de4ef2c54b7c9de420c87f9df200721b24.synth_visapy/mea_c30/set1/firings_true.mda",
+            "samplerate": 30000,
+            "download_from": "spikeforest.public"
+        },
         "max_samples": 10000,
         "max_dt_msec": 150,
         "bin_size_msec": 2

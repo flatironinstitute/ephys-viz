@@ -1,65 +1,90 @@
 from mountaintools import client as mt
+from mountaintools import MountainClient
+import traceback
 import spikeextractors as se
 import numpy as np
 import io
 import base64
-from spikeforest import SFMdaRecordingExtractor, mdaio
+from spikeforest import mdaio
 from spikeforest import EfficientAccessRecordingExtractor
-
+from ..pycommon.autoextractors import AutoRecordingExtractor
 
 class TimeseriesView:
     def __init__(self):
         super().__init__()
         self._recording = None
         self._multiscale_recordings = None
+        self._segment_size = 100000
 
     def javascript_state_changed(self, prev_state, state):
         if not self._recording:
-            recordingPath = state.get('recordingPath', None)
-            if not recordingPath:
+            self._set_status('running', 'Running TimeseriesView')
+            recording0 = state.get('recording', None)
+            if not recording0:
+                self._set_error('Missing: recording')
                 return
-            self.set_python_state(dict(status_message='Loading recording'))
-            mt.configDownloadFrom(state.get('download_from'))
-            X = SFMdaRecordingExtractor(
-                dataset_directory=recordingPath, download=True)
-            self.set_python_state(dict(
-                numChannels=X.get_num_channels(),
-                numTimepoints=X.get_num_frames(),
-                samplerate=X.get_sampling_frequency(),
+            try:
+                self._recording = AutoRecordingExtractor(recording0)
+            except Exception as err:
+                traceback.print_exc()
+                self._set_error('Problem initiating recording: {}'.format(err))
+                return
+
+            self._set_status('running', 'Loading recording')
+            traces0 = self._recording.get_traces(channel_ids=self._recording.get_channel_ids(), start_frame=0, end_frame=min(self._recording.get_num_frames(), 25000))
+            y_offsets = -np.mean(traces0, axis=1)
+            for m in range(traces0.shape[0]):
+                traces0[m, :] = traces0[m, :] + y_offsets[m]
+            vv = np.percentile(np.abs(traces0), 90)
+            y_scale_factor = 1 / (2 * vv) if vv > 0 else 1
+            self.set_state(dict(
+                num_channels=self._recording.get_num_channels(),
+                num_timepoints=self._recording.get_num_frames(),
+                channel_ids=self._recording.get_channel_ids(),
+                y_offsets=y_offsets,
+                y_scale_factor=y_scale_factor,
+                samplerate=self._recording.get_sampling_frequency(),
+                segment_size=self._segment_size,
                 status_message='Loaded recording.'
             ))
-            self._recording = X
-        else:
-            X = self._recording
-
+    
         SR = state.get('segmentsRequested', {})
         for key in SR.keys():
             aa = SR[key]
             if not self.get_python_state(key, None):
-                self.set_python_state(dict(status_message='Loading segment {}'.format(key)))
+                self.set_state(dict(status_message='Loading segment {}'.format(key)))
                 data0 = self._load_data(aa['ds'], aa['ss'])
                 data0_base64 = _mda32_to_base64(data0)
                 state0 = {}
                 state0[key] = dict(data=data0_base64, ds=aa['ds'], ss=aa['ss'])
-                self.set_python_state(state0)
-                self.set_python_state(dict(status_message='Loaded segment {}'.format(key)))
+                self.set_state(state0)
+                self.set_state(dict(status_message='Loaded segment {}'.format(key)))
 
     def _load_data(self, ds, ss):
         if ds > 1:
             if self._multiscale_recordings is None:
-                self.set_python_state(dict(status_message='Creating multiscale recordings...'))
+                self.set_state(dict(status_message='Creating multiscale recordings...'))
                 self._multiscale_recordings = _create_multiscale_recordings(recording=self._recording, progressive_ds_factor=3)
-                self.set_python_state(dict(status_message='Done creating multiscale recording'))
+                self.set_state(dict(status_message='Done creating multiscale recording'))
             rx = self._multiscale_recordings[ds]
-            X = _extract_data_segment(recording=rx, segment_num=ss, segment_size=self.get_javascript_state('segmentSize') * 2)
+            X = _extract_data_segment(recording=rx, segment_num=ss, segment_size=self._segment_size * 2)
             return X
 
         traces = self._recording.get_traces(
-            start_frame=ss*self.get_javascript_state('segmentSize'), end_frame=(ss+1)*self.get_javascript_state('segmentSize'))
+            start_frame=ss*self._segment_size, end_frame=(ss+1)*self._segment_size)
         return traces
 
     def iterate(self):
         pass
+
+    def _set_state(self, **kwargs):
+        self.set_state(kwargs)
+    
+    def _set_error(self, error_message):
+        self._set_status('error', error_message)
+    
+    def _set_status(self, status, status_message=''):
+        self._set_state(status=status, status_message=status_message)
 
 
 def _mda32_to_base64(X):
@@ -101,13 +126,22 @@ class _DownsampledRecordingExtractor(se.RecordingExtractor):
         self._recording = recording
         self._ds_factor = ds_factor
         self._input_has_minmax = input_has_minmax
+        self._recording_hash = None
         self.copy_channel_properties(recording)
 
     def hash(self):
+        if not self._recording_hash:
+            if hasattr(self._recording, 'hash'):
+                if type(self._recording.hash) == str:
+                    self._recording_hash = self._recording.hash
+                else:
+                    self._recording_hash = self._recording.hash()
+            else:
+                self._recording_hash = _samplehash(self._recording)
         return mt.sha1OfObject(dict(
             name='downsampled-recording-extractor',
             version=2,
-            recording=self._recording.hash(),
+            recording=self._recording_hash,
             ds_factor=self._ds_factor,
             input_has_minmax=self._input_has_minmax
         ))
@@ -170,3 +204,22 @@ class _DownsampledRecordingExtractor(se.RecordingExtractor):
         EfficientAccessRecordingExtractor(
             recording=recording, _dest_path=save_path)
 
+def _samplehash(recording):
+    from mountaintools import client as mt
+    obj = {
+        'channels': tuple(recording.get_channel_ids()),
+        'frames': recording.get_num_frames(),
+        'data': _samplehash_helper(recording)
+    }
+    return mt.sha1OfObject(obj)
+
+
+def _samplehash_helper(recording):
+    rng = np.random.RandomState(37)
+    n_samples = min(recording.get_num_frames() // 1000, 100)
+    inds = rng.randint(low=0, high=recording.get_num_frames(), size=n_samples)
+    h = 0
+    for i in inds:
+        t = recording.get_traces(start_frame=i, end_frame=i + 100)
+        h = hash((hash(bytes(t)), hash(h)))
+    return h

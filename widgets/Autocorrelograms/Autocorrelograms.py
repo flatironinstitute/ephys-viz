@@ -1,8 +1,11 @@
 import numpy as np
 from mountaintools import client as mt
 import mlprocessors as mlpr
-import json
 import simplejson
+import logging
+import traceback
+from ..pycommon.autoextractors import AutoSortingExtractor
+logger = logging.getLogger('reactopya')
 
 def compute_autocorrelogram(times, *, max_dt_tp, bin_size_tp, max_samples=None):
     num_bins_left = int(max_dt_tp / bin_size_tp)  # number of bins to the left of the origin
@@ -67,10 +70,9 @@ class ComputeAutocorrelograms(mlpr.Processor):
     VERSION = '0.1.5'
 
     # Inputs
-    firings_path = mlpr.Input()
+    sorting = mlpr.Input()
 
     # Parameters
-    samplerate = mlpr.FloatParameter()
     max_samples = mlpr.IntegerParameter(optional=True, default=100000)
     bin_size_msec = mlpr.FloatParameter(optional=True, default=2)
     max_dt_msec = mlpr.FloatParameter(optional=True, default=50)
@@ -79,10 +81,8 @@ class ComputeAutocorrelograms(mlpr.Processor):
     json_out = mlpr.Output()
 
     def run(self):
-        from spikeforest import SFMdaRecordingExtractor, SFMdaSortingExtractor
-        
-        sorting = SFMdaSortingExtractor(firings_file=self.firings_path)
-        samplerate = self.samplerate
+        sorting = self.sorting
+        samplerate = sorting.get_sampling_frequency()
         max_samples = self.max_samples
         max_dt_msec = self.max_dt_msec
         bin_size_msec = self.bin_size_msec
@@ -92,8 +92,7 @@ class ComputeAutocorrelograms(mlpr.Processor):
 
         autocorrelograms = []
         for unit_id in sorting.get_unit_ids():
-            print('Unit::g {}'.format(unit_id))
-            (bin_counts, bin_edges) = compute_autocorrelogram(sorting.get_unit_spike_train(unit_id), max_dt_tp=max_dt_tp, bin_size_tp=bin_size_tp, max_samples=max_samples)
+            (bin_counts, bin_edges) = compute_autocorrelogram(sorting.get_unit_spike_train(unit_id=unit_id), max_dt_tp=max_dt_tp, bin_size_tp=bin_size_tp, max_samples=max_samples)
             bin_edges = bin_edges / samplerate *1000  # milliseconds
             autocorrelograms.append(dict(
                 unit_id=unit_id,
@@ -112,8 +111,18 @@ class Autocorrelograms:
         super().__init__()
 
     def javascript_state_changed(self, prev_state, state):
-        self.set_python_state(dict(status='running', status_message='Running'))
-        mt.configDownloadFrom(state.get('download_from', []))
+        self._set_status('running', 'Running')
+        
+        sorting0 = state.get('sorting', None)
+        if not sorting0:
+            self._set_error('Missing: sorting')
+            return
+        try:
+            self._sorting = AutoSortingExtractor(sorting0)
+        except Exception as err:
+            traceback.print_exc()
+            self._set_error('Problem initiating sorting: {}'.format(err))
+            return
 
         max_samples = state.get('max_samples')
         max_dt_msec = state.get('max_dt_msec')
@@ -121,48 +130,28 @@ class Autocorrelograms:
         if not max_dt_msec:
             return
 
-        firings_path = state.get('firingsPath', None)
-        if not firings_path:
-            self.set_python_state(dict(
-                status='error',
-                status_message='No firingsPath provided'
-            ))
-            return
-
-        samplerate = state.get('samplerate', None)
-        if not samplerate:
-            self.set_python_state(dict(
-                status='error',
-                status_message='No samplerate provided'
-            ))
-            return
-
-        self.set_python_state(dict(status_message='Realizing file: {}'.format(firings_path)))
-        firings_path2 = mt.realizeFile(firings_path)
-        if not firings_path2:
-            self.set_python_state(dict(
-                status='error',
-                status_message='Unable to realize file: {}'.format(firings_path)
-            ))
-            return
-
         result = ComputeAutocorrelograms.execute(
-            firings_path=firings_path2,
-            samplerate=samplerate,
+            sorting=self._sorting,
             max_samples=max_samples,
             bin_size_msec=bin_size_msec,
             max_dt_msec=max_dt_msec,
             json_out=dict(ext='.json')
         )
         if result.retcode != 0:
-            self.set_python_state(dict(
-                status='error',
-                status_message='Error computing autocorrelogram.'
-            ))
+            self._set_error('Error computing autocorrelograms.')
             return
 
         output = mt.loadObject(path=result.outputs['json_out'])
-        self.set_python_state(dict(
+        self._set_state(
             status='finished',
             output=output
-        ))
+        )
+    
+    def _set_state(self, **kwargs):
+        self.set_state(kwargs)
+    
+    def _set_error(self, error_message):
+        self._set_status('error', error_message)
+    
+    def _set_status(self, status, status_message=''):
+        self._set_state(status=status, status_message=status_message)

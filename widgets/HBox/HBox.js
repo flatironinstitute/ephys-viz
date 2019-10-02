@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
+import { minWidth } from '@material-ui/system';
 const config = require('./HBox.json');
 
 export default class HBox extends Component {
@@ -44,7 +45,7 @@ class HBoxInner extends Component {
                     <tr>
                         {
                             (this.props.children || []).map((Child, ii) => (
-                                <td key={ii}>
+                                <td valign="top" key={ii} style={{minWidth:width0}}>
                                     <Child.type {...Child.props} width={width0} />
                                 </td>
                             ))

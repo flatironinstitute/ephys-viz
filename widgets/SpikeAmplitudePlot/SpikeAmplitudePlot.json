@@ -1,0 +1,6 @@
+{
+    "project_name": "ephys_viz",
+    "type": "SpikeAmplitudePlot",
+    "description": "Spike amplitude plot",
+    "defaultProps": {}
+}

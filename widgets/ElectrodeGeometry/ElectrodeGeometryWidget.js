@@ -21,7 +21,6 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.ymin = 0;
         this.ymax = 2;
         this.transpose = false;
-        this.margins = { top: 15, bottom: 15, left: 15, right: 15 };
         this.channel_rects = {};
         this.dragSelectRect = null;
 
@@ -41,7 +40,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
 
     componentDidMount() {
         this.computeSize();
-        this.repaint();
+        this.initializeCanvasWidget();
     }
 
     componentWillUnmount() {
@@ -98,11 +97,11 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
             H = maxHeight;
             W = w0 * H / h0;
         }
-        this.setSize(W, H);
+        this.setCanvasSize(W, H);
     }
 
     paintDragSelect = (painter) => {
-        painter.clearRect(0, 0, this.width(), this.height());
+        painter.clear();
         if (this.dragSelectRect) {
             painter.fillRect(this.dragSelectRect, 'lightgray');
         }
@@ -127,8 +126,8 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     paintMainLayer = (painter) => {
         let ids = this.ids();
 
-        const W = this.width();
-        const H = this.height();
+        const W = this.canvasWidgetWidth();
+        const H = this.canvasWidgetHeight();
 
         painter.clearRect(0, 0, W, H);
 
