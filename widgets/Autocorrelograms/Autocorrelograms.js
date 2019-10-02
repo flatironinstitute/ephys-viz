@@ -29,7 +29,7 @@ export default class Autocorrelograms extends Component {
         this.pythonInterface.setState({
             sorting: this.props.sorting,
             max_samples: this.props.max_samples || 10000,
-            bin_size_msec: this.props.bin_sec_msec || 2,
+            bin_size_msec: this.props.bin_size_msec || 2,
             max_dt_msec: this.props.max_dt_msec || 50,
             download_from: this.props.download_from
         });

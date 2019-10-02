@@ -5,6 +5,7 @@ import simplejson
 import logging
 import traceback
 from ..pycommon.autoextractors import AutoSortingExtractor
+from .examples import examples
 logger = logging.getLogger('reactopya')
 
 def compute_autocorrelogram(times, *, max_dt_tp, bin_size_tp, max_samples=None):
@@ -155,3 +156,5 @@ class Autocorrelograms:
     
     def _set_status(self, status, status_message=''):
         self._set_state(status=status, status_message=status_message)
+
+setattr(Autocorrelograms, 'examples', examples)

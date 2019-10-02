@@ -8,8 +8,10 @@ import base64
 from spikeforest import mdaio
 from spikeforest import EfficientAccessRecordingExtractor
 from ..pycommon.autoextractors import AutoRecordingExtractor
+from .examples import examples
 
 class TimeseriesView:
+    examples = examples
     def __init__(self):
         super().__init__()
         self._recording = None
@@ -85,7 +87,6 @@ class TimeseriesView:
     
     def _set_status(self, status, status_message=''):
         self._set_state(status=status, status_message=status_message)
-
 
 def _mda32_to_base64(X):
     f = io.BytesIO()

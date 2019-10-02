@@ -5,9 +5,12 @@ from scipy import interpolate
 from copy import deepcopy
 import tempfile
 import os
+from .examples import examples
 
 
 class PlaceField:
+    examples = examples
+    
     def __init__(self):
         super().__init__()
 

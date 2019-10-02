@@ -4,10 +4,13 @@ from mountaintools import client as mt
 from mountaintools import MountainClient
 import spikeextractors as se
 from ..pycommon.autoextractors import AutoSortingExtractor
+from .examples import examples
 
     
 
 class SpikeRasterPlot:
+    examples = examples
+    
     def __init__(self):
         super().__init__()
 

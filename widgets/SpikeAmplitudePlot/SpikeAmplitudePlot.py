@@ -4,9 +4,12 @@ from mountaintools import client as mt
 from mountaintools import MountainClient
 import spikeextractors as se
 from ..pycommon.autoextractors import AutoSortingExtractor, AutoRecordingExtractor
+from .examples import examples
 
 
 class SpikeAmplitudePlot:
+    examples = examples
+    
     def __init__(self):
         super().__init__()
         self._sorting = None
@@ -26,7 +29,7 @@ class SpikeAmplitudePlot:
                 return
             try:
                 self._sorting = AutoSortingExtractor(sorting0)
-            except:
+            except Exception as err:
                 traceback.print_exc()
                 self._set_error('Problem initiating sorting: {}'.format(err))
                 return
@@ -39,7 +42,7 @@ class SpikeAmplitudePlot:
                 return
             try:
                 self._recording = AutoRecordingExtractor(recording0)
-            except:
+            except Exception as err:
                 traceback.print_exc()
                 self._set_error('Problem initiating recording: {}'.format(err))
                 return

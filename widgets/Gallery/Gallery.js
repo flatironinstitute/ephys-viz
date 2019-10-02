@@ -93,7 +93,15 @@ export default class Gallery extends Component {
     }
     render() {
         const { expandedWidgetIndex } = this.state;
-        const style0 = { overflowX: 'hidden', margin: 10, padding: 20, background: 'lightblue' };
+        const style0 = {
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            margin: 0,
+            padding: 0,
+            background: 'lightblue',
+            width: this.props.width || 300,
+            height: this.props.height || 300
+        };
         const style1 = { padding: 20, margin: 10, minHeight: 800, maxHeight: 800, overflowY: 'auto' };
         let item_sizes = {
             xs: 12,

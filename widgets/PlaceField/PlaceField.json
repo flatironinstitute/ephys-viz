@@ -2,23 +2,7 @@
     "project_name": "ephys_viz",
     "type": "PlaceField",
     "description": "Place field for spikes and animal position",
-    "propsKeys": [],
-    "javaScriptStateKeys": [
-        "nwb_query",
-        "download_from",
-        "downsample_factor"
-    ],
-    "pythonStateKeys": [
-        "positions",
-        "timestamps",
-        "spike_time_indices",
-        "spike_labels",
-        "all_unit_ids",
-        "cluster_names",
-        "status",
-        "status_message"
-    ],
-    "galleryProps": {
+    "defaultProps": {
         "nwb_query": {
             "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
             "epochs": [1]

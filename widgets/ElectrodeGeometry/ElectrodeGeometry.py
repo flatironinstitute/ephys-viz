@@ -1,9 +1,12 @@
 import numpy as np
 from mountaintools import client as mt
 import spikeextractors as se
+from .examples import examples
 
 
 class ElectrodeGeometry:
+    examples = examples
+    
     def __init__(self):
         super().__init__()
 

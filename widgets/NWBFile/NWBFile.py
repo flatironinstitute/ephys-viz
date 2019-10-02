@@ -1,7 +1,10 @@
 from mountaintools import client as mt
 from ..pycommon.nwb_to_dict import nwb_to_dict
+from .examples import examples
 
 class NWBFile:
+    examples = examples
+    
     def __init__(self):
         super().__init__()
 

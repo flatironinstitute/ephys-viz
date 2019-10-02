@@ -2,9 +2,12 @@ from vtk import vtkXMLPolyDataReader
 from ..pycommon.nwb_to_dict import nwb_to_dict
 from mountaintools import client as mt
 import numpy as np
+from .examples import examples
 
 
 class CorticalSurface:
+    examples = examples
+
     def __init__(self):
         super().__init__()
 
