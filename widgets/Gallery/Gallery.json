@@ -1,0 +1,6 @@
+{
+    "project_name": "ephys_viz",
+    "type": "Gallery",
+    "description": "Gallery view of a list of widgets",
+    "defaultProps": {}
+}

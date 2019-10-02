@@ -1,5 +1,6 @@
 from mountaintools import MountainClient
 import spikeextractors as se
+import numpy as np
 from .mdaextractors import MdaRecordingExtractor
 
 class AutoRecordingExtractor(se.RecordingExtractor):
