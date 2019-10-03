@@ -5,6 +5,47 @@
         "key": "Gallery",
         "children": [
             {
+                "type": "SpikeRasterPlot",
+                "key": "SpikeRasterPlot",
+                "props": {
+                    "title": "Raster plot",
+                    "sorting": {
+                        "path": "sha1dir://b1618868a12e92d8fb5df2b60b34dc0716a40552.manual_franklab/tetrode_600s/sorter1_1/firings_true.mda",
+                        "samplerate": 30000,
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            },
+            {
+                "type": "SpikeAmplitudePlot",
+                "key": "SpikeAmplitudePlot",
+                "props": {
+                    "title": "Spike amplitude plot",
+                    "recording": {
+                        "path": "sha1dir://b1618868a12e92d8fb5df2b60b34dc0716a40552.manual_franklab/tetrode_600s/sorter1_1/raw.mda",
+                        "samplerate": 30000,
+                        "download_from": "spikeforest.public"
+                    },
+                    "sorting": {
+                        "path": "sha1dir://b1618868a12e92d8fb5df2b60b34dc0716a40552.manual_franklab/tetrode_600s/sorter1_1/firings_true.mda",
+                        "samplerate": 30000,
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            },
+            {
+                "type": "TimeseriesView",
+                "key": "TimeseriesView",
+                "props": {
+                    "title": "Timeseries view",
+                    "recording": {
+                        "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
+                        "samplerate": 30000,
+                        "download_from": "spikeforest.public"
+                    }
+                }
+            },
+            {
                 "type": "Autocorrelograms",
                 "key": "Autocorrelograms",
                 "props": {

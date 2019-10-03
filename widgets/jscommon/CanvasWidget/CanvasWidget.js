@@ -127,6 +127,8 @@ export default class CanvasWidget extends Component {
         return this.state.overrideHeight || this.props.height;
     }
     setCanvasSize(W, H) {
+        if ((this.state.overrideWidth === W) && (this.state.overrideHeight === H))
+            return;
         this.setState({
             overrideWidth: W,
             overrideHeight: H

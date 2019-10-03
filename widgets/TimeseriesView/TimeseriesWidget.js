@@ -34,6 +34,7 @@ export default class TimeseriesWidget extends TimeWidget {
         this.addAction(() => {this._zoomAmplitude(1 / 1.15)}, {title: 'Scale amplitude down [down arrow]', icon: <FaArrowDown />, key: 40});
     }
     componentDidUpdate() {
+        this.updateTimeWidget();
         this.updatePanels();
     }
     updateDownsampleFactor() {

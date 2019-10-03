@@ -31,18 +31,26 @@ class SpikeRasterPlotInner extends TimeWidget {
             status: '',
             status_message: ''
         }
+        this._initializedTimeRange = false;
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
         this.pythonInterface.start();
         this.pythonInterface.setState({
             sorting: this.props.sorting,
-        });
-        this.initializeTimeWidget();
+        });        
         this.updatePanels();
+        this.initializeTimeWidget();
     }
     componentDidUpdate() {
+        if (this.state.num_timepoints) {
+            if (!this._initializedTimeRange) {
+                this.setTimeRange([0, this.state.num_timepoints]);
+                this._initializedTimeRange = true;
+            }
+        }
         this.updatePanels();
+        this.updateTimeWidget();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

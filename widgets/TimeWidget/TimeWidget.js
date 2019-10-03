@@ -29,16 +29,26 @@ export default class TimeWidget extends CanvasWidget {
         this._cursorLayer = this.addCanvasLayer(this.paintCursorLayer);
         this._panelLabelLayer = this.addCanvasLayer(this.paintPanelLabelLayer);
 
-        this._mainLayer.setMargins(50, 0, 0, 50);
-        this._cursorLayer.setMargins(50, 0, 0, 50);
+        this._mainLayer.setMargins(50, 10, 0, 50);
+        this._cursorLayer.setMargins(50, 10, 0, 50);
 
         this.initializeCanvasWidget();
+        this.updateTimeWidget();
+    }
+    updateTimeWidget() {
         this.setCanvasSize(this.props.width, this.props.height - 50);
     }
     paintMainLayer = (painter) => {
         painter.clear();
-
         painter.useCoords();
+        this.setCoordXRange(0, 1);
+        this.setCoordYRange(0, 1);
+        painter.setPen({color: 'gray'});
+        painter.drawLine(0, 0, 0, 1);
+        painter.drawLine(1, 0, 1, 1);
+        painter.drawLine(0, 1, 1, 1);
+
+        
         for (let panel of this._panels) {
             this.setCoordXRange(this._timeRange[0], this._timeRange[1]);
             // v1=-1 => y1
@@ -77,7 +87,7 @@ export default class TimeWidget extends CanvasWidget {
     paintTimeAxisLayer = (painter) => {
         let W = this.canvasWidgetWidth();
         let H = this.canvasWidgetHeight();
-        this._timeAxisLayer.setMargins(50, 0, H-50, 0);
+        this._timeAxisLayer.setMargins(50, 10, H-50, 0);
         this._timeAxisLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
         this._timeAxisLayer.setCoordYRange(0, 1);
         painter.clear();

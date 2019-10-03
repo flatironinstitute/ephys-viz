@@ -38,13 +38,24 @@ export default class SelectUnits extends Component {
         this.props.onSelectedUnitsChanged && this.props.onSelectedUnitsChanged(selectedUnits);
     }
     render() {
+        let style0 = {
+            position: 'relative',
+            left: 0,
+            right: 0,
+            top: 0,
+            height: this.props.height || 200,
+            background: 'lightgray',
+            overflow: 'auto'
+        };
         return (
             <RespectStatus {...this.state}>
-                <UnitSelector
-                    all_unit_ids={this.state.unit_ids}
-                    selectedUnits={this.state.selectedUnits}
-                    onChange={this._handleChange}
-                />
+                <div style={style0}>
+                    <UnitSelector
+                        all_unit_ids={this.state.unit_ids}
+                        selectedUnits={this.state.selectedUnits}
+                        onChange={this._handleChange}
+                    />
+                </div>
             </RespectStatus>
         )
     }

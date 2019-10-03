@@ -36,14 +36,19 @@ class SpikeAmplitudePlotSelectUnitIds extends Component {
         });
     }
     render() {
+        let height = this.props.height || 500;
+        let selectUnitsHeight = 100;
         return (
             <React.Fragment>
-                <SpikeAmplitudePlot {...this.props} unit_ids={this.state.unit_ids} />
+                <SpikeAmplitudePlot
+                    {...this.props} height={height-selectUnitsHeight} unit_ids={this.state.unit_ids}
+                />
                 <SelectUnits
                     sorting={this.props.sorting}
                     reactopyaParent={this}
                     reactopyaChildId="SelectUnits"
                     onSelectedUnitsChanged={this._handleSelectedUnitsChanged}
+                    height={selectUnitsHeight}
                 />
             </React.Fragment>
         )
@@ -69,6 +74,7 @@ class SpikeAmplitudePlotInner extends TimeWidget {
         this.retrievedSpikeTrains = {};
         this.retrievedSpikeAmplitudes = {};
         this._ampRange = [null, null];
+        this._initializedTimeRange = false;
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
@@ -96,6 +102,7 @@ class SpikeAmplitudePlotInner extends TimeWidget {
             });
         }
         this._updateAmpRange();
+        this.updateTimeWidget();
     }
     componentWillUnmount() {
         this.pythonInterface.stop();
@@ -112,6 +119,10 @@ class SpikeAmplitudePlotInner extends TimeWidget {
     }
     paintMainPanel = (painter) => {
         if (this.state.status !== 'finished') return;
+        if (!this._initializedTimeRange) {
+            this.setTimeRange([0, this.state.num_timepoints]);
+            this._initializedTimeRange = true;
+        }
         let trange = this.timeRange();
         for (let unit_id of this.props.unit_ids) {
             let times0 = this.retrievedSpikeTrains[unit_id];
