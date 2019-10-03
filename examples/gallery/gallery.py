@@ -12,7 +12,7 @@ def main():
         ev.ElectrodeGeometry.examples.from_geom_csv(),
         ev.TimeseriesView.examples.toy_example(),
         ev.SpikeRasterPlot.examples.toy_example(),
-        ev.SpikeAmplitudePlot.examples.toy_example(),
+        ev.SpikeAmplitudePlot.examples.franklab_example(),
         ev.PlaceField.examples.bon03(),
         ev.NWBFile.examples.EC2(),
         ev.NWBBrowser.examples.bon03(),
