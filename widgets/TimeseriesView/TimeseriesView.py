@@ -10,6 +10,8 @@ from spikeforest import mdaio
 # from spikeforest import EfficientAccessRecordingExtractor
 from ..pycommon.autoextractors import AutoRecordingExtractor
 from .examples import examples
+import logging
+logger = logging.getLogger('reactopya')
 
 class TimeseriesView:
     examples = examples
@@ -21,6 +23,7 @@ class TimeseriesView:
         self._segment_size = None
 
     def javascript_state_changed(self, prev_state, state):
+        self._set_status('running', 'Running TimeseriesView')
         self._create_efficient_access = state.get('create_efficient_access', False)
         if not self._recording:
             self._set_status('running', 'Loading recording')
@@ -65,8 +68,10 @@ class TimeseriesView:
                 state0[key] = dict(data=data0_base64, ds=aa['ds'], ss=aa['ss'])
                 self.set_state(state0)
                 self.set_state(dict(status_message='Loaded segment {}'.format(key)))
+        self._set_status('finished', '')
 
     def _load_data(self, ds, ss):
+        logger.info('_load_data {} {}'.format(ds, ss))
         if ds > 1:
             if self._multiscale_recordings is None:
                 self.set_state(dict(status_message='Creating multiscale recordings...'))
@@ -81,10 +86,13 @@ class TimeseriesView:
             start_time = time.time()
             X = _extract_data_segment(recording=rx, segment_num=ss, segment_size=self._segment_size * 2)
             # print('done extracting data segment', time.time() - start_time)
+            logger.info('extracted data segment {} {} {}'.format(ds, ss, time.time() - start_time))
             return X
 
+        start_time = time.time()
         traces = self._recording.get_traces(
             start_frame=ss*self._segment_size, end_frame=(ss+1)*self._segment_size)
+        logger.info('extracted data segment {} {} {}'.format(ds, ss, time.time() - start_time))
         return traces
 
     def iterate(self):

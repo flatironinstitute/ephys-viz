@@ -6,15 +6,24 @@ export default class AutoDetermineWidth extends Component {
         this.state = {
             width: null
         };
+        this._polling = true;
     }
 
     async componentDidMount() {
         this.updateDimensions();
         // window.addEventListener("resize", this.resetWidth);
+        this._nextPoll();
     }
 
     componentWillUnmount() {
         // window.removeEventListener("resize", this.resetWidth);
+        this._polling = false;
+    }
+
+    _nextPoll = () => {
+        if (!this._polling) return;
+        setTimeout(() => {this._nextPoll()}, 1000);
+        this.updateDimensions();
     }
 
     resetWidth = () => {
@@ -32,14 +41,17 @@ export default class AutoDetermineWidth extends Component {
     }
 
     updateDimensions() {
-        if ((!this.container) || (!this.container.offsetWidth)) return;
-        if (this.state.width !== this.container.offsetWidth) {
-            this.setState({
-                width: this.container.offsetWidth // see render()
-            });
-            if (!this.container.sensor) {
-                this.container.sensor = new ResizeSensor(this.container, () => {this.updateDimensions();});
-                // this.container.sensor = new ResizeObserver(() => {/*this.updateDimensions()*/}).observe(this.container);
+        if ((this.container) && (this.container.offsetWidth)) {
+            if (this.state.width !== this.container.offsetWidth) {
+                this.setState({
+                    width: this.container.offsetWidth // see render()
+                });
+                if (!this.container.sensor) {
+                    //this.container.sensor = new ResizeSensor(this.container, () => {this.updateDimensions();});
+                    this.container.sensor = new ResizeObserver(() => {
+                        this.updateDimensions()
+                    }).observe(this.container);
+                }
             }
         }
     }
@@ -59,7 +71,7 @@ export default class AutoDetermineWidth extends Component {
         }
         else {
             let width = this.state.width || undefined;
-            if (!width) width = 312;
+            if (!width) width = 0;
 
             let new_props = {};
             for (let key in elmt.props) {
@@ -82,7 +94,6 @@ export default class AutoDetermineWidth extends Component {
 
 function ResizeSensor(element, callback)
 {
-    console.log('test 1');
     let zIndex = parseInt(getComputedStyle(element));
     if(isNaN(zIndex)) { zIndex = 0; };
     zIndex--;
@@ -148,7 +159,6 @@ function ResizeSensor(element, callback)
         let newWidth = size.width;
         let newHeight = size.height;
 
-        console.log('abc', newWidth, currentWidth);
         if(newWidth != currentWidth || newHeight != currentHeight)
         {
             currentWidth = newWidth;

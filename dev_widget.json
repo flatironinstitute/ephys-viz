@@ -1,5 +1,14 @@
 {
     "widget": {
+        "type": "TimeseriesView",
+        "key": "LFP",
+        "props": {
+            "title": "LFP test",
+            "recording": "test",
+            "initial_y_scale_factor": 3
+        }
+    },
+    "widget2": {
         "type": "Gallery",
         "title": "Gallery",
         "key": "Gallery",

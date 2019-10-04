@@ -140,6 +140,7 @@ function determine_downsample_factor_from_num_timepoints(target_num_pix, num) {
     // determine what the downsample factor should be based on the number
     // of timepoints in the view range
     // we also need to consider the number of pixels it corresponds to
+    if (target_num_pix < 500) target_num_pix = 500;
     let ds_factor = 1;
     let factor = 3;
     while (num / (ds_factor * factor) > target_num_pix) {

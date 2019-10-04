@@ -117,7 +117,7 @@ class TimeseriesViewInner extends Component {
                         num_timepoints={this.state.num_timepoints}
                         channel_ids={this.state.channel_ids}
                         y_offsets={this.state.y_offsets}
-                        y_scale_factor={this.state.y_scale_factor}
+                        y_scale_factor={this.state.y_scale_factor * (this.props.initial_y_scale_factor || 1)}
                         width={this.props.width}
                         height={this.props.height || 500}
                     />
