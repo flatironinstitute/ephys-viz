@@ -33,13 +33,20 @@ export default class TimeseriesWidget extends TimeWidget {
         this.addAction(() => {this._zoomAmplitude(1.15)}, {title: 'Scale amplitude up [up arrow]', icon: <FaArrowUp />, key: 38});
         this.addAction(() => {this._zoomAmplitude(1 / 1.15)}, {title: 'Scale amplitude down [down arrow]', icon: <FaArrowDown />, key: 40});
     }
-    componentDidUpdate() {
-        this.updateTimeWidget();
-        this.updatePanels();
+    componentDidUpdate(prevProps, prevState) {
+        if ((this.props.width !== prevProps.width) || (this.props.height !== prevProps.height)) {
+            this.updateTimeWidget();
+            this.updatePanels();
+        }
+        this.updateDownsampleFactor();
     }
     updateDownsampleFactor() {
         let trange = this.timeRange();
-        let downsample_factor = determine_downsample_factor_from_num_timepoints(this.props.width * 1.3, trange[1] - trange[0]);
+        let factor0 = 1.3; // this is a tradeoff between rendering speed and appearance
+        if ((this.props.num_channels) && (this.props.num_channels > 32)) {
+            factor0 = 0.5;
+        }
+        let downsample_factor = determine_downsample_factor_from_num_timepoints(this.props.width * factor0, trange[1] - trange[0]);
         if (downsample_factor !== this._downsampleFactor) {
             this._downsampleFactor = downsample_factor;
             this.repaint();
@@ -49,10 +56,17 @@ export default class TimeseriesWidget extends TimeWidget {
         const { num_channels, channel_ids } = this.props;
         this.clearPanels();
         if (!num_channels) return;
+        this.setMaxTimeSpan(1e6 / num_channels)
+        const maxChannelsToLabel = Math.max(1, this.props.height / 18);
+        let channelsToLabel = {};
+        let incr = Math.ceil(num_channels / maxChannelsToLabel);
+        for (let m = 0; m < num_channels; m += incr) {
+            channelsToLabel[m] = true;
+        }
         for (let m = 0; m < num_channels; m++) {
             let panel = this.addPanel(
                 (painter) => {this.paintChannel(painter, m)},
-                {label: channel_ids[m]}
+                {label: channelsToLabel[m] ? channel_ids[m] : ''}
             );
             panel.setCoordYRange(-1, 1);
         }
@@ -75,6 +89,7 @@ export default class TimeseriesWidget extends TimeWidget {
         let t2b = Math.floor(t2 / downsample_factor);
         painter.setPen({ 'color': this.channel_colors[m % this.channel_colors.length] });
         let pp = new PainterPath();
+        this.setStatusBarText(`Painting timepoints ${t1b} to ${t2b}; downsampling ${downsample_factor}`);
         let data0 = this.props.timeseriesModel.getChannelData(m, t1b, t2b, downsample_factor);
         // trigger pre-loading
         this.props.timeseriesModel.getChannelData(m, Math.floor(t1b / 3), Math.floor(t2b / 3), downsample_factor * 3, { request_only: true });

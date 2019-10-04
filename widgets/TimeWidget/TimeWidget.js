@@ -7,14 +7,21 @@ export { PainterPath } from '../jscommon/CanvasWidget';
 export default class TimeWidget extends CanvasWidget {
     constructor(props) {
         super(props);
+        this.state = this.state || {};
+        this.state._statusBarText = '';
 
         this._panels = [];
-        this._timeRange = [0, 80000];
+        this._timeRange = [0, 1000];
         this._timeRangeChangedHandlers = [];
         this._currentTime = null;
         this._anchorTimeRange = null;
         this._dragging = false;
         this._customActions = [];
+        this._toolbarHeight = 50;
+        this._statusBarHeight = 0;
+        this._paintPanelIndex = 0;
+        this._paintPanelCode = 0;
+        this._maxTimeSpan = null
 
         this.mouseHandler().onMousePress(this.handle_mouse_press);
         this.mouseHandler().onMouseRelease(this.handle_mouse_release);
@@ -29,16 +36,18 @@ export default class TimeWidget extends CanvasWidget {
         this._cursorLayer = this.addCanvasLayer(this.paintCursorLayer);
         this._panelLabelLayer = this.addCanvasLayer(this.paintPanelLabelLayer);
 
-        this._mainLayer.setMargins(50, 10, 0, 50);
-        this._cursorLayer.setMargins(50, 10, 0, 50);
+        this._mainLayer.setMargins(50, 10, 15, 50);
+        this._cursorLayer.setMargins(50, 10, 15, 50);
 
         this.initializeCanvasWidget();
         this.updateTimeWidget();
     }
     updateTimeWidget() {
-        this.setCanvasSize(this.props.width, this.props.height - 50);
+        this.setCanvasSize(this.props.width, this.props.height - this._toolbarHeight - this._statusBarHeight);
     }
     paintMainLayer = (painter) => {
+        this._paintPanelIndex = 0;
+        this._paintPanelCode++;
         painter.clear();
         painter.useCoords();
         this.setCoordXRange(0, 1);
@@ -48,8 +57,18 @@ export default class TimeWidget extends CanvasWidget {
         painter.drawLine(1, 0, 1, 1);
         painter.drawLine(0, 1, 1, 1);
 
-        
-        for (let panel of this._panels) {
+        this._paintPanels(painter, this._paintPanelCode);
+    }
+
+    _paintPanels = (painter, paintPanelCode) => {
+        if (paintPanelCode !== this._paintPanelCode) {
+            // we have started a new painting
+            return;
+        }
+        const indexPermutation = _getIndexPermutation(this._panels.length);
+        let timer = new Date();
+        while (this._paintPanelIndex < this._panels.length) {
+            const panel = this._panels[indexPermutation[this._paintPanelIndex]];
             this.setCoordXRange(this._timeRange[0], this._timeRange[1]);
             // v1=-1 => y1
             //  v2=1 => y2
@@ -68,6 +87,15 @@ export default class TimeWidget extends CanvasWidget {
 
             this.setCoordYRange(a, b);
             panel.paint(painter);
+            this._paintPanelIndex++;
+
+            let elapsed = (new Date()) - timer;
+            if (elapsed > 200) {
+                setTimeout(() => {
+                    this._paintPanels(painter, paintPanelCode);
+                }, 1);
+                return;
+            }
         }
     }
     paintCursorLayer = (painter) => {
@@ -107,7 +135,7 @@ export default class TimeWidget extends CanvasWidget {
                 painter.drawLine(info.t2, 0.45, info.t2, 0.5);
                 let rect = [info.t1, 0, info.t2 - info.t1, 0.35];
                 let alignment = {AlignTop: true, AlignCenter: true};
-                painter.drawText(rect, alignment, info.label);
+                painter.drawText(rect, alignment, info.label + '');
             }
         }
     }
@@ -122,13 +150,13 @@ export default class TimeWidget extends CanvasWidget {
             let panel = this._panels[i];
             let p1 = i / this._panels.length;
             let p2 = (i + 1) / this._panels.length;
-            this._panelLabelLayer.setMargins(0, W - 50, (H - 50) * p1, H - (H - 50) * p2);
+            this._panelLabelLayer.setMargins(0, W - 50, 15 + (H - 50 - 15) * p1, H - (15 + (H - 50 - 15) * p2));
             this._panelLabelLayer.setCoordXRange(0, 1);
             this._panelLabelLayer.setCoordYRange(0, 1);
             
             let rect = [0.2, 0.2, 0.6, 0.6];
             let alignment = {AlignRight: true, AlignVCenter: true};
-            panel._opts.label && painter.drawText(rect, alignment, panel._opts.label);
+            panel._opts.label + '' && painter.drawText(rect, alignment, panel._opts.label + '');
         }
     }
     addAction(action, opts) {
@@ -152,6 +180,9 @@ export default class TimeWidget extends CanvasWidget {
         this._currentTime = t;
         this._cursorLayer.repaint();
     }
+    setMaxTimeSpan(val) {
+        this._maxTimeSpan = Math.ceil(val)
+    }
     setTimeRange(trange) {
         let tr = clone(trange);
         if (tr[1] >= this.numTimepoints()) {
@@ -166,6 +197,13 @@ export default class TimeWidget extends CanvasWidget {
         }
         if (tr[1] >= this.numTimepoints()) {
             tr[1] = this.numTimepoints() - 1;
+        }
+        if (this._maxTimeSpan) {
+            if (tr[1] - tr[0] > this._maxTimeSpan) {
+                return;
+                // tr[0] = Math.max(0, Math.floor((tr[0] + tr[1]) / 2 - this._maxTimeSpan / 2));
+                // tr[1] = tr[0] + this._maxTimeSpan;
+            }
         }
         if ((this._timeRange[0] === tr[0]) && (this._timeRange[1] === tr[1]))
             return;
@@ -203,6 +241,18 @@ export default class TimeWidget extends CanvasWidget {
     pixToTime(pix) {
         let coords = this._mainLayer.pixToCoords(pix);
         return coords[0];
+    }
+    setStatusBarText(txt) {
+        if (this.state._statusBarText === txt)
+            return;
+        this.setState({
+            _statusBarText: txt
+        });
+        let height = txt ? 40 : 0;
+        if (height !== this._statusBarHeight) {
+            this._statusBarHeight = height;
+            this.updateTimeWidget();
+        }
     }
     handle_mouse_press = (X) => {
         let t = this.pixToTime(X.pos);
@@ -288,7 +338,7 @@ export default class TimeWidget extends CanvasWidget {
             <div>
                 <TimeWidgetToolBar
                     width={this.canvasWidgetWidth()}
-                    height={50}
+                    height={this._toolbarHeight}
                     onZoomIn={() => {this.zoomTime(1.15)}}
                     onZoomOut={() => {this.zoomTime(1 / 1.15)}}
                     onShiftTimeLeft={() => {this.handle_key_left()}}
@@ -296,6 +346,11 @@ export default class TimeWidget extends CanvasWidget {
                     customActions={this._customActions}
                 />
                 {this.renderCanvasWidget()}
+                <TimeWidgetStatusBar
+                    width={this.canvasWidgetWidth()}
+                    height={this._statusBarHeight}
+                    text={this.state._statusBarText}
+                />
             </div>
         );
     }
@@ -349,6 +404,21 @@ class TimeWidgetToolBar extends Component {
                 </Toolbar>
             </div>
             
+        );
+    }
+}
+
+class TimeWidgetStatusBar extends Component {
+    render() {
+        const style0 = {
+            position: 'relative',
+            width: this.props.width,
+            height: this.props.height
+        };
+        return (
+            <div style={style0}>
+                {this.props.text}
+            </div>
         );
     }
 }
@@ -478,6 +548,37 @@ class TimeWidgetPanel {
     paint(painter) {
         this.onPaint(painter);
     }
+}
+
+function _getIndexPermutation(N) {
+    let ret = [];
+    let indices = [];
+    for (let i = 0; i < N; i++)
+        indices.push(i);
+    let used = [];
+    for (let i of indices) {
+        used.push(false);
+    }
+    let cur = 0;
+    let increment = Math.floor(N / 2);
+    if (increment < 1) increment = 1;
+    while (ret.length < N) {
+        if (!used[cur]) {
+            ret.push(cur);
+            used[cur] = true;
+        }
+        cur += increment;
+        if (cur >= N) {
+            cur = 0;
+            if (increment <= 1) {
+                increment = 1;
+            }
+            else {
+                increment = Math.floor(increment / 2);
+            }
+        }
+    }
+    return ret;
 }
 
 function clone(obj) {

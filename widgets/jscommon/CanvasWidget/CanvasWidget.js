@@ -10,6 +10,7 @@ class CanvasWidgetLayer {
         this._margins = null;
         this._coordXRange = null;
         this._coordYRange = null;
+        this._repaintScheduled = false;
     }
     ref() {
         return this._ref;
@@ -25,9 +26,16 @@ class CanvasWidgetLayer {
         return canvas;
     }
     repaint = () => {
-        for (let handler of this._repaintHandlers) {
-            handler();
+        if (this._repaintScheduled) {
+            return;
         }
+        this._repaintScheduled = true;
+        setTimeout(() => {
+            this._repaintScheduled = false;
+            for (let handler of this._repaintHandlers) {
+                handler();
+            }
+        }, 5);
     }
     width() {
         return this._canvasWidget.canvasWidgetWidth();
@@ -110,6 +118,7 @@ export default class CanvasWidget extends Component {
         L._onRepaintCalled(() => {
             let ctx = L.context();
             if (!ctx) {
+                L.repaintNeeded = true;
                 return;
             }
             this._mouseHandler.setElement(L.canvasElement());
@@ -226,7 +235,12 @@ export default class CanvasWidget extends Component {
     renderCanvasWidget() {
         // Need to ind better way to do this:
         setTimeout(() => {
-            this.repaint();
+            for (let L of this._canvasLayers) {
+                if (L.repaintNeeded) {
+                    L.repaintNeeded = false;
+                    L.repaint();
+                }
+            }
         }, 100);
         return (
             <div

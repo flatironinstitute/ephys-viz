@@ -5,8 +5,9 @@ import spikeextractors as se
 import numpy as np
 import io
 import base64
+import time
 from spikeforest import mdaio
-from spikeforest import EfficientAccessRecordingExtractor
+# from spikeforest import EfficientAccessRecordingExtractor
 from ..pycommon.autoextractors import AutoRecordingExtractor
 from .examples import examples
 
@@ -16,11 +17,13 @@ class TimeseriesView:
         super().__init__()
         self._recording = None
         self._multiscale_recordings = None
-        self._segment_size = 100000
+        self._segment_size_times_num_channels = 100000
+        self._segment_size = None
 
     def javascript_state_changed(self, prev_state, state):
+        self._create_efficient_access = state.get('create_efficient_access', False)
         if not self._recording:
-            self._set_status('running', 'Running TimeseriesView')
+            self._set_status('running', 'Loading recording')
             recording0 = state.get('recording', None)
             if not recording0:
                 self._set_error('Missing: recording')
@@ -32,13 +35,14 @@ class TimeseriesView:
                 self._set_error('Problem initiating recording: {}'.format(err))
                 return
 
-            self._set_status('running', 'Loading recording')
+            self._set_status('running', 'Loading recording data')            
             traces0 = self._recording.get_traces(channel_ids=self._recording.get_channel_ids(), start_frame=0, end_frame=min(self._recording.get_num_frames(), 25000))
             y_offsets = -np.mean(traces0, axis=1)
             for m in range(traces0.shape[0]):
                 traces0[m, :] = traces0[m, :] + y_offsets[m]
             vv = np.percentile(np.abs(traces0), 90)
             y_scale_factor = 1 / (8 * vv) if vv > 0 else 1
+            self._segment_size = int(np.ceil(self._segment_size_times_num_channels / self._recording.get_num_channels()))
             self.set_state(dict(
                 num_channels=self._recording.get_num_channels(),
                 num_timepoints=self._recording.get_num_frames(),
@@ -66,10 +70,17 @@ class TimeseriesView:
         if ds > 1:
             if self._multiscale_recordings is None:
                 self.set_state(dict(status_message='Creating multiscale recordings...'))
-                self._multiscale_recordings = _create_multiscale_recordings(recording=self._recording, progressive_ds_factor=3)
+                self._multiscale_recordings = _create_multiscale_recordings(
+                    recording=self._recording,
+                    progressive_ds_factor=3,
+                    create_efficient_access=self._create_efficient_access
+                )
                 self.set_state(dict(status_message='Done creating multiscale recording'))
             rx = self._multiscale_recordings[ds]
+            # print('_extract_data_segment', ds, ss, self._segment_size)
+            start_time = time.time()
             X = _extract_data_segment(recording=rx, segment_num=ss, segment_size=self._segment_size * 2)
+            # print('done extracting data segment', time.time() - start_time)
             return X
 
         traces = self._recording.get_traces(
@@ -105,7 +116,7 @@ def _extract_data_segment(*, recording, segment_num, segment_size):
     X = recording.get_traces(start_frame=a1, end_frame=a2)
     return X
 
-def _create_multiscale_recordings(*, recording, progressive_ds_factor):
+def _create_multiscale_recordings(*, recording, progressive_ds_factor, create_efficient_access=True):
     ret = dict()
     current_rx = recording
     current_ds_factor = 1
@@ -114,7 +125,8 @@ def _create_multiscale_recordings(*, recording, progressive_ds_factor):
     while current_ds_factor * progressive_ds_factor < N:
         current_rx = _DownsampledRecordingExtractor(
             recording=current_rx, ds_factor=progressive_ds_factor, input_has_minmax=recording_has_minmax)
-        current_rx = EfficientAccessRecordingExtractor(recording=current_rx)
+        if create_efficient_access:
+            current_rx = EfficientAccessRecordingExtractor(recording=current_rx)
         current_ds_factor = current_ds_factor * progressive_ds_factor
         ret[current_ds_factor] = current_rx
         recording_has_minmax = True

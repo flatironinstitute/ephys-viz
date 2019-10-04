@@ -1,3 +1,4 @@
+from mountaintools import client as mt
 from mountaintools import MountainClient
 import spikeextractors as se
 import numpy as np
@@ -7,7 +8,9 @@ class AutoRecordingExtractor(se.RecordingExtractor):
     def __init__(self, arg):
         super().__init__()
         self._hash = None
-        if isinstance(arg, se.RecordingExtractor):
+        if arg == 'test':
+            self._recording = LFPTestRecordingExtractor('sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb')
+        elif isinstance(arg, se.RecordingExtractor):
             self._recording = arg
             self.copy_channel_properties(recording=self._recording)
         else:
@@ -62,6 +65,36 @@ class AutoRecordingExtractor(se.RecordingExtractor):
 
     def get_traces(self, **kwargs):
         return self._recording.get_traces(**kwargs)
+
+class LFPTestRecordingExtractor(se.RecordingExtractor):
+    def __init__(self, nwb_path):
+        super().__init__()
+        import pynwb
+        from pynwb import NWBHDF5IO
+        nwb_io = NWBHDF5IO(mt.realizeFile(path=nwb_path), mode='r')
+        nwb = nwb_io.read()
+        X = nwb.fields['processing']['ecephys']['LFP']['electrical_series']
+        self._samplerate = X.rate
+        self._data = X.data
+        self._num_channels = self._data.shape[1]
+
+    def get_channel_ids(self):
+        return list(range(self._num_channels))
+
+    def get_num_frames(self):
+        return self._data.shape[0]
+
+    def get_sampling_frequency(self):
+        return self._samplerate
+
+    def get_traces(self, channel_ids=None, start_frame=None, end_frame=None):
+        if start_frame is None:
+            start_frame = 0
+        if end_frame is None:
+            end_frame = self.get_num_frames()
+        if channel_ids is None:
+            channel_ids = self.get_channel_ids()
+        return self._data[start_frame:end_frame, :][:, channel_ids].T
 
 def _samplehash(recording):
     from mountaintools import client as mt
