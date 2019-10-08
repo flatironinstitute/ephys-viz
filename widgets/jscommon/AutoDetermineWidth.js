@@ -80,11 +80,12 @@ export default class AutoDetermineWidth extends Component {
             new_props.width = width;
 
             return (
-                <div
-                    className="determiningWidth"
-                    ref={el => (this.container = el)}
-                    style={{ position: 'relative', left: 0, right: 0, top: 0, bottom: 0 }}
-                >
+                <div>
+                    <div
+                        className="determiningWidth2"
+                        ref={el => (this.container = el)}
+                        style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 0 }}
+                    />
                     <elmt.type {...new_props}  />
                 </div>
             );

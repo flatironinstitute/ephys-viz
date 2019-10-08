@@ -498,7 +498,7 @@ class InnerContainer extends Component {
 class OuterContainer extends Component {
     render() {
         let style0 = {
-            position: 'absolute',
+            position: 'relative',
             left: 0,
             top: 0,
             width: this.props.width,

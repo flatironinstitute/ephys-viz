@@ -31,9 +31,9 @@ export default class SelectElectrodes extends Component {
         if (!ids) return;
         this.props.onChange(ids);
     }
-    _setViewOnlySelectedChannels = (val) => {
+    _toggleViewOnlySelectedChannels = (val) => {
         let prefs = clone(this.props.prefs || {});
-        prefs.viewOnlySelectedChannels = val;
+        prefs.viewOnlySelectedChannels = prefs.viewOnlySelectedChannels ? false : true;
         this.props.onPrefsChange && this.props.onPrefsChange(prefs);
     }
     render() {
@@ -56,7 +56,7 @@ export default class SelectElectrodes extends Component {
                     selectedElectrodeIds={this.props.selectedElectrodeIds}
                     onSelectedElectrodeIdsChanged={(ids) => {this.props.onChange(ids)}}
                 />
-                <Checkbox key="checkbox1" checked={prefs.viewOnlySelectedChannels} onChange={(evt, checked) => {this._setViewOnlySelectedChannels(checked)}} /> View only selected channels
+                <Checkbox key="checkbox1" checked={prefs.viewOnlySelectedChannels} onClick={() => {this._toggleViewOnlySelectedChannels()}} /> View only selected channels
             </React.Fragment>
         );
     }

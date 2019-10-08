@@ -122,7 +122,7 @@ class TimeseriesViewInner extends Component {
                         y_offsets={this.state.y_offsets}
                         y_scale_factor={this.state.y_scale_factor * (this.props.initial_y_scale_factor || 1)}
                         width={this.props.width}
-                        height={this.props.height || 500}
+                        height={this.props.height || 800}
                     />
                 </div>
             )
