@@ -6,6 +6,8 @@ notebook_examples/*-Copy*.ipynb
 notebook_examples/*.html
 test.json
 desktop_examples/test1.py
+old
+log.txt
 
 .ipynb_checkpoints
 .mypy_cache

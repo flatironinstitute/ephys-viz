@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import CanvasWidget from '../jscommon/CanvasWidget';
+import CanvasWidget, { CanvasWidgetLayer } from '../jscommon/CanvasWidget';
 
-export default class PlaceFieldCanvas extends CanvasWidget {
+export default class PlaceFieldCanvas extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            canvasWidth: 0,
+            canvasHeight: 0
+        };
 
         // this.mouseHandler().onMousePress(this.handleMousePress);
         // this.mouseHandler().onMouseRelease(this.handleMouseRelease);
@@ -12,15 +15,20 @@ export default class PlaceFieldCanvas extends CanvasWidget {
         // this.mouseHandler().onMouseDrag(this.handleMouseDrag);
         // this.mouseHandler().onMouseDragRelease(this.handleMouseDragRelease);
 
-        this.mainLayer = this.addCanvasLayer(this.paintMainLayer);
-        this.currentPositionLayer = this.addCanvasLayer(this.paintCurrentPositionLayer);
-        this.spikeLayer = this.addCanvasLayer(this.paintSpikeLayer);
+        this.mainLayer = new CanvasWidgetLayer(this.paintMainLayer);
+        this.currentPositionLayer = new CanvasWidgetLayer(this.paintCurrentPositionLayer);
+        this.spikeLayer = new CanvasWidgetLayer(this.paintSpikeLayer);
+
+        this.allLayers = [
+            this.mainLayer,
+            this.currentPositionLayer,
+            this.spikeLayer
+        ];
     }
 
     componentDidMount() {
         this.updateRanges();
-        this.repaint();
-        // this.startAnimation(this.onAnimationFrame, 100);
+        this._repaintAllLayers();
     }
 
     componentDidUpdate(prevProps) {
@@ -37,23 +45,36 @@ export default class PlaceFieldCanvas extends CanvasWidget {
 
     updateRanges() {
         const { positions, width } = this.props;
-        const W = width;
+        let W = width;
         if (!W) W = 500;
         let H = Math.min(600, W);
-        this.setCanvasSize(W, H);
+        this.setState({
+            canvasWidth: W,
+            canvasHeight: H
+        });
         if (positions) {
             let xmin = compute_min(positions[0]);
             let xmax = compute_max(positions[0]);
             let ymin = compute_min(positions[1]);
             let ymax = compute_max(positions[1]);
-            this.setPreserveAspectRatio(true);
-            this.setCoordXRange(xmin, xmax);
-            this.setCoordYRange(ymin, ymax);
+            for (let L of this.allLayers) {
+                L.setPreserveAspectRatio(true);
+                L.setCoordXRange(xmin, xmax);
+                L.setCoordYRange(ymin, ymax);
+            }
         }
         else {
-            this.setPreserveAspectRatio(true);
-            this.setCoordXRange(0, 1);
-            this.setCoordYRange(0, 1);
+            for (let L of this.allLayers) {
+                L.setPreserveAspectRatio(true);
+                L.setCoordXRange(0, 1);
+                L.setCoordYRange(0, 1);
+            }
+        }
+    }
+
+    _repaintAllLayers = () => {
+        for (let L of this.allLayers) {
+            L.repaint();
         }
     }
 
@@ -126,8 +147,8 @@ export default class PlaceFieldCanvas extends CanvasWidget {
 
         const { positions } = this.props;
 
-        const W = this.canvasWidgetWidth();
-        const H = this.canvasWidgetHeight();
+        const W = this.currentPositionLayer.width();
+        const H = this.currentPositionLayer.height();
 
         painter.clear();
 
@@ -188,7 +209,11 @@ export default class PlaceFieldCanvas extends CanvasWidget {
             </span>
         }
 
-        return this.renderCanvasWidget();
+        return <CanvasWidget
+            layers={this.allLayers}
+            width={this.state.canvasWidth}
+            height={this.state.canvasHeight}
+        />
     }
 }
 

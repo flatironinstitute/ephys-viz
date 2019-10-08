@@ -1,16 +1,21 @@
 import React, { Component } from "react";
 import { CanvasPainter, MouseHandler } from "./CanvasPainter";
 
-class CanvasWidgetLayer {
-    constructor(onPaint, canvasWidget) {
+function g_elapsed() {
+    return (new Date()) - 0;
+}
+
+export class CanvasWidgetLayer {
+    constructor(onPaint) {
         this._onPaint = onPaint;
         this._ref = React.createRef();
         this._repaintHandlers = [];
-        this._canvasWidget = canvasWidget;
-        this._margins = null;
-        this._coordXRange = null;
-        this._coordYRange = null;
+        this._preserveAspectRatio = false;
+        this._margins = [0, 0, 0, 0];
+        this._coordXRange = [0, 1];
+        this._coordYRange = [0, 1];
         this._repaintScheduled = false;
+        this._lastRepaintTime = new Date();
     }
     ref() {
         return this._ref;
@@ -25,35 +30,61 @@ class CanvasWidgetLayer {
         if (!canvas) return null;
         return canvas;
     }
+    _canvasWidget() {
+        return this._canvasWidget;
+    }
+    _setCanvasWidget(canvasWidget) {
+        this._canvasWidget = canvasWidget;
+    }
     repaint = () => {
         if (this._repaintScheduled) {
             return;
         }
+        if (this._timeSinceLastRepaint() > 10) {
+            // do it right away
+            this._doRepaint();
+            return;
+        }
         this._repaintScheduled = true;
+        let code = Math.random();
+        let timer = new Date();
         setTimeout(() => {
+            let elapsed = (new Date()) - timer;
             this._repaintScheduled = false;
-            for (let handler of this._repaintHandlers) {
-                handler();
-            }
+            this._doRepaint();
         }, 5);
     }
+    repaintImmediate = () => {
+        this._doRepaint();
+    }
+    _doRepaint = () => {
+        for (let handler of this._repaintHandlers) {
+            handler();
+        }
+        this._lastRepaintTime = new Date();
+    }
+    _timeSinceLastRepaint() {
+        return (new Date()) - this._lastRepaintTime;
+    }
     width() {
-        return this._canvasWidget.canvasWidgetWidth();
+        if (!this._canvasWidget) return 0;
+        return this._canvasWidget.props.width;
     }
     height() {
-        return this._canvasWidget.canvasWidgetHeight();
+        if (!this._canvasWidget) return 0;
+        return this._canvasWidget.props.height;
     }
     setMargins(l, r, t, b) {
         this._margins = [l, r, t, b];
     }
     margins() {
-        return this._margins ? clone(this._margins) : this._canvasWidget.margins();
+        return cloneSimpleArray(this._margins);
     }
     coordXRange() {
-        return this._coordXRange ? clone(this._coordXRange) : this._canvasWidget.coordXRange();
+        return cloneSimpleArray(this._coordXRange);
     }
     coordYRange() {
-        return this._coordYRange ? clone(this._coordYRange) : this._canvasWidget.coordYRange();
+        return cloneSimpleArray(this._coordYRange);
     }
     setCoordXRange(min, max) {
         this._coordXRange = [min, max];
@@ -61,8 +92,11 @@ class CanvasWidgetLayer {
     setCoordYRange(min, max) {
         this._coordYRange = [min, max];
     }
+    setPreserveAspectRatio(val) {
+        this._preserveAspectRatio = val;
+    }
     preserveAspectRatio() {
-        return this._canvasWidget.preserveAspectRatio();
+        return this._preserveAspectRatio;
     }
     pixToCoords(pix) {
         let margins = this.margins();
@@ -94,6 +128,12 @@ export default class CanvasWidget extends Component {
         this._canvasLayers = [];
         this._mouseHandler = new MouseHandler();
 
+        this._mouseHandler.onMousePress(this._handleMousePress);
+        this._mouseHandler.onMouseRelease(this._handleMouseRelease);
+        this._mouseHandler.onMouseMove(this._handleMouseMove);
+        this._mouseHandler.onMouseDrag(this._handleMouseDrag);
+        this._mouseHandler.onMouseDragRelease(this._handleMouseDragRelease);
+
         this._animationRunning = false;
         this._onAnimationFrame = null;
         this._animationCode = 0;
@@ -103,18 +143,27 @@ export default class CanvasWidget extends Component {
 
         this._keyPressHandlers = [];
     }
-    initializeCanvasWidget() {
+    componentDidMount() {
+        this._connectLayers();
         this.setState({
             overrideWidth: null,
             overrideHeight: null
         });
-        this.repaint();
+        this._repaint();
     }
-    componentWillUnmount() {
-        this.stopAnimation();
+    componentDidUpdate() {
+        this._connectLayers();
+        this._repaint();
     }
-    addCanvasLayer(onPaint) {
-        let L = new CanvasWidgetLayer(onPaint, this);
+    _connectLayers() {
+        for (let layer of this.props.layers || []) {
+            if (layer._canvasWidget != this) {
+                this._connectLayer(layer);
+            }
+        }
+    }
+    _connectLayer(L) {
+        L._setCanvasWidget(this);
         L._onRepaintCalled(() => {
             let ctx = L.context();
             if (!ctx) {
@@ -123,139 +172,65 @@ export default class CanvasWidget extends Component {
             }
             this._mouseHandler.setElement(L.canvasElement());
             let painter = new CanvasPainter(ctx, L);
-            painter._initialize(this.canvasWidgetWidth(), this.canvasWidgetHeight());
+            painter._initialize(this.props.width, this.props.height);
             L._callOnPaint(painter);
         });
-        this._canvasLayers.push(L);
-        return L;
     }
-    canvasWidgetWidth() {
-        return this.state.overrideWidth || this.props.width;
-    }
-    canvasWidgetHeight() {
-        return this.state.overrideHeight || this.props.height;
-    }
-    setCanvasSize(W, H) {
-        if ((this.state.overrideWidth === W) && (this.state.overrideHeight === H))
-            return;
-        this.setState({
-            overrideWidth: W,
-            overrideHeight: H
-        });
-    }
-    setCoordXRange(xmin, xmax) {
-        if ((xmin === this._coordXRange[0]) && (xmax === this._coordXRange[1])) {
-            return;
-        }
-        this._coordXRange = [xmin, xmax];
-    }
-    setCoordYRange(ymin, ymax) {
-        if ((ymin === this._coordYRange[0]) && (ymax === this._coordYRange[1])) {
-            return;
-        }
-        this._coordYRange = [ymin, ymax];
-    }
-    pixToCoords(pix) {
-        let xpct = (pix[0] - this._margins[0]) / (this.canvasWidgetWidth() - this._margins[0] - this._margins[1]);
-        let x = this._coordXRange[0] + xpct * (this._coordXRange[1] - this._coordXRange[0]);
-        let ypct = (pix[1] - this._margins[2]) / (this.canvasWidgetHeight() - this._margins[2] - this._margins[3]);
-        let y = this._coordYRange[0] + ypct * (this._coordYRange[1] - this._coordYRange[0]);
-        return [x, y];
-    }
-    setPreserveAspectRatio(val) {
-        if (this._preserveAspectRatio === val)
-            return;
-        this._preserveAspectRatio = val;
-    }
-    setMargins(l, r, t, b) {
-        const lrtb = [l, r, t, b];
-        if (JSON.stringify(lrtb) === JSON.stringify(this._margins))
-            return
-        this._margins = lrtb;
-    }
-    coordXRange() {
-        return [this._coordXRange[0], this._coordXRange[1]];
-    }
-    coordYRange() {
-        return [this._coordYRange[0], this._coordYRange[1]];
-    }
-    preserveAspectRatio() {
-        return this._preserveAspectRatio;
-    }
-    margins() {
-        return clone(this._margins);
-    }
-    mouseHandler() {
-        return this._mouseHandler;
-    }
-    onKeyPress(handler) {
-        this._keyPressHandlers.push(handler);
-    }
-    _handleKeyPress = (evt) => {
-        for (let handler of this._keyPressHandlers) {
-            handler(evt);
-        }
-    }
-    startAnimation(onAnimationFrame, fps) {
-        if (this._animationRunning) {
-            this.stopAnimation();
-        }
-        this._animationRunning = true;
-        this._onAnimationFrame = onAnimationFrame;
-        this._animationCode = this._animationCode + 1;
-        this._animationStartTime = new Date();
-        this._animationFPS = fps;
-        this.scheduleNextAnimationFrame();
-    }
-    stopAnimation() {
-        this._animationCode = this._animationCode + 1;
-        this._animationRunning = false;
-    }
-    animationElapsedMsec() {
-        if (!this._animationRunning) return 0;
-        let elapsed = (new Date()) - this._animationStartTime;
-        return elapsed;
-    }
-    scheduleNextAnimationFrame() {
-        let code = this._animationCode;
-        setTimeout(() => {
-            if (code != this._animationCode)
-                return;
-            if (!this._animationRunning)
-                return;
-            this._onAnimationFrame();
-            this.scheduleNextAnimationFrame();
-        }, 1000/this._animationFPS);
-    }
-    repaint = () => {
-        for (let L of this._canvasLayers) {
+    _repaint = () => {
+        for (let L of this.props.layers) {
             L.repaint();
         }
     }
-    renderCanvasWidget() {
-        // Need to ind better way to do this:
+    _handleMousePress = (X) => {
+        this.props.onMousePress && this.props.onMousePress(X);
+    }
+
+    _handleMouseRelease = (X) => {
+        this.props.onMouseRelease && this.props.onMouseRelease(X);
+    }
+
+    _handleMouseMove = (X) => {
+        this.props.onMouseMove && this.props.onMouseMove(X);
+    }
+
+    _handleMouseDrag = (X) => {
+        this.props.onMouseDrag && this.props.onMouseDrag(X);
+    }
+
+    _handleMouseDragRelease = (X) => {
+        this.props.onMouseDragRelease && this.props.onMouseDragRelease(X);
+    }
+    render() {
+        // Need to find better way to do this:
         setTimeout(() => {
-            for (let L of this._canvasLayers) {
+            for (let L of this.props.layers) {
                 if (L.repaintNeeded) {
                     L.repaintNeeded = false;
                     L.repaint();
                 }
             }
         }, 100);
+        let style0 = {
+            position: 'relative',
+            width: this.props.width,
+            height: this.props.height,
+            left: 0,
+            top: 0
+        }
         return (
             <div
-                style={{position: 'relative', width: this.canvasWidgetWidth(), height: this.canvasWidgetHeight(), left: 0, top: 0}}
-                onKeyDown={this._handleKeyPress}
+                style={style0}
+                onKeyDown={(evt) => {this.props.onKeyPress && this.props.onKeyPress(evt);}}
                 tabIndex={0} // tabindex needed to handle keypress
             >
                 {
-                    this._canvasLayers.map((L, index) => (
+                    this.props.layers.map((L, index) => (
                         <canvas
                             key={index}
                             style={{position: 'absolute', left: 0, top: 0}}
                             ref={L.ref()}
-                            width={this.canvasWidgetWidth()}
-                            height={this.canvasWidgetHeight()}
+                            width={this.props.width}
+                            height={this.props.height}
                             onMouseDown={this._mouseHandler.mouseDown}
                             onMouseUp={this._mouseHandler.mouseUp}
                             onMouseMove={this._mouseHandler.mouseMove}
@@ -270,3 +245,8 @@ export default class CanvasWidget extends Component {
 function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
+
+function cloneSimpleArray(x) {
+    return x.slice(0);
+}
+

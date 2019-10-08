@@ -1,14 +1,47 @@
 {
+    "widget5": {
+        "type": "TimeseriesView",
+        "key": "TimeseriesView",
+        "props": {
+            "title": "Timeseries view",
+            "recording": {
+                "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
+                "samplerate": 30000,
+                "download_from": "spikeforest.public"
+            }
+        }
+    },
+    "widget6": {
+        "type": "ElectrodeGeometry",
+        "props": {
+            "title": "Electrode geometry from geom.csv",
+            "path": "sha1dir://0ba09f6658e767d4e70055773805a8d939a9a4c6.paired_mea64c/20160415_patch2/geom.csv",
+            "download_from": "spikeforest.public"
+        }
+    },
     "widget": {
         "type": "TimeseriesView",
         "key": "LFP",
         "props": {
             "title": "LFP test",
             "recording": "test",
-            "initial_y_scale_factor": 3
+            "initial_y_scale_factor": 3,
+            "height": 900
         }
     },
-    "widget2": {
+    "widget3": {
+        "type": "SpikeRasterPlot",
+        "key": "SpikeRasterPlot",
+        "props": {
+            "title": "Raster plot",
+            "sorting": {
+                "path": "sha1dir://b1618868a12e92d8fb5df2b60b34dc0716a40552.manual_franklab/tetrode_600s/sorter1_1/firings_true.mda",
+                "samplerate": 30000,
+                "download_from": "spikeforest.public"
+            }
+        }
+    },
+    "widget4": {
         "type": "Gallery",
         "title": "Gallery",
         "key": "Gallery",

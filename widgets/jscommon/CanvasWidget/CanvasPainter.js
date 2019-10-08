@@ -9,11 +9,11 @@ export function CanvasPainter(context2d, canvasLayer) {
     let m_height = 0;
     let m_use_coords = false;
 
-    this.pen = function () { return clone(m_pen); };
+    this.pen = function () { return shallowClone(m_pen); };
     this.setPen = function (pen) { setPen(pen); };
-    this.font = function () { return clone(m_font); };
+    this.font = function () { return shallowClone(m_font); };
     this.setFont = function (font) { setFont(font); };
-    this.brush = function () { return clone(m_brush); };
+    this.brush = function () { return shallowClone(m_brush); };
     this.setBrush = function (brush) { setBrush(brush); };
     this.useCoords = function() { m_use_coords = true; };
     this.usePixels = function() { m_use_coords = false; };
@@ -194,15 +194,15 @@ export function CanvasPainter(context2d, canvasLayer) {
     }
 
     function setPen(pen) {
-        m_pen = clone(pen);
+        m_pen = shallowClone(pen);
     }
 
     function setFont(font) {
-        m_font = clone(font);
+        m_font = shallowClone(font);
     }
 
     function setBrush(brush) {
-        m_brush = clone(brush);
+        m_brush = shallowClone(brush);
     }
 
     function to_color(col) {
@@ -333,44 +333,70 @@ export function MouseHandler() {
     let m_drag_anchor = null;
     let m_drag_pos = null;
     let m_drag_rect = null;
+    let m_last_report_drag = new Date();
+    let m_scheduled_report_drag_X = null;
 
     function report(name, X) {
+        if (name == 'drag') {
+            let elapsed = (new Date()) - m_last_report_drag;
+            if (elapsed < 50) {
+                schedule_report_drag(X, 50 - elapsed + 10);
+                return;
+            }
+            m_last_report_drag = new Date();
+        }
         for (let i in m_handlers[name]) {
             m_handlers[name][i](X);
         }
         drag_functionality(name, X);
     }
 
+    function schedule_report_drag(X, timeout) {
+        if (m_scheduled_report_drag_X) {
+            m_scheduled_report_drag_X = X;
+            return;
+        }
+        else {
+            m_scheduled_report_drag_X = X;
+            setTimeout(() => {
+                let X2 = m_scheduled_report_drag_X;
+                m_scheduled_report_drag_X = null;
+                report('drag', X2);
+            }, timeout)
+        }
+        
+    }
+
     function drag_functionality(name, X) {
         if (name == 'press') {
             m_dragging = false;
-            m_drag_anchor = clone(X.pos);
+            m_drag_anchor = cloneSimpleArray(X.pos);
             m_drag_pos = null;
         }
         else if (name == 'release') {
             if (m_dragging) {
-                report('drag_release', { anchor: clone(m_drag_anchor), pos: clone(m_drag_pos), rect: clone(m_drag_rect) });
+                report('drag_release', { anchor: cloneSimpleArray(m_drag_anchor), pos: cloneSimpleArray(m_drag_pos), rect: cloneSimpleArray(m_drag_rect) });
             }
             m_dragging = false;
         }
         if ((name === 'move') && (X.buttons === 1)) {
             // move with left button
             if (m_dragging) {
-                m_drag_pos = clone(X.pos);
+                m_drag_pos = cloneSimpleArray(X.pos);
             }
             else {
                 if (!m_drag_anchor) {
-                    m_drag_anchor = clone(X.pos);
+                    m_drag_anchor = cloneSimpleArray(X.pos);
                 }
                 const tol = 4;
                 if ((Math.abs(X.pos[0] - m_drag_anchor[0]) > tol) || (Math.abs(X.pos[1] - m_drag_anchor[1]) > tol)) {
                     m_dragging = true;
-                    m_drag_pos = clone(X.pos);
+                    m_drag_pos = cloneSimpleArray(X.pos);
                 }
             }
             if (m_dragging) {
                 m_drag_rect = [Math.min(m_drag_anchor[0], m_drag_pos[0]), Math.min(m_drag_anchor[1], m_drag_pos[1]), Math.abs(m_drag_pos[0] - m_drag_anchor[0]), Math.abs(m_drag_pos[1] - m_drag_anchor[1])];
-                report('drag', { anchor: clone(m_drag_anchor), pos: clone(m_drag_pos), rect: clone(m_drag_rect) });
+                report('drag', { anchor: cloneSimpleArray(m_drag_anchor), pos: cloneSimpleArray(m_drag_pos), rect: cloneSimpleArray(m_drag_rect) });
             }
         }
     }
@@ -401,3 +427,12 @@ export function MouseHandler() {
 function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
+
+function shallowClone(obj) {
+    return Object.assign({}, obj);
+}
+
+function cloneSimpleArray(x) {
+    return x.slice(0);
+}
+

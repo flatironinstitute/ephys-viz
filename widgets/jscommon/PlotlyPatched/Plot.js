@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CanvasWidget from '../../jscommon/CanvasWidget';
+import CanvasWidget, { CanvasWidgetLayer } from '../../jscommon/CanvasWidget';
 import Plotly from './plotly.patched.min.js';
 import createPlotlyComponent from 'react-plotly.js/factory';
 const Plot = createPlotlyComponent(Plotly);
@@ -9,13 +9,16 @@ export default Plot;
 export class LightPlot extends CanvasWidget {
     constructor(props) {
         super(props);
-        this.plotLayer = this.addCanvasLayer(this.paintPlotLayer);
-        this.titleLayer = this.addCanvasLayer(this.paintTitleLayer);
+        this.state({
+            canvasWidth: 0,
+            canvasHeight: 0
+        })
+        this.plotLayer = new CanvasWidgetLayer(this.paintPlotLayer);
+        this.titleLayer = new CanvasWidgetLayer(this.paintTitleLayer);
     }
 
     componentDidMount() {
         this.updateSize();
-        this.initializeCanvasWidget();
     }
 
     componentWillUnmount() {
@@ -27,9 +30,9 @@ export class LightPlot extends CanvasWidget {
 
     updateSize() {
         const { data, layout } = this.props;
-        this.setCanvasSize(layout.width, layout.height);
         let margin = layout.margin || {};
-        this.setMargins(margin.l || 0, margin.r || 0, margin.t || 0, margin.b || 0);
+        this.plotLayer.setMargins(margin.l || 0, margin.r || 0, margin.t || 0, margin.b || 0);
+        this.titleLayer.setMargins(margin.l || 0, margin.r || 0, margin.t || 0, margin.b || 0);
 
         {
             let xmin, xmax;
@@ -53,7 +56,7 @@ export class LightPlot extends CanvasWidget {
                 xmin = layout.xaxis.range[0],
                 xmax = layout.xaxis.range[1]
             }
-            this.setCoordXRange(xmin, xmax);
+            this.plotLayer.setCoordXRange(xmin, xmax);
         }
         {
             let ymin, ymax;
@@ -80,8 +83,12 @@ export class LightPlot extends CanvasWidget {
                 ymin = layout.yaxis.range[0],
                 ymax = layout.yaxis.range[1]
             }
-            this.setCoordYRange(ymin, ymax);
+            this.plotLayer.setCoordYRange(ymin, ymax);
         }
+        this.setState({
+            canvasWidth: layout.width,
+            canvasHeight: layout.height
+        });
     }
 
     paintPlotLayer = (painter) => {
@@ -145,12 +152,18 @@ export class LightPlot extends CanvasWidget {
         painter.clear();
 
         if (layout.title) {
-            painter.drawText([0, 0, this.width(), (layout.margin || {}).t || 0], {AlignBottom: true, AlignCenter: true}, layout.title);
+            painter.drawText([0, 0, this.titleLayer.width(), (layout.margin || {}).t || 0], {AlignBottom: true, AlignCenter: true}, layout.title);
         }
     }
 
     render() {
-        return this.renderCanvasWidget();
+        let layers = [
+            this.plotLayer,
+            this.titleLayer
+        ];
+        return <CanvasWidget
+            layers={layers}
+        />
     }
 }
 

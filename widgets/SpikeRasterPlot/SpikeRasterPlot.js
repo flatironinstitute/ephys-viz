@@ -42,15 +42,21 @@ class SpikeRasterPlotInner extends TimeWidget {
         this.updatePanels();
         this.initializeTimeWidget();
     }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         if (this.state.num_timepoints) {
             if (!this._initializedTimeRange) {
                 this.setTimeRange([0, this.state.num_timepoints]);
                 this._initializedTimeRange = true;
             }
         }
-        this.updatePanels();
-        this.updateTimeWidget();
+        if (
+            (this.props.width !== prevProps.width) ||
+            (this.props.height !== prevProps.height) ||
+            (this.state.spike_trains !== prevState.spike_trains)
+        ) {
+            this.updatePanels();
+            this.updateTimeWidget();
+        }
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import CanvasWidget from '../jscommon/CanvasWidget';
+import CanvasWidget, { CanvasWidgetLayer } from '../jscommon/CanvasWidget';
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
 const stable_stringify = require('json-stable-stringify');
 
@@ -13,7 +13,7 @@ export default class ElectrodeGeometryWidget extends Component {
     }
 }
 
-class ElectrodeGeometryWidgetInner extends CanvasWidget {
+class ElectrodeGeometryWidgetInner extends Component {
     constructor(props) {
         super(props);
         this.xmin = 0;
@@ -25,22 +25,17 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.dragSelectRect = null;
 
         this.state = {
-            hoveredElectrodeIds: {}
+            hoveredElectrodeIds: {},
+            _canvasWidth: 0,
+            _canvasHeight: 0
         }
 
-        this.mouseHandler().onMousePress(this.handleMousePress);
-        this.mouseHandler().onMouseRelease(this.handleMouseRelease);
-        this.mouseHandler().onMouseMove(this.handleMouseMove);
-        this.mouseHandler().onMouseDrag(this.handleMouseDrag);
-        this.mouseHandler().onMouseDragRelease(this.handleMouseDragRelease);
-
-        this.dragSelectLayer = this.addCanvasLayer(this.paintDragSelect);
-        this.mainLayer = this.addCanvasLayer(this.paintMainLayer);
+        this.dragSelectLayer = new CanvasWidgetLayer(this.paintDragSelect);
+        this.mainLayer = new CanvasWidgetLayer(this.paintMainLayer);
     }
 
     componentDidMount() {
         this.computeSize();
-        this.initializeCanvasWidget();
     }
 
     componentWillUnmount() {
@@ -56,10 +51,10 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
             (this.props.maxHeight != prevProps.maxHeight)
         ) {
             this.computeSize();
-            this.repaint();
+            this.mainLayer.repaint();
         }
         else {
-            this.repaint();
+            this.mainLayer.repaint();
         }
     }
 
@@ -97,7 +92,10 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
             H = maxHeight;
             W = w0 * H / h0;
         }
-        this.setCanvasSize(W, H);
+        this.setState({
+            _canvasWidth: W,
+            _canvasHeight: H
+        });
     }
 
     paintDragSelect = (painter) => {
@@ -126,8 +124,8 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
     paintMainLayer = (painter) => {
         let ids = this.ids();
 
-        const W = this.canvasWidgetWidth();
-        const H = this.canvasWidgetHeight();
+        const W = this.state._canvasWidth;
+        const H = this.state._canvasHeight;
 
         painter.clearRect(0, 0, W, H);
 
@@ -192,7 +190,7 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
         this.xmin = xmin; this.xmax = xmax;
         this.ymin = ymin; this.ymax = ymax;
 
-        this.transpose = (this.ymax - this.ymin > this.xmax - this.xmin);
+        // this.transpose = (this.ymax - this.ymin > this.xmax - this.xmin);
 
         let mindists = [];
         for (var i in this.props.locations) {
@@ -381,8 +379,19 @@ class ElectrodeGeometryWidgetInner extends CanvasWidget {
                 <div>Not found.</div>
             </span>
         }
-
-        return this.renderCanvasWidget();
+        let layers = [
+            this.dragSelectLayer,
+            this.mainLayer
+        ];
+        return <CanvasWidget
+            layers={layers}
+            width={this.state._canvasWidth}
+            height={this.state._canvasHeight}
+            onMousePress={this.handleMousePress}
+            onMouseRelease={this.handleMouseRelease}
+            onMouseDrag={this.handleMouseDrag}
+            onMouseDragRelease={this.handleMouseDragRelease}
+        />;
     }
 }
 

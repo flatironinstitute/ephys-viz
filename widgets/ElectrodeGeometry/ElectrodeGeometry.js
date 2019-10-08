@@ -42,10 +42,20 @@ export default class ElectrodeGeometry extends Component {
                 status_message: 'Insufficient props'
             });
         }
+        if (this.props.selectedElectrodeIds) {
+            this.setState({
+                selectedElectrodeIds: this.props.selectedElectrodeIds
+            });
+        }
         this.sync = new Sync(this, props.sync);
         this.sync.start();
     }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
+        if (this.props.selectedElectrodeIds != prevProps.selectedElectrodeIds) {
+            this.setState({
+                selectedElectrodeIds: this.props.selectedElectrodeIds
+            });
+        }
         this.sync.update();
     }
     componentWillUnmount() {
@@ -53,6 +63,12 @@ export default class ElectrodeGeometry extends Component {
             this.pythonInterface.stop();
         }
         this.sync.stop();
+    }
+    _handleSelectedElectrodeIdsChanged = (ids) => {
+        this.setState({
+            selectedElectrodeIds: ids
+        });
+        this.props.onSelectedElectrodeIdsChanged && this.props.onSelectedElectrodeIdsChanged(ids);
     }
     render() {
         const { locations, ids, currentElectrodeId, selectedElectrodeIds } = this.state;
@@ -65,7 +81,7 @@ export default class ElectrodeGeometry extends Component {
                     currentElectrodeId={currentElectrodeId}
                     selectedElectrodeIds={selectedElectrodeIds}
                     onCurrentElectrodeIdChanged={(id) => {this.setState({currentElectrodeId: id})}}
-                    onSelectedElectrodeIdsChanged={(ids) => {this.setState({selectedElectrodeIds: ids})}}
+                    onSelectedElectrodeIdsChanged={this._handleSelectedElectrodeIdsChanged}
                 />
             </RespectStatus>
         )

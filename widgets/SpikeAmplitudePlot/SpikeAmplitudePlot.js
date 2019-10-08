@@ -88,7 +88,7 @@ class SpikeAmplitudePlotInner extends TimeWidget {
         this._mainPanel = this.addPanel(this.paintMainPanel, {label: null});
         this._updateAmpRange();
     }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         if (this.state.spike_trains) {
             for (let id in this.state.spike_trains) {
                 this.retrievedSpikeTrains[id] = this.state.spike_trains[id];
@@ -101,8 +101,15 @@ class SpikeAmplitudePlotInner extends TimeWidget {
                 unit_ids: unit_ids_to_compute
             });
         }
-        this._updateAmpRange();
-        this.updateTimeWidget();
+        if (
+            (this.props.width !== prevProps.width) ||
+            (this.props.height !== prevProps.height) ||
+            (this.state.spike_trains !== prevState.spike_trains) ||
+            (this.state.spike_amplitudes !== prevState.spike_amplitudes)
+        ) {
+            this._updateAmpRange();
+            this.updateTimeWidget();
+        }
     }
     componentWillUnmount() {
         this.pythonInterface.stop();

@@ -46,10 +46,15 @@ class TimeseriesView:
             vv = np.percentile(np.abs(traces0), 90)
             y_scale_factor = 1 / (8 * vv) if vv > 0 else 1
             self._segment_size = int(np.ceil(self._segment_size_times_num_channels / self._recording.get_num_channels()))
+            try:
+                channel_locations = self._recording.get_channel_locations()
+            except:
+                channel_locations = None
             self.set_state(dict(
                 num_channels=self._recording.get_num_channels(),
-                num_timepoints=self._recording.get_num_frames(),
                 channel_ids=self._recording.get_channel_ids(),
+                channel_locations=channel_locations,
+                num_timepoints=self._recording.get_num_frames(),
                 y_offsets=y_offsets,
                 y_scale_factor=y_scale_factor,
                 samplerate=self._recording.get_sampling_frequency(),

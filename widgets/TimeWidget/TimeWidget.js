@@ -1,61 +1,93 @@
 import React, { Component } from 'react';
-import { Toolbar, IconButton } from '@material-ui/core';
-import { FaSearchMinus, FaSearchPlus, FaArrowUp, FaArrowDown, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import CanvasWidget from '../jscommon/CanvasWidget';
+import CanvasWidget, { CanvasWidgetLayer } from '../jscommon/CanvasWidget';
+import TimeWidgetBottomBar from './TimeWidgetBottomBar';
+import TimeWidgetToolBar from './TimeWidgetToolBar';
+import SpanWidget from './SpanWidget';
+import Splitter from './Splitter';
 export { PainterPath } from '../jscommon/CanvasWidget';
 
-export default class TimeWidget extends CanvasWidget {
+function g_elapsed() {
+    return (new Date()) - 0;
+}
+
+export default class TimeWidget extends Component {
     constructor(props) {
         super(props);
-        this.state = this.state || {};
-        this.state._statusBarText = '';
+        this.state = {
+            bottomBarInfo: {show: true},
+            spanWidgetInfo: {}
+        };
 
-        this._panels = [];
-        this._timeRange = [0, 1000];
-        this._timeRangeChangedHandlers = [];
-        this._currentTime = null;
         this._anchorTimeRange = null;
         this._dragging = false;
-        this._customActions = [];
-        this._toolbarHeight = 50;
-        this._statusBarHeight = 0;
+        this._toolbarWidth = 50;
+        this._spanWidgetHeight = 50;
+        this._bottomBarHeight = 0;
         this._paintPanelIndex = 0;
         this._paintPanelCode = 0;
-        this._maxTimeSpan = null
+        this._statusText = '';
+        this._timeRange = [0, 1000];
+        this._currentTime = null;
 
-        this.mouseHandler().onMousePress(this.handle_mouse_press);
-        this.mouseHandler().onMouseRelease(this.handle_mouse_release);
-        this.mouseHandler().onMouseDrag(this.handle_mouse_drag);
-        this.mouseHandler().onMouseDragRelease(this.handle_mouse_drag_release);
+        this._timeAxisLayer = new CanvasWidgetLayer(this.paintTimeAxisLayer);
+        this._mainLayer = new CanvasWidgetLayer(this.paintMainLayer);
+        this._cursorLayer = new CanvasWidgetLayer(this.paintCursorLayer);
+        this._panelLabelLayer = new CanvasWidgetLayer(this.paintPanelLabelLayer);
 
-        this.onKeyPress(this.handle_key_press);
-    }
-    initializeTimeWidget() {
-        this._timeAxisLayer = this.addCanvasLayer(this.paintTimeAxisLayer);
-        this._mainLayer = this.addCanvasLayer(this.paintMainLayer);
-        this._cursorLayer = this.addCanvasLayer(this.paintCursorLayer);
-        this._panelLabelLayer = this.addCanvasLayer(this.paintPanelLabelLayer);
+        this._allLayers = [
+            this._timeAxisLayer,
+            this._mainLayer,
+            this._cursorLayer,
+            this._panelLabelLayer
+        ];
 
-        this._mainLayer.setMargins(50, 10, 15, 50);
         this._cursorLayer.setMargins(50, 10, 15, 50);
-
-        this.initializeCanvasWidget();
-        this.updateTimeWidget();
     }
-    updateTimeWidget() {
-        this.setCanvasSize(this.props.width, this.props.height - this._toolbarHeight - this._statusBarHeight);
+    componentDidMount() {
+        this.props.registerRepainter && this.props.registerRepainter(() => {this._mainLayer.repaint()});
+        this._updateInfo();
+        if (this.props.currentTime !== undefined) {
+            this._currentTime = this.props.currentTime;            
+        }
+        if (this.props.timeRange !== undefined) {
+            this.setTimeRange(this.props.timeRange);
+        }
+        this.updateLayout();
+    }
+    componentDidUpdate(prevProps) {
+        if (this.props.currentTime != prevProps.currentTime) {
+            this.setCurrentTime(this.props.currentTime);
+        }
+        if (this.props.timeRange != prevProps.timeRange) {
+            this.setTimeRange(this.props.timeRange);
+        }
+        this._updateInfo();
+        this.updateLayout();
     }
     paintMainLayer = (painter) => {
         this._paintPanelIndex = 0;
         this._paintPanelCode++;
         painter.clear();
         painter.useCoords();
-        this.setCoordXRange(0, 1);
-        this.setCoordYRange(0, 1);
+        this._mainLayer.setCoordXRange(0, 1);
+        this._mainLayer.setCoordYRange(0, 1);
+        this._mainLayer.setMargins(50, 10, 15, 50);
         painter.setPen({color: 'gray'});
         painter.drawLine(0, 0, 0, 1);
         painter.drawLine(1, 0, 1, 1);
         painter.drawLine(0, 1, 1, 1);
+
+        // Keep this for highlighting spike raster plots
+        // // highlight selected
+        // for (let panel of this.props.panels) {
+        //     if (panel.selected()) {
+        //         console.log('---- selected', panel.label());
+        //         this._mainLayer.setMargins(50, 15, panel._yRange[0], this._mainLayer.height() - panel._yRange[1]);
+        //         this._mainLayer.setCoordXRange(0, 1);
+        //         this._mainLayer.setCoordYRange(0, 1);
+        //         painter.fillRect(0, 0, 1, 1, 'yellow');
+        //     }
+        // }
 
         this._paintPanels(painter, this._paintPanelCode);
     }
@@ -65,11 +97,13 @@ export default class TimeWidget extends CanvasWidget {
             // we have started a new painting
             return;
         }
-        const indexPermutation = _getIndexPermutation(this._panels.length);
+        const panels = this.props.panels;
+        const indexPermutation = _getIndexPermutation(panels.length);
         let timer = new Date();
-        while (this._paintPanelIndex < this._panels.length) {
-            const panel = this._panels[indexPermutation[this._paintPanelIndex]];
-            this.setCoordXRange(this._timeRange[0], this._timeRange[1]);
+        while (this._paintPanelIndex < panels.length) {
+            const panel = panels[indexPermutation[this._paintPanelIndex]];
+            this._mainLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
+            this._mainLayer.setMargins(50, 15, panel._yRange[0], this._mainLayer.height() - panel._yRange[1]);
             // v1=-1 => y1
             //  v2=1 => y2
             // (v1-a) / (b-a) * H = y1
@@ -79,21 +113,24 @@ export default class TimeWidget extends CanvasWidget {
             // (v2 - v1) = (y2-y1)/H * (b-a)
             // b-a = (v2-v1) / (y2-y1) * H
             // a = v1 - y1/H*(b-a)
-            let v1 = panel._coordYRange[0];
-            let v2 = panel._coordYRange[1];
-            let b_minus_a = (v2 - v1) / (panel._yRange[1] - panel._yRange[0]) * this.props.height;
-            let a = v1 - panel._yRange[0] * b_minus_a / this.props.height;
-            let b = a + b_minus_a;
 
-            this.setCoordYRange(a, b);
-            panel.paint(painter);
+            // let v1 = panel._coordYRange[0];
+            // let v2 = panel._coordYRange[1];
+            // let b_minus_a = (v2 - v1) / (panel._yRange[1] - panel._yRange[0]) * (this.props.height - this._spanWidgetHeight - this._bottomBarHeight);
+            // let a = v1 - panel._yRange[0] * b_minus_a / (this.props.height - this._spanWidgetHeight - this._bottomBarHeight);
+            // let b = a + b_minus_a;
+
+            //this._mainLayer.setCoordYRange(a, b);
+            this._mainLayer.setCoordYRange(panel._coordYRange[0], panel._coordYRange[1]);
+            // console.log('--- paint panel', panel, a, b, this._timeRange[0], this._timeRange[1]);
+            panel.paint(painter, clone(this._timeRange));
             this._paintPanelIndex++;
 
             let elapsed = (new Date()) - timer;
             if (elapsed > 200) {
                 setTimeout(() => {
                     this._paintPanels(painter, paintPanelCode);
-                }, 1);
+                }, 100);
                 return;
             }
         }
@@ -101,8 +138,8 @@ export default class TimeWidget extends CanvasWidget {
     paintCursorLayer = (painter) => {
         painter.clear();
 
-        this.setCoordXRange(this._timeRange[0], this._timeRange[1]);
-        this.setCoordYRange(0, 1);
+        this._cursorLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
+        this._cursorLayer.setCoordYRange(0, 1);
         painter.useCoords();
 
         if (this._currentTime !== null) {
@@ -113,8 +150,8 @@ export default class TimeWidget extends CanvasWidget {
         }
     }
     paintTimeAxisLayer = (painter) => {
-        let W = this.canvasWidgetWidth();
-        let H = this.canvasWidgetHeight();
+        let W = this._timeAxisLayer.width();
+        let H = this._timeAxisLayer.height();
         this._timeAxisLayer.setMargins(50, 10, H-50, 0);
         this._timeAxisLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
         this._timeAxisLayer.setCoordYRange(0, 1);
@@ -122,14 +159,13 @@ export default class TimeWidget extends CanvasWidget {
         painter.useCoords();
         painter.setPen({color: 'rgb(22, 22, 22)'});
         painter.drawLine(this._timeRange[0], 1, this._timeRange[1], 1);
-        let samplerate = 30000; //fix this
+        let samplerate = this.props.samplerate;
         let ticks = get_ticks(this._timeRange[0], this._timeRange[1], W, samplerate);
         for (let tick of ticks) {
             if (!tick.scale_info) {
                 painter.drawLine(tick.t, 1, tick.t, 1 - tick.height);
             }
-            else {
-                let info = tick;
+            else {                let info = tick;
                 painter.drawLine(info.t1, 0.45, info.t2, 0.45);
                 painter.drawLine(info.t1, 0.45, info.t1, 0.5);
                 painter.drawLine(info.t2, 0.45, info.t2, 0.5);
@@ -140,16 +176,18 @@ export default class TimeWidget extends CanvasWidget {
         }
     }
     paintPanelLabelLayer = (painter) => {
-        let W = this.canvasWidgetWidth();
-        let H = this.canvasWidgetHeight();
+        let W = this._mainLayer.width();
+        let H = this._mainLayer.height();
         
         painter.clear();
         painter.useCoords();
 
-        for (let i = 0; i < this._panels.length; i++) {
-            let panel = this._panels[i];
-            let p1 = i / this._panels.length;
-            let p2 = (i + 1) / this._panels.length;
+        const panels = this.props.panels;
+
+        for (let i = 0; i < panels.length; i++) {
+            let panel = panels[i];
+            let p1 = i / panels.length;
+            let p2 = (i + 1) / panels.length;
             this._panelLabelLayer.setMargins(0, W - 50, 15 + (H - 50 - 15) * p1, H - (15 + (H - 50 - 15) * p2));
             this._panelLabelLayer.setCoordXRange(0, 1);
             this._panelLabelLayer.setCoordYRange(0, 1);
@@ -159,17 +197,8 @@ export default class TimeWidget extends CanvasWidget {
             panel._opts.label + '' && painter.drawText(rect, alignment, panel._opts.label + '');
         }
     }
-    addAction(action, opts) {
-        this._customActions.push({
-            action: action,
-            opts: opts
-        });
-    }
-    currentTime() {
-        return this._currentTime;
-    }
     numTimepoints() {
-        return this.props.num_timepoints || this.state.num_timepoints;
+        return this.props.numTimepoints;
     }
     setCurrentTime(t) {
         if (t < 0) t = 0;
@@ -179,9 +208,14 @@ export default class TimeWidget extends CanvasWidget {
             return;
         this._currentTime = t;
         this._cursorLayer.repaint();
+        this._updateInfo();
+        this.props.onCurrentTimeChanged && this.props.onCurrentTimeChanged(t);
     }
-    setMaxTimeSpan(val) {
-        this._maxTimeSpan = Math.ceil(val)
+    setStatusText(txt) {
+        if (txt != this._statusText) {
+            this._statusText = txt;
+            this._updateInfo();
+        }
     }
     setTimeRange(trange) {
         let tr = clone(trange);
@@ -198,65 +232,89 @@ export default class TimeWidget extends CanvasWidget {
         if (tr[1] >= this.numTimepoints()) {
             tr[1] = this.numTimepoints() - 1;
         }
-        if (this._maxTimeSpan) {
-            if (tr[1] - tr[0] > this._maxTimeSpan) {
+        if (this.props.maxTimeSpan) {
+            if (tr[1] - tr[0] > this.props.maxTimeSpan) {
                 return;
-                // tr[0] = Math.max(0, Math.floor((tr[0] + tr[1]) / 2 - this._maxTimeSpan / 2));
-                // tr[1] = tr[0] + this._maxTimeSpan;
+                // tr[0] = Math.max(0, Math.floor((tr[0] + tr[1]) / 2 - this.props.maxTimeSpan / 2));
+                // tr[1] = tr[0] + this.props.maxTimeSpan;
             }
         }
-        if ((this._timeRange[0] === tr[0]) && (this._timeRange[1] === tr[1]))
+        if ((this._timeRange[0] === tr[0]) && (this._timeRange[1] === tr[1])) {
             return;
-        this._timeRange = tr;
-        for (let handler of this._timeRangeChangedHandlers) {
-            handler();
         }
-        this.repaint();        
-    }
-    timeRange() {
-        return [this._timeRange[0], this._timeRange[1]];
-    }
-    onTimeRangeChanged(handler) {
-        this._timeRangeChangedHandlers.push(handler);
-    }
-    clearPanels() {
-        this._panels = [];
-        this.updateLayout();
-    }
-    addPanel(onPaint, opts) {
-        let panel = new TimeWidgetPanel(onPaint, opts);
-        this._panels.push(panel);
-        this.updateLayout();
-        return panel;
+        this._timeRange = tr;
+        // this._timeAxisLayer.repaintImmediate();
+        this._repaintAllLayers();
+        this._updateInfo();
+        this.props.onTimeRangeChanged && this.props.onTimeRangeChanged(tr);
     }
     updateLayout() {
-        let H0 = this.props.height;
-        let panelHeight = H0 / this._panels.length;
-        let y0 = 0;
-        for (let panel of this._panels) {
+        const panels = this.props.panels;
+        let H0 = this.props.height - this._spanWidgetHeight - this._bottomBarHeight - 10 - 50;
+        let panelHeight = H0 / panels.length;
+        let y0 = 10;
+        for (let panel of panels) {
             panel.setYRange(y0, y0+panelHeight);
             y0 += panelHeight;
         }
+        this._updateInfo();
     }
     pixToTime(pix) {
         let coords = this._mainLayer.pixToCoords(pix);
         return coords[0];
     }
-    setStatusBarText(txt) {
-        if (this.state._statusBarText === txt)
-            return;
-        this.setState({
-            _statusBarText: txt
-        });
-        let height = txt ? 40 : 0;
-        if (height !== this._statusBarHeight) {
-            this._statusBarHeight = height;
-            this.updateTimeWidget();
+    _repaintAllLayers = () => {
+        for (let L of this._allLayers) {
+            L.repaint();
+        }
+    }
+    _updateSpanWidgetInfo() {
+        let info = {
+            numTimepoints: this.numTimepoints(),
+            currentTime: this._currentTime,
+            timeRange: clone(this._timeRange),
+            samplerate: this.props.samplerate,
+            statusText: this._statusText
+        };
+        this._setSpanWidgetInfo(info);
+    }
+    _setSpanWidgetInfo(info) {
+        if (JSON.stringify(info) != JSON.stringify(this.state.spanWidgetInfo)) {
+            this.setState({
+                spanWidgetInfo: info
+            });
+        }
+    }
+    _updateInfo() {
+        this._updateBottomBarInfo();
+        this._updateSpanWidgetInfo();
+    }
+    _updateBottomBarInfo() {
+        let info = {
+            show: true,
+            currentTime: this._currentTime,
+            timeRange: clone(this._timeRange),
+            samplerate: this.props.samplerate,
+            statusText: this._statusText
+        };
+        this._setBottomBarInfo(info);
+    }
+    _setBottomBarInfo(info) {
+        if (JSON.stringify(info) != JSON.stringify(this.state.bottomBarInfo)) {
+            this.setState({
+                bottomBarInfo: info
+            });
+        }
+        let height = info.show ? 40 : 0;
+        if (height !== this._bottomBarHeight) {
+            this._bottomBarHeight = height;
+            this._updateInfo();
         }
     }
     handle_mouse_press = (X) => {
         let t = this.pixToTime(X.pos);
         this._anchorTimeRange = clone(this._timeRange);
+        this._dragging = false;
     }
 
     handle_mouse_release = (X) => {
@@ -267,6 +325,7 @@ export default class TimeWidget extends CanvasWidget {
     }
 
     handle_mouse_drag = (X) => {
+        if (!this._anchorTimeRange) return;
         this._dragging = true;
         let t1 = this.pixToTime(X.anchor);
         let t2 = this.pixToTime(X.pos);
@@ -281,9 +340,9 @@ export default class TimeWidget extends CanvasWidget {
     }
 
     handle_key_press = (event) => {
-        for (let a of this._customActions) {
-            if (a.opts.key === event.keyCode) {
-                a.action();
+        for (let a of this.props.actions || []) {
+            if (a.key === event.keyCode) {
+                a.callback();
                 event.preventDefault();
                 return false;
             }
@@ -332,96 +391,128 @@ export default class TimeWidget extends CanvasWidget {
         let t2 = anchor_time + (old_t2 - anchor_time) / factor;
         this.setTimeRange([t1, t2]);
     }
+    ensureCurrentTimeVisibleByChangingTimeRange = () => {
+        if (this._currentTime === null)
+            return;
+        if ((this._timeRange[0] < this._currentTime) && (this._currentTime < this._timeRange[1]))
+            return;
+        const span = this._timeRange[1] - this._timeRange[0];
+        let tr = [this._currentTime - span / 2, this._currentTime + span / 2];
+        this.setTimeRange(tr);
+    }
 
-    renderTimeWidget() {
+    ensureCurrentTimeVisibleByChangingCurrentTime = () => {
+        if (this._currentTime === null)
+            return;
+        if ((this._timeRange[0] < this._currentTime) && (this._currentTime < this._timeRange[1]))
+            return;
+        let t = (this._timeRange[0] + this._timeRange[1]) / 2;
+        this.setCurrentTime(t);
+    }
+
+    render() {
+        let layers = this._allLayers;
+        let innerContainer = (
+            <InnerContainer>
+                <SpanWidget
+                    width={this.props.width}
+                    height={this._spanWidgetHeight}
+                    info={this.state.spanWidgetInfo || {}}
+                    onCurrentTimeChanged={(t) => {this.setCurrentTime(t); this.ensureCurrentTimeVisibleByChangingTimeRange();}}
+                    onTimeRangeChanged={(tr) => {if (tr) {this.setTimeRange(tr); this.ensureCurrentTimeVisibleByChangingCurrentTime();}}}
+                />
+                <CanvasWidget
+                    layers={layers}
+                    width={this.props.width}
+                    height={this.props.height - this._spanWidgetHeight - this._bottomBarHeight}
+                    onMousePress={this.handle_mouse_press}
+                    onMouseRelease={this.handle_mouse_release}
+                    onMouseDrag={this.handle_mouse_drag}
+                    onMouseDragRelease={this.handle_mouse_drag_release}
+                    onKeyPress={this.handle_key_press}
+                />
+                <TimeWidgetBottomBar
+                    width={this.props.width}
+                    height={this._bottomBarHeight}
+                    info={this.state.bottomBarInfo || {}}
+                    onCurrentTimeChanged={(t) => {this.setCurrentTime(t); this.ensureCurrentTimeVisibleByChangingTimeRange();}}
+                    onTimeRangeChanged={(tr) => {if (tr) {this.setTimeRange(tr); this.ensureCurrentTimeVisibleByChangingCurrentTime();}}}
+                />
+            </InnerContainer>
+        );
+        let leftPanel = this.props.leftPanel
         return (
-            <div>
+            <OuterContainer
+                width={this.props.width}
+                height={this.props.height}
+            >
                 <TimeWidgetToolBar
-                    width={this.canvasWidgetWidth()}
-                    height={this._toolbarHeight}
+                    width={this._toolbarWidth}
+                    height={this.props.height}
+                    top={this._spanWidgetHeight}
                     onZoomIn={() => {this.zoomTime(1.15)}}
                     onZoomOut={() => {this.zoomTime(1 / 1.15)}}
                     onShiftTimeLeft={() => {this.handle_key_left()}}
                     onShiftTimeRight={() => {this.handle_key_right()}}
-                    customActions={this._customActions}
+                    customActions={this.props.actions || []}
                 />
-                {this.renderCanvasWidget()}
-                <TimeWidgetStatusBar
-                    width={this.canvasWidgetWidth()}
-                    height={this._statusBarHeight}
-                    text={this.state._statusBarText}
-                />
-            </div>
+                <Splitter
+                    width={this.props.width - this._toolbarWidth}
+                    height={this.props.height}
+                    left={this._toolbarWidth}
+                >
+                    {
+                        leftPanel ? (
+                            [leftPanel, innerContainer]
+                        ) : (
+                            innerContainer
+                        )
+                    }
+                </Splitter>
+            </OuterContainer>
         );
     }
 }
 
-class TimeWidgetToolBar extends Component {
+class InnerContainer extends Component {
     render() {
-        const style0 = {
-            position: 'relative',
+        let style0 = {
+            position: 'absolute',
+            left: this.props.left || 0,
+            top: 0,
             width: this.props.width,
             height: this.props.height
-        };
-        let buttons = [];
-        buttons.push({
-            title: "Time zoom out (-)",
-            onClick: this.props.onZoomOut,
-            icon: <FaSearchMinus />
-        });
-        buttons.push({
-            title: "Time zoom in (+)",
-            onClick: this.props.onZoomIn,
-            icon: <FaSearchPlus />
-        });
-        buttons.push({
-            title: "Shift time left [left arrow]",
-            onClick: this.props.onShiftTimeLeft,
-            icon: <FaArrowLeft />
-        });
-        buttons.push({
-            title: "Shift time right [right arrow]",
-            onClick: this.props.onShiftTimeRight,
-            icon: <FaArrowRight />
-        });
-        for (let a of this.props.customActions) {
-            buttons.push({
-                title: a.opts.title,
-                onClick: a.action,
-                icon: a.opts.icon
-            });
         }
         return (
             <div style={style0}>
-                <Toolbar style={{minHeight: this.props.height}}>
-                    {
-                        buttons.map((button) => (
-                            <IconButton title={button.title} onClick={button.onClick} key={button.title}>
-                                {button.icon}
-                            </IconButton>
-                        ))
-                    }
-                </Toolbar>
+                {
+                    this.props.children.map((child, ii) => (
+                        <child.type key={ii} {...child.props} width={this.props.width} />
+                    ))
+                }
             </div>
-            
-        );
+        )
     }
 }
 
-class TimeWidgetStatusBar extends Component {
+class OuterContainer extends Component {
     render() {
-        const style0 = {
-            position: 'relative',
+        let style0 = {
+            position: 'absolute',
+            left: 0,
+            top: 0,
             width: this.props.width,
             height: this.props.height
-        };
+        }
         return (
             <div style={style0}>
-                {this.props.text}
+                {this.props.children}
             </div>
-        );
+        )
     }
 }
+
+
 
 function get_ticks(t1, t2, width, samplerate) {
 
@@ -531,7 +622,7 @@ function get_ticks(t1, t2, width, samplerate) {
     return ticks2;
 }
 
-class TimeWidgetPanel {
+export class TimeWidgetPanel {
     constructor(onPaint, opts) {
         this.onPaint = onPaint;
         this._opts = opts;
@@ -539,14 +630,20 @@ class TimeWidgetPanel {
         this._yRange = [0, 1];
         this._coordYRange = [-1, 1];
     }
+    selected() {
+        return this._opts.selected ? true : false;
+    }
+    label() {
+        return this._opts.label;
+    }
     setYRange(y1, y2) {
         this._yRange = [y1, y2];
     }
     setCoordYRange(y1, y2) {
         this._coordYRange = [y1, y2];
     }
-    paint(painter) {
-        this.onPaint(painter);
+    paint(painter, timeRange) {
+        this.onPaint(painter, timeRange);
     }
 }
 
