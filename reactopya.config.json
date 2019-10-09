@@ -1,6 +1,6 @@
 {
     "project_name": "ephys_viz",
-    "version": "0.8.5",
+    "version": "0.8.6",
     "description": "Neurophysiology visualization widgets",
     "author": "Jeremy Magland",
     "license": "Apache-2.0",
