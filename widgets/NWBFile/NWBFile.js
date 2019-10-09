@@ -4,6 +4,8 @@ import Accordion from '../Accordion/Accordion';
 import Tabs from '../Tabs/Tabs';
 import NWBBrowser from '../NWBBrowser/NWBBrowser';
 import Surface3d from '../Surface3d/Surface3d';
+import TimeseriesView from '../TimeseriesView/TimeseriesView';
+import SpikeRasterPlot from '../SpikeRasterPlot/SpikeRasterPlot';
 const config = require('./NWBFile.json');
 
 export default class NWBFile extends Component {
@@ -30,40 +32,69 @@ export default class NWBFile extends Component {
             path: this.props.path
         });
         this.pythonInterface.start();
-        this._updatePanels()
+        this._updateAccordionPanels()
     }
     componentDidUpdate(prevProps, prevState) {
         if (this.state.object !== prevState.object) {
-            this._updatePanels();
+            this._updateAccordionPanels();
         }
     }
     componentWillUnmount() {
         this.pythonInterface.stop();
     }
-    _updatePanels() {
+    _updateAccordionPanels() {
         const { object } = this.state;
         if (!object) return;
         let panels = [];
         panels.push({
-            label: 'Raw',
-            key: 'raw',
+            label: 'File hierarchy',
+            key: 'file-hierarchy',
             type: NWBBrowser,
             props: {
                 object: object
             }
         });
-        if (object.general.subject.cortical_surfaces) {
-            panels.push({
-                label: 'Cortical surfaces',
-                key: 'cortical-surfaces',
-                type: CorticalSurfaces,
-                props: {
-                    data: object.general.subject.cortical_surfaces,
-                    reactopyaParent: this,
-                    reactopyaChildId: 'cortical-surfaces'
-                }
-            })
+        if (propertyExists(object, '/processing/ecephys/LFP/lfp')) {
+            let LFP = object.processing.ecephys.LFP;
+            if (LFP.lfp) {
+                panels.push({
+                    label: 'LFP',
+                    key: 'lfp',
+                    type: TimeseriesView,
+                    props: {
+                        recording: {
+                            path: this.state.path,
+                            nwb_path: '/processing/ecephys/LFP/lfp'
+                        }
+                    }
+                });
+            }
         }
+        if (propertyExists(object, '/units/_datasets/spike_times')) {
+            panels.push({
+                label: 'Spike raster plot',
+                key: 'srp',
+                type: SpikeRasterPlot,
+                props: {
+                    sorting: {
+                        path: this.state.path,
+                        nwb_path: '/units'
+                    }
+                }
+            });
+        }
+        // if (object.general.subject.cortical_surfaces) {
+        //     panels.push({
+        //         label: 'Cortical surfaces',
+        //         key: 'cortical-surfaces',
+        //         type: CorticalSurfaces,
+        //         props: {
+        //             data: object.general.subject.cortical_surfaces,
+        //             reactopyaParent: this,
+        //             reactopyaChildId: 'cortical-surfaces'
+        //         }
+        //     })
+        // }
         this.setState({
             panels: panels
         });
@@ -81,7 +112,7 @@ export default class NWBFile extends Component {
                         >
                             {
                                 panels.map((panel) => (
-                                    <panel.type {...panel.props} key={panel.key} />
+                                    <panel.type {...panel.props} key={panel.key} reactopyaParent={this} reactopyaChildId={panel.key} />
                                 ))
                             }
                         </Accordion>
@@ -92,6 +123,23 @@ export default class NWBFile extends Component {
             </RespectStatus>
         )
     }
+}
+
+function propertyExists(obj, path) {
+    let list0 = path.split('/');
+    let list1 = [];
+    for (let val of list0)
+        if (val) list1.push(val);
+    return _propertyExists(obj, list1);
+}
+
+function _propertyExists(obj, keys) {
+    if (keys.length === 0) return false;
+    if (keys[0] in obj) {
+        if (keys.length === 1) return true;
+        return _propertyExists(obj[keys[0]], keys.slice(1));
+    }
+    else return false;    
 }
 
 class CorticalSurfaces extends Component {

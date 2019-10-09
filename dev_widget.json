@@ -1,5 +1,15 @@
 {
-    "widget5": {
+    "widget": {
+        "type": "NWBFile",
+        "key": "nwb-file",
+        "props": {
+            "title": "NWBFile",
+            "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
+            "altpath": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+            "download_from": "spikeforest.public"
+        }
+    },
+    "widget2": {
         "type": "TimeseriesView",
         "key": "TimeseriesView",
         "props": {
@@ -11,7 +21,7 @@
             }
         }
     },
-    "widget6": {
+    "widget3": {
         "type": "ElectrodeGeometry",
         "props": {
             "title": "Electrode geometry from geom.csv",
@@ -19,17 +29,21 @@
             "download_from": "spikeforest.public"
         }
     },
-    "widget": {
+    "widget4": {
         "type": "TimeseriesView",
         "key": "LFP",
         "props": {
             "title": "LFP test",
-            "recording": "test",
+            "recording": {
+                "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
+                "download_from": "spikeforest.public",
+                "nwb_path": "/processing/ecephys/LFP/lfp"
+            },
             "initial_y_scale_factor": 3,
             "height": 900
         }
     },
-    "widget3": {
+    "widget5a": {
         "type": "SpikeRasterPlot",
         "key": "SpikeRasterPlot",
         "props": {
@@ -41,7 +55,48 @@
             }
         }
     },
-    "widget4": {
+    "widget5b": {
+        "type": "SpikeRasterPlot",
+        "key": "SpikeRasterPlot",
+        "props": {
+            "title": "Raster plot",
+            "sorting": {
+                "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb"
+            }
+        }
+    },
+    "widget6": {
+        "type": "Gallery",
+        "title": "Gallery",
+        "key": "Gallery",
+        "children": [
+            {
+                "type": "TimeseriesView",
+                "key": "LFP",
+                "props": {
+                    "title": "LFP test",
+                    "recording": {
+                        "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
+                        "download_from": "spikeforest.public",
+                        "nwb_path": "/processing/ecephys/LFP/lfp"
+                    },
+                    "initial_y_scale_factor": 3,
+                    "height": 600
+                }
+            },
+            {
+                "type": "NWBFile",
+                "key": "nwb-file",
+                "props": {
+                    "title": "NWBFile",
+                    "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
+                    "altpath": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+                    "download_from": "spikeforest.public"
+                }
+            }
+        ]
+    },
+    "widget7": {
         "type": "Gallery",
         "title": "Gallery",
         "key": "Gallery",
@@ -160,7 +215,9 @@
                     "title": "Place field",
                     "nwb_query": {
                         "path": "sha1://a713cb31d505749f7a15c3ede21a5244a3f5a4d9/bon03.nwb",
-                        "epochs": [1]
+                        "epochs": [
+                            1
+                        ]
                     },
                     "download_from": "spikeforest.public"
                 }
@@ -174,11 +231,9 @@
                 }
             }
         ],
-        "props": {
-        }
+        "props": {}
     },
-    "widgets": [
-    ],
+    "widgets": [],
     "widgets2": [
         {
             "type": "NWBFile",
@@ -271,9 +326,34 @@
             "title": "Simple vtk.js example",
             "key": "surface3d-triangle",
             "props": {
-                "vertices": [[0, 0, 0], [0, 1, 0], [1, 0, 0]],
-                "faces": [3, 0, 1, 2],
-                "scalars": [0, 1, 2]
+                "vertices": [
+                    [
+                        0,
+                        0,
+                        0
+                    ],
+                    [
+                        0,
+                        1,
+                        0
+                    ],
+                    [
+                        1,
+                        0,
+                        0
+                    ]
+                ],
+                "faces": [
+                    3,
+                    0,
+                    1,
+                    2
+                ],
+                "scalars": [
+                    0,
+                    1,
+                    2
+                ]
             }
         }
     ]

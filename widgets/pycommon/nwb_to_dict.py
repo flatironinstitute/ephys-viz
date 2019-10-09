@@ -7,7 +7,7 @@ import shutil
 import mlprocessors as mlpr
 import simplejson
 
-def nwb_to_dict(fname, *, upload_to=None, use_cache=False):
+def nwb_to_dict(fname, *, upload_to=None, use_cache=False, exclude_data=False, verbose=False):
     if fname.endswith('.json'):
         with open(fname, 'r') as f:
             return simplejson.load(f)
@@ -23,11 +23,13 @@ def nwb_to_dict(fname, *, upload_to=None, use_cache=False):
 
     fname = mt.realizeFile(path=fname)
     opts = dict(
-        upload_to=upload_to
+        upload_to=upload_to,
+        exclude_data=exclude_data,
+        verbose=verbose
     )
     with h5py.File(fname, 'r') as f:
         opts['file'] = f
-        return _nwb_to_dict(f, opts=opts, name=None)
+        return _nwb_to_dict(f, opts=opts, name=None, path='')
 
 
 
@@ -115,7 +117,7 @@ def _handle_ndarray(x, *, opts, name, snapshot=False):
                 mdaio.writenpy(x, fname, dtype=npy_dtype_to_string(x.dtype))
                 return mt.createSnapshot(fname, upload_to=opts.get('upload_to', None))
         else:
-            if (x.size > 10000):
+            if (x.size > 1000):
                 raise Exception(
                     'Array is too large to include in file (need to use snapshot). name={}, shape={}'.format(name, x.shape))
             list0 = [_handle_list_or_val(val, opts=opts, name=name)
@@ -127,11 +129,16 @@ def _handle_ndarray(x, *, opts, name, snapshot=False):
         return list0
 
 
-def _handle_dataset(ds: h5py.Dataset, *, opts, name):
+def _handle_dataset(ds: h5py.Dataset, *, opts, name, path):
     _attrs = _get_attrs(ds, opts=opts, name=name)
-    value = _handle_val(ds.value, opts=opts, name=name)
+    print(simplejson.dumps(_attrs))
+    if opts.get('exclude_data', None):
+        _data = None
+    else:
+        _data = _handle_val(ds.value, opts=opts, name=name)
     ret = dict(
-        _data=value,
+        _data=_data,
+        _dataset_path=path,
         _shape=list(ds.shape),
         _dtype=ds.dtype.name
     )
@@ -147,21 +154,25 @@ def _get_attrs(f, *, opts, name):
     return attrs
 
 
-def _nwb_to_dict(f, *, opts, name):
+def _nwb_to_dict(f, *, opts, name, path):
+    if opts.get('verbose', None):
+        print('nwb_to_dict', name)
     _attrs = _get_attrs(f, opts=opts, name=name)
     _datasets = {}
     ret = {}
     for name0, item in f.items():
+        path2 = path + '/' + name0
         if isinstance(item, h5py.Group):
-            ret[name0] = _nwb_to_dict(item, opts=opts, name=name0)
+            ret[name0] = _nwb_to_dict(item, opts=opts, name=name0, path=path2)
         elif isinstance(item, h5py.Dataset):
-            _datasets[name0] = _handle_dataset(item, opts=opts, name=name0)
+            _datasets[name0] = _handle_dataset(item, opts=opts, name=name0, path=path2)
         else:
             print('Unhandled item', type(item))
     if len(_attrs.keys()) > 0:
         ret['_attrs'] = _attrs
     if len(_datasets.keys()) > 0:
         ret['_datasets'] = _datasets
+    ret['_path'] = path
     return ret
 
 

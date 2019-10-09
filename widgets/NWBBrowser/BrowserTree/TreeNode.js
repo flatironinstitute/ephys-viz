@@ -1,8 +1,10 @@
 import React from 'react';
-import { FaFile, FaFolder, FaFolderOpen, FaChevronDown, FaChevronRight, FaBed, FaBullhorn, FaBullseye } from 'react-icons/fa';
+import { FaFile, FaFolder, FaFolderOpen, FaChevronDown, FaChevronRight, FaBed, FaBullhorn, FaBullseye, FaCircle } from 'react-icons/fa';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import Sha1PathLink from './Sha1PathLink';
+import CopyableText from './CopyableText'
+import { notEqual } from 'assert';
 
 const getPaddingLeft = (level, type) => {
   let paddingLeft = level * 20;
@@ -44,18 +46,31 @@ const abbreviate = (val, max_chars) => {
   }
 }
 
+const objectType = (obj) => {
+  if ((obj._attrs) && (obj._attrs.neurodata_type) && (obj._attrs.namespace))
+    return 'nwb:' + obj._attrs.namespace + ':' + obj._attrs.neurodata_type;
+  return null;
+}
+
 const getNodeLabel = (node) => {
+  let ret;
   if (node.type === 'value') {
     if (typeof(node.data.value) == 'string') {
       if ((node.data.value.startsWith('sha1://')) || (node.data.value.startsWith('sha1dir://'))) {
         return <span>{`${node.name || '/'}: `}<Sha1PathLink path={node.data.value} canCopy={true} abbreviate={true} /></span>;
       }
     }
-    return `${node.name || '/'}: ${abbreviate(node.data.value, 30)}`;
+    ret = <span>{`${node.name || '/'}: `}<CopyableText text={node.data.value} abbreviate={30} /></span>;
   }
   else {
-    return node.name || '/';
+    ret = node.name || '/';
   }
+  if (node.type === 'object') {
+    if (objectType(node.data.object)) {
+      ret = `${ret} (${objectType(node.data.object)})`;
+    }
+  }
+  return ret;
 }
 
 const TreeNode = (props) => {
@@ -79,11 +94,12 @@ const TreeNode = (props) => {
         
         <NodeIcon key={'item-icon'} marginRight={10}>
           { node.type === 'file' && <FaFile /> }
-          { node.type === 'value' && <FaBed /> }
+          {/* { node.type === 'value' && <FaCircle /> } */}
+          { node.type === 'value' && <span /> }
           { node.type === 'dir' && isExpanded && <FaFolderOpen /> }
           { node.type === 'dir' && !isExpanded && <FaFolder /> }
-          { node.type === 'object' && isExpanded && <FaBullhorn /> }
-          { node.type === 'object' && !isExpanded && <FaBullhorn /> }
+          { node.type === 'object' && isExpanded && <FaCircle /> }
+          { node.type === 'object' && !isExpanded && <FaCircle /> }
           { node.type === 'array-parent' && isExpanded && <FaBullhorn /> }
           { node.type === 'array-parent' && !isExpanded && <FaBullhorn /> }
         </NodeIcon>

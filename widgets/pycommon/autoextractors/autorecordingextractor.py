@@ -1,16 +1,16 @@
 from mountaintools import client as mt
 from mountaintools import MountainClient
+import h5py
 import spikeextractors as se
 import numpy as np
 from .mdaextractors import MdaRecordingExtractor
+from ...pycommon.load_nwb_item import load_nwb_item
 
 class AutoRecordingExtractor(se.RecordingExtractor):
     def __init__(self, arg):
         super().__init__()
         self._hash = None
-        if arg == 'test':
-            self._recording = LFPTestRecordingExtractor('sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb')
-        elif isinstance(arg, se.RecordingExtractor):
+        if isinstance(arg, se.RecordingExtractor):
             self._recording = arg
             self.copy_channel_properties(recording=self._recording)
         else:
@@ -30,7 +30,9 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             else:
                 raise Exception('Unable to initialize recording extractor')
     def _init_from_file(self, path: str, *, original_path: str, kwargs: dict):
-        if original_path.endswith('.mda'):
+        if 'nwb_path' in kwargs:
+            self._recording = NwbElectricalSeriesRecordingExtractor(path=path, nwb_path=kwargs['nwb_path'])
+        elif original_path.endswith('.mda'):
             if 'samplerate' not in kwargs:
                 raise Exception('Missing argument: samplerate')
             samplerate = kwargs['samplerate']
@@ -66,23 +68,22 @@ class AutoRecordingExtractor(se.RecordingExtractor):
     def get_traces(self, **kwargs):
         return self._recording.get_traces(**kwargs)
 
-class LFPTestRecordingExtractor(se.RecordingExtractor):
-    def __init__(self, nwb_path):
+class NwbElectricalSeriesRecordingExtractor(se.RecordingExtractor):
+    def __init__(self, *, path, nwb_path):
         super().__init__()
-        import pynwb
-        from pynwb import NWBHDF5IO
-        nwb_io = NWBHDF5IO(mt.realizeFile(path=nwb_path), mode='r')
-        nwb = nwb_io.read()
-        X = nwb.fields['processing']['ecephys']['LFP']['electrical_series']
-        self._samplerate = X.rate
-        self._data = X.data
-        self._num_channels = self._data.shape[1]
+        self._path = path
+        self._nwb_path = nwb_path
+        with h5py.File(self._path, 'r') as f:
+            X = load_nwb_item(file=f, nwb_path=self._nwb_path)
+            self._samplerate = X['starting_time'].attrs['rate']
+            self._num_timepoints = X['data'].shape[0]
+            self._num_channels = X['data'].shape[1]
 
     def get_channel_ids(self):
         return list(range(self._num_channels))
 
     def get_num_frames(self):
-        return self._data.shape[0]
+        return self._num_timepoints
 
     def get_sampling_frequency(self):
         return self._samplerate
@@ -94,7 +95,9 @@ class LFPTestRecordingExtractor(se.RecordingExtractor):
             end_frame = self.get_num_frames()
         if channel_ids is None:
             channel_ids = self.get_channel_ids()
-        return self._data[start_frame:end_frame, :][:, channel_ids].T
+        with h5py.File(self._path, 'r') as f:
+            X = load_nwb_item(file=f, nwb_path=self._nwb_path)
+            return X['data'][start_frame:end_frame, :][:, channel_ids].T
 
 def _samplehash(recording):
     from mountaintools import client as mt

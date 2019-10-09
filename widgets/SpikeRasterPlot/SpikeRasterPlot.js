@@ -3,6 +3,7 @@ import { PythonInterface } from 'reactopya';
 const config = require('./SpikeRasterPlot.json');
 import TimeWidget, { PainterPath } from '../TimeWidget/TimeWidget';
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
+import { TimeWidgetPanel } from '../TimeWidget/TimeWidget';
 
 export default class SpikeRasterPlot extends Component {
     static title = 'Spike raster plot'
@@ -17,7 +18,7 @@ export default class SpikeRasterPlot extends Component {
     }
 }
 
-class SpikeRasterPlotInner extends TimeWidget {
+class SpikeRasterPlotInner extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -29,9 +30,12 @@ class SpikeRasterPlotInner extends TimeWidget {
             num_timepoints: null,
             spike_trains: null,
             status: '',
-            status_message: ''
+            status_message: '',
+
+            panels: []
         }
         this._initializedTimeRange = false;
+        this._repainter = null;
     }
     componentDidMount() {
         this.pythonInterface = new PythonInterface(this, config);
@@ -39,14 +43,12 @@ class SpikeRasterPlotInner extends TimeWidget {
         this.pythonInterface.setState({
             sorting: this.props.sorting,
         });        
-        this.updatePanels();
-        this.initializeTimeWidget();
     }
     componentDidUpdate(prevProps, prevState) {
         if (this.state.num_timepoints) {
             if (!this._initializedTimeRange) {
-                this.setTimeRange([0, this.state.num_timepoints]);
-                this._initializedTimeRange = true;
+                // this.setTimeRange([0, this.state.num_timepoints]);
+                // this._initializedTimeRange = true;
             }
         }
         if (
@@ -55,28 +57,13 @@ class SpikeRasterPlotInner extends TimeWidget {
             (this.state.spike_trains !== prevState.spike_trains)
         ) {
             this.updatePanels();
-            this.updateTimeWidget();
         }
     }
     componentWillUnmount() {
         this.pythonInterface.stop();
     }
-    updatePanels() {
-        const { unit_ids } = this.state;
-        this.clearPanels();
-        if (!unit_ids) return;
-        for (let unit_id of unit_ids) {
-            let panel = this.addPanel(
-                (painter) => {this.paintUnit(painter, unit_id)},
-                {label: unit_id}
-            );
-            panel.setCoordYRange(0, 1);
-        }
-        this.repaint();
-    }
-    paintUnit = (painter, unit_id) => {
+    paintUnit = (painter, trange, unit_id) => {
         let times0 = this.state.spike_trains[unit_id];
-        let trange = this.timeRange();
         painter.setPen({color: 'black'});
         for (let t of times0) {
             if ((trange[0] <= t) && (t <= trange[1])) {
@@ -84,9 +71,47 @@ class SpikeRasterPlotInner extends TimeWidget {
             }
         }
     }
+    updatePanels = () => {
+        const { unit_ids } = this.state;
+        let panels = [];
+        if (unit_ids) {
+            for (let unit_id of unit_ids) {
+                let panel = new TimeWidgetPanel(
+                    (painter, timeRange) => {this.paintUnit(painter, timeRange, unit_id)},
+                    {label: unit_id}
+                );
+                panel.setCoordYRange(0, 1);
+                panels.push(panel);
+            }
+        }
+        this.setState({
+            panels: panels
+        });
+    }
+    _repaint = () => {
+        this._repainter && this._repainter();
+    }
     render() {
         if (this.state.status === 'finished') {
-            return this.renderTimeWidget();
+            const { panels } = this.state;
+            
+            return (
+                <TimeWidget
+                    panels={panels}
+                    actions={[]}
+                    width={this.props.width}
+                    height={this.props.height}
+                    registerRepainter={(repaintFunc) => {this._repainter=repaintFunc}}
+                    samplerate={30000} // fix this
+                    maxTimeSpan={null}
+                    numTimepoints={this.state.num_timepoints}
+                    // currentTime={this.state.currentTime}
+                    // timeRange={this.state.timeRange}
+                    // onCurrentTimeChanged={this._handleCurrentTimeChanged}
+                    // onTimeRangeChanged={this._handleTimeRangeChanged}
+                    // leftPanel={leftPanel}
+                />
+            )
         }
         else {
             return (
