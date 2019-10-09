@@ -131,7 +131,6 @@ def _handle_ndarray(x, *, opts, name, snapshot=False):
 
 def _handle_dataset(ds: h5py.Dataset, *, opts, name, path):
     _attrs = _get_attrs(ds, opts=opts, name=name)
-    print(simplejson.dumps(_attrs))
     if opts.get('exclude_data', None):
         _data = None
     else:

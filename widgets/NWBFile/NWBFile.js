@@ -106,6 +106,7 @@ export default class NWBFile extends Component {
                 {
                     panels ? (
                         <Accordion
+                            width={this.props.width}
                             panels={panels.map((panel) => (
                                 {label: panel.label}
                             ))}

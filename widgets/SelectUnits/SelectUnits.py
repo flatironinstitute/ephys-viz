@@ -10,7 +10,6 @@ class SelectUnits:
         self._set_status('running', 'Running SelectUnits')
 
         sorting0 = state.get('sorting', None)
-        print(sorting0)
         if not sorting0:
             self._set_error('Missing: sorting')
             return

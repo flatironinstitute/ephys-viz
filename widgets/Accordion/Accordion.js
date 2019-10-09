@@ -76,7 +76,7 @@ class AccordionInner extends Component {
                         </AccordionItemHeading>
                         <AccordionItemPanel>
                             {
-                                this.state.indicesSelected[i] ? <Child.type width={this.props.width} {...Child.props} /> : <span>Waiting</span>
+                                this.state.indicesSelected[i] ? <Child.type width={this.props.width - 40 /* because padding is 20 */ } {...Child.props} /> : <span>Waiting</span>
                             }
                         </AccordionItemPanel>
                     </AccordionItem>

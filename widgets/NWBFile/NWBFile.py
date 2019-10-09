@@ -15,7 +15,7 @@ class NWBFile:
         if path:
             if path.endswith('.nwb'):
                 self._set_status('running', 'Reading nwb file: {}'.format(path))
-                obj = nwb_to_dict(path, use_cache=False, exclude_data=True, verbose=True)
+                obj = nwb_to_dict(path, use_cache=False, exclude_data=True, verbose=False)
                 self._set_status('running', 'Finished nwb file: {}'.format(path))
             else:
                 self._set_status('running', 'Realizing object: {}'.format(path))

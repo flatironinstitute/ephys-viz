@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { maxHeight } from '@material-ui/system';
 
 export default class AutoDetermineWidth extends Component {
     constructor(props) {
@@ -42,15 +43,19 @@ export default class AutoDetermineWidth extends Component {
 
     updateDimensions() {
         if ((this.container) && (this.container.offsetWidth)) {
-            if (this.state.width !== this.container.offsetWidth) {
+            let newWidth = this.container.offsetWidth - 2; // Subtract 2 because of jupyterlab (in the future only do this for jupyterlab)
+            if (this.state.width !== newWidth) {
                 this.setState({
-                    width: this.container.offsetWidth // see render()
+                    width: newWidth // see render()
                 });
                 if (!this.container.sensor) {
                     //this.container.sensor = new ResizeSensor(this.container, () => {this.updateDimensions();});
+                    /*
+                    // The following was causing problems in Accordion view on Jupyter Lab
                     this.container.sensor = new ResizeObserver(() => {
                         this.updateDimensions()
                     }).observe(this.container);
+                    */
                 }
             }
         }
@@ -79,6 +84,8 @@ export default class AutoDetermineWidth extends Component {
             }
             new_props.width = width;
 
+            let style_for_jupyterlab = {maxWidth: width, overflow: 'hidden'};
+
             return (
                 <div>
                     <div
@@ -86,7 +93,7 @@ export default class AutoDetermineWidth extends Component {
                         ref={el => (this.container = el)}
                         style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 0 }}
                     />
-                    <elmt.type {...new_props}  />
+                    <elmt.type {...new_props} style={style_for_jupyterlab}  />
                 </div>
             );
         }

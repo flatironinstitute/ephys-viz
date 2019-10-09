@@ -75,8 +75,6 @@ class NwbSortingExtractor(se.SortingExtractor):
             self._spike_times_index = X['spike_times_index'][:]
             self._unit_ids = X['id'][:]
             self._index_by_id = dict()
-            print(type(self._unit_ids))
-            print(self._unit_ids.shape)
             for index, id0 in enumerate(self._unit_ids):
                 self._index_by_id[id0] = index
 
