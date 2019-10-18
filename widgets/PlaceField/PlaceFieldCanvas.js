@@ -85,8 +85,6 @@ export default class PlaceFieldCanvas extends Component {
     paintMainLayer = (painter) => {
         const { positions } = this.props;
 
-        painter.clear();
-
         if (positions) {
             painter.useCoords();
             painter.setPen({ color: 'lightblue' });
@@ -102,8 +100,6 @@ export default class PlaceFieldCanvas extends Component {
 
     paintSpikeLayer = (painter) => {
         const { positions, spike_time_indices, spike_labels, selectedUnits, unitColorArray, currentTimepoint } = this.props;
-
-        painter.clear();
 
         if (spike_time_indices) {
             painter.useCoords();
@@ -149,8 +145,6 @@ export default class PlaceFieldCanvas extends Component {
 
         const W = this.currentPositionLayer.width();
         const H = this.currentPositionLayer.height();
-
-        painter.clear();
 
         if (positions) {
             painter.useCoords();

@@ -7,6 +7,11 @@ export default function TimeseriesModel(params) {
     let m_request_data_segment_handlers = [];
     let m_data_segment_set_handlers = [];
     let m_data_segments_requested = {};
+
+    this.clear = function() {
+      m_data_segments = {};
+      m_data_segments_requested.clear();
+    }
   
     this.setDataSegment = function (ds_factor, segment_num, X) {
       let timer = new Date()

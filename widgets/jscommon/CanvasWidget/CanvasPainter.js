@@ -5,9 +5,8 @@ export function CanvasPainter(context2d, canvasLayer) {
     var m_pen = { color: 'black' };
     var m_font = { "pixel-size": 12, family: 'Arial' };
     var m_brush = { color: 'black' };
-    let m_width = 0;
-    let m_height = 0;
     let m_use_coords = false;
+    let m_exporting_figure = false;
 
     this.pen = function () { return shallowClone(m_pen); };
     this.setPen = function (pen) { setPen(pen); };
@@ -19,18 +18,24 @@ export function CanvasPainter(context2d, canvasLayer) {
     this.usePixels = function() { m_use_coords = false; };
     this.newPainterPath = function() { return new PainterPath(); };
 
+    this.setExportingFigure = function(val) { m_exporting_figure = val; };
+    this.exportingFigure = function() { return m_exporting_figure; }; 
+
     this._initialize = function (W, H) {
         //ctx.fillStyle='black';
         //ctx.fillRect(0,0,W,H);
-        m_width = W;
-        m_height = H;
+        // m_width = W;
+        // m_height = H;
     };
     this._finalize = function () {
     };
     this.clear = function() {
-        return _clearRect(0, 0, m_width, m_height);
+        return _clearRect(0, 0, canvasLayer.width(), canvasLayer.height());
     }
     this.clearRect = function (x, y, W, H) {
+        this.fillRect(x, y, W, H, {color: 'transparent'});
+        return;
+
         if (typeof(x) === 'object') {
             let a = x;
             x = a[0];
@@ -236,16 +241,16 @@ export function CanvasPainter(context2d, canvasLayer) {
             const yr = canvasLayer.coordYRange();
             let W = canvasLayer.width() - margins[0] - margins[1];
             let H = canvasLayer.height() - margins[2] - margins[3];
-            const xextent = xr[1] - xr[0];
-            const yextent = yr[1] - yr[0];
-            if (canvasLayer.preserveAspectRatio()) {
-                if ((W * yextent > H * xextent) && (yextent)) {
-                    W = H * xextent / yextent;
-                }
-                else if ((H * xextent > W * yextent) && (xextent)) {
-                    H = W * yextent / xextent;
-                }
-            }
+            // const xextent = xr[1] - xr[0];
+            // const yextent = yr[1] - yr[0];
+            // if (canvasLayer.preserveAspectRatio()) {
+            //     if ((W * yextent > H * xextent) && (yextent)) {
+            //         W = H * xextent / yextent;
+            //     }
+            //     else if ((H * xextent > W * yextent) && (xextent)) {
+            //         H = W * yextent / xextent;
+            //     }
+            // }
             const xpct = (x - xr[0]) / (xr[1] - xr[0]);
             const ypct = 1 - (y - yr[0]) / (yr[1] - yr[0]);
             return [margins[0] + W * xpct, margins[2] + H * ypct];

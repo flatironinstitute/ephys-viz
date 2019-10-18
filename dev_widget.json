@@ -4,8 +4,10 @@
         "key": "nwb-file",
         "props": {
             "title": "NWBFile",
-            "path": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
-            "altpath": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
+            "path": "sha1://481f571fb55637d8db4e5207439281bbb5124d60/YutaMouse45-160305.nwb",
+            "path2": "sha1://807b5eb3dfab70b3e1c65b8bd7af0b5d66d73e9d/mouse1_fni16_150817_001_ch2-PnevPanResults-170808-190057.nwb",
+            "altpath1": "sha1://6b867660e31b1583a44e9221f0777423a8d8f29e/YutaMouse20-140321.nwb",
+            "altpath2": "sha1://e8414b711599a066e6cc9d2df34b0c3783c8b6f7/EC2.nwb",
             "download_from": "spikeforest.public"
         }
     },

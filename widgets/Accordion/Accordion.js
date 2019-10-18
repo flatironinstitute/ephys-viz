@@ -32,7 +32,6 @@ class AccordionInner extends Component {
         super(props);
         this.state={
             indicesSelected: {
-                0: true
             }
         }
     }

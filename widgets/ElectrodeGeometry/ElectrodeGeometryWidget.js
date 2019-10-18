@@ -99,7 +99,6 @@ class ElectrodeGeometryWidgetInner extends Component {
     }
 
     paintDragSelect = (painter) => {
-        painter.clear();
         if (this.dragSelectRect) {
             painter.fillRect(this.dragSelectRect, 'lightgray');
         }
@@ -126,8 +125,6 @@ class ElectrodeGeometryWidgetInner extends Component {
 
         const W = this.state._canvasWidth;
         const H = this.state._canvasHeight;
-
-        painter.clearRect(0, 0, W, H);
 
         let W1 = W, H1 = H;
         if (this.transpose) {

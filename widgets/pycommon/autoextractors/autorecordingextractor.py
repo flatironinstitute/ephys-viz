@@ -1,5 +1,6 @@
 from mountaintools import client as mt
 from mountaintools import MountainClient
+from .bandpass_filter import bandpass_filter
 import h5py
 import spikeextractors as se
 import numpy as np
@@ -16,6 +17,13 @@ class AutoRecordingExtractor(se.RecordingExtractor):
         else:
             self._recording = None
             self._client = MountainClient()
+
+            # filters
+            if ('recording' in arg) and ('filters' in arg):
+                recording1 = AutoRecordingExtractor(arg['recording'])
+                self._recording = self._apply_filters(recording1, arg['filters'])
+                return
+
             if 'download_from' in arg:
                 self._client.configDownloadFrom(arg['download_from'])
             if 'path' in arg:
@@ -23,7 +31,7 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                 if self._client.isFile(path):
                     file_path = self._client.realizeFile(path=path)
                     if not file_path:
-                        raise Exception('Unable to realize file: {}'.format(file_path))
+                        raise Exception('Unable to realize file: {}'.format(path))
                     self._init_from_file(file_path, original_path=path, kwargs=arg)
                 else:
                     raise Exception('Not a file: {}'.format(path))
@@ -44,6 +52,24 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             setattr(self, 'hash', hash0)
         else:
             raise Exception('Unsupported format for {}'.format(original_path))
+    
+    def _apply_filters(self, recording, filters):
+        ret = recording
+        for filter0 in filters:
+            ret = self._apply_filter(ret, filter0)
+        return ret
+    
+    def _apply_filter(self, recording, filter0):
+        if filter0['type'] == 'bandpass_filter':
+            args = dict()
+            if 'freq_min' in filter0:
+                args['freq_min'] = filter0['freq_min']
+            if 'freq_max' in filter0:
+                args['freq_max'] = filter0['freq_max']
+            if 'freq_wid' in filter0:
+                args['freq_wid'] = filter0['freq_wid']
+            return bandpass_filter(recording, **args)
+        return None
     
     def hash(self):
         if not self._hash:

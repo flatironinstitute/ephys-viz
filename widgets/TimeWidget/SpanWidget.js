@@ -20,7 +20,6 @@ export default class SpanWidget extends CanvasWidget {
     paintMainLayer = (painter) => {
         const { info } = this.props;
         if (!info.numTimepoints) return;
-        painter.clear();
         painter.useCoords();
         this._mainLayer.setCoordXRange(0, info.numTimepoints);
         this._mainLayer.setCoordYRange(0, 1);

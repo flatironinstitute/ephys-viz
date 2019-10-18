@@ -67,7 +67,6 @@ export default class TimeWidget extends Component {
     paintMainLayer = (painter) => {
         this._paintPanelIndex = 0;
         this._paintPanelCode++;
-        painter.clear();
         painter.useCoords();
         this._mainLayer.setCoordXRange(0, 1);
         this._mainLayer.setCoordYRange(0, 1);
@@ -127,7 +126,7 @@ export default class TimeWidget extends Component {
             this._paintPanelIndex++;
 
             let elapsed = (new Date()) - timer;
-            if (elapsed > 200) {
+            if ((elapsed > 200) && (!painter.exportingFigure())) {
                 setTimeout(() => {
                     this._paintPanels(painter, paintPanelCode);
                 }, 100);
@@ -136,8 +135,7 @@ export default class TimeWidget extends Component {
         }
     }
     paintCursorLayer = (painter) => {
-        painter.clear();
-
+        if (painter.exportingFigure()) return;
         this._cursorLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
         this._cursorLayer.setCoordYRange(0, 1);
         painter.useCoords();
@@ -155,7 +153,6 @@ export default class TimeWidget extends Component {
         this._timeAxisLayer.setMargins(50, 10, H-50, 0);
         this._timeAxisLayer.setCoordXRange(this._timeRange[0], this._timeRange[1]);
         this._timeAxisLayer.setCoordYRange(0, 1);
-        painter.clear();
         painter.useCoords();
         painter.setPen({color: 'rgb(22, 22, 22)'});
         painter.drawLine(this._timeRange[0], 1, this._timeRange[1], 1);
@@ -179,7 +176,6 @@ export default class TimeWidget extends Component {
         let W = this._mainLayer.width();
         let H = this._mainLayer.height();
         
-        painter.clear();
         painter.useCoords();
 
         const panels = this.props.panels;
@@ -430,6 +426,7 @@ export default class TimeWidget extends Component {
                     onMouseDrag={this.handle_mouse_drag}
                     onMouseDragRelease={this.handle_mouse_drag_release}
                     onKeyPress={this.handle_key_press}
+                    menuOpts={{exportSvg: true}}
                 />
                 <TimeWidgetBottomBar
                     width={this.props.width}

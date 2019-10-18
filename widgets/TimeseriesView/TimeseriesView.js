@@ -4,6 +4,8 @@ import Mda from './Mda';
 import TimeseriesWidget from "./TimeseriesWidget";
 import TimeseriesModel from "./TimeseriesModel";
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
+import { MdGridOn as FilterOptsIcon } from 'react-icons/md';
+import FilterOpts from './FilterOpts';
 const config = require('./TimeseriesView.json');
 
 
@@ -13,19 +15,57 @@ export default class TimeseriesView extends Component {
     render() {
         return (
             <AutoDetermineWidth>
-                <TimeseriesViewInner {...this.props} />
+                <TimeseriesViewFO {...this.props} />
             </AutoDetermineWidth>
         );
     }
 }
 
+class TimeseriesViewFO extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            filterOpts: props.filterOpts || {type: 'none', freq_min: 300, freq_max: 6000, freq_wid: 1000}
+        };
+    }
+    render() {
+        let leftPanels = [
+            {
+                key: 'filter-options',
+                title: "Filter options",
+                icon: <FilterOptsIcon />,
+                render: () => (
+                    <FilterOpts
+                        filterOpts={this.state.filterOpts}
+                        onChange={(newOpts) => {this.setState({filterOpts: newOpts})}}
+                    />
+                )
+            }
+        ];
+        return (
+            <AutoDetermineWidth>
+                <TimeseriesViewInner
+                    {...this.props}
+                    key={keyFromObject(this.state.filterOpts)}
+                    filterOpts={this.state.filterOpts}
+                    leftPanels={leftPanels}
+                />
+            </AutoDetermineWidth>
+        );
+    }
+}
+
+function keyFromObject(obj) {
+    return JSON.stringify(obj);
+}
+
 class TimeseriesViewInner extends Component {
     constructor(props) {
+        console.log('---- TimeseriesViewInner constructor');
         super(props)
         this.state = {
             // javascript state
             recording: null,
-            segmentsRequested: null,
 
             // python state
             num_channels: null,
@@ -43,22 +83,40 @@ class TimeseriesViewInner extends Component {
             timeseriesModelSet: false // to trigger re-render
         }
         this.timeseriesModel = null;
-        this.segmentsRequested = {};
     }
 
     componentDidMount() {
+        console.log('--- creating new python interface');
         this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.onMessage((msg) => {
+            if (msg.command == 'setSegment') {
+                let X = new Mda();
+                X.setFromBase64(msg.data);
+                this.timeseriesModel.setDataSegment(msg.ds_factor, msg.segment_num, X);
+            }
+        })
+        let recording = this.props.recording;
+        console.log('---', this.props.filterOpts);
+        if (this.props.filterOpts.type === 'bandpass_filter') {
+            recording = {
+                recording: recording,
+                filters: [
+                    this.props.filterOpts
+                ]
+            };
+        }
         this.pythonInterface.setState({
-            recording: this.props.recording
+            recording: recording
         });
 
         this.pythonInterface.start();
         this.updateData();
     }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         this.updateData();
     }
     componentWillUnmount() {
+        console.log('--- stopping python interface');
         this.pythonInterface.stop();
     }
 
@@ -76,41 +134,22 @@ class TimeseriesViewInner extends Component {
             };
             this.timeseriesModel = new TimeseriesModel(params);
             this.timeseriesModel.onRequestDataSegment((ds_factor, segment_num) => {
-                let sr = this.segmentsRequested;
-                let code = `${ds_factor}-${segment_num}`;
-                sr[code] = { ds: ds_factor, ss: segment_num };
-                this.segmentsRequested = sr;
-                this.pythonInterface.setState({
-                    segmentsRequested: sr
+                this.pythonInterface.sendMessage({
+                    command: 'requestSegment',
+                    ds_factor: ds_factor,
+                    segment_num: segment_num
                 });
             });
             this.setState({
                 timeseriesModelSet: true
             });
         }
-        let SR = this.segmentsRequested;
-        let keys = Object.keys(SR);
-        let something_changed = false;
-        for (let key of keys) {
-            let aa = this.state[key] || null;
-            if ((aa) && (aa.data)) {
-                let X = new Mda();
-                X.setFromBase64(aa.data);
-                this.timeseriesModel.setDataSegment(aa.ds, aa.ss, X);
-                delete SR[key];
-                // delete SF[key];
-                something_changed = true;
-            }
-        }
-        if (something_changed) {
-            this.segmentsRequested = SR;
-            this.pythonInterface.setState({
-                segmentsRequested: SR
-            });
-        }
     }
     render() {
         if (this.timeseriesModel) {
+            let leftPanels = [];
+            for (let lp of this.props.leftPanels)
+                leftPanels.push(lp);
             return (
                 <div>
                     <TimeseriesWidget
@@ -123,13 +162,14 @@ class TimeseriesViewInner extends Component {
                         y_scale_factor={this.state.y_scale_factor * (this.props.initial_y_scale_factor || 1)}
                         width={this.props.width}
                         height={this.props.height || 800}
+                        leftPanels={leftPanels}
                     />
                 </div>
             )
         }
         else {
             return (
-                <div>{this.state.status_message}</div>
+                <div>Loading timeseries... {this.state.status_message}</div>
             );
         }
     }

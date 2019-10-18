@@ -95,7 +95,6 @@ export class LightPlot extends CanvasWidget {
         const { data, layout } = this.props;
 
         painter.useCoords();
-        painter.clear();
 
         for (let data0 of data) {
             if (data0.type === 'bar') {
@@ -148,8 +147,6 @@ export class LightPlot extends CanvasWidget {
     }
     paintTitleLayer = (painter) => {
         const { layout } = this.props;
-
-        painter.clear();
 
         if (layout.title) {
             painter.drawText([0, 0, this.titleLayer.width(), (layout.margin || {}).t || 0], {AlignBottom: true, AlignCenter: true}, layout.title);

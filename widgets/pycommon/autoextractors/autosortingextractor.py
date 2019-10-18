@@ -22,7 +22,7 @@ class AutoSortingExtractor(se.SortingExtractor):
                 if self._client.isFile(path):
                     file_path = self._client.realizeFile(path=path)
                     if not file_path:
-                        raise Exception('Unable to realize file: {}'.format(file_path))
+                        raise Exception('Unable to realize file: {}'.format(path))
                     self._init_from_file(file_path, original_path=path, kwargs=arg)
                 else:
                     raise Exception('Not a file: {}'.format(path))
@@ -71,7 +71,7 @@ class NwbSortingExtractor(se.SortingExtractor):
         self._path = path
         with h5py.File(self._path, 'r') as f:
             X = load_nwb_item(file=f, nwb_path=nwb_path)
-            self._spike_times = X['spike_times'][:]
+            self._spike_times = X['spike_times'][:] * self.get_sampling_frequency()
             self._spike_times_index = X['spike_times_index'][:]
             self._unit_ids = X['id'][:]
             self._index_by_id = dict()
@@ -93,6 +93,10 @@ class NwbSortingExtractor(se.SortingExtractor):
         else:
             ii1 = 0
         return self._spike_times[ii1:ii2]
+    
+    def get_sampling_frequency(self):
+        # need to fix this
+        return 30000
 
 def _samplehash(sorting):
     from mountaintools import client as mt

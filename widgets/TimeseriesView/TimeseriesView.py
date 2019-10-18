@@ -62,20 +62,35 @@ class TimeseriesView:
                 status_message='Loaded recording.'
             ))
     
-        SR = state.get('segmentsRequested', {})
-        for key in SR.keys():
-            aa = SR[key]
-            if not self.get_python_state(key, None):
-                self.set_state(dict(status_message='Loading segment {}'.format(key)))
-                data0 = self._load_data(aa['ds'], aa['ss'])
-                data0_base64 = _mda32_to_base64(data0)
-                state0 = {}
-                state0[key] = dict(data=data0_base64, ds=aa['ds'], ss=aa['ss'])
-                self.set_state(state0)
-                self.set_state(dict(status_message='Loaded segment {}'.format(key)))
+        # SR = state.get('segmentsRequested', {})
+        # for key in SR.keys():
+        #     aa = SR[key]
+        #     if not self.get_python_state(key, None):
+        #         self.set_state(dict(status_message='Loading segment {}'.format(key)))
+        #         data0 = self._load_data(aa['ds'], aa['ss'])
+        #         data0_base64 = _mda32_to_base64(data0)
+        #         state0 = {}
+        #         state0[key] = dict(data=data0_base64, ds=aa['ds'], ss=aa['ss'])
+        #         self.set_state(state0)
+        #         self.set_state(dict(status_message='Loaded segment {}'.format(key)))
         self._set_status('finished', '')
+    
+    def on_message(self, msg):
+        if msg['command'] == 'requestSegment':
+            ds = msg['ds_factor']
+            ss = msg['segment_num']
+            data0 = self._load_data(ds, ss)
+            data0_base64 = _mda32_to_base64(data0)
+            self.send_message(dict(
+                command='setSegment',
+                ds_factor=ds,
+                segment_num=ss,
+                data=data0_base64
+            ))
 
     def _load_data(self, ds, ss):
+        if not self._recording:
+            return
         logger.info('_load_data {} {}'.format(ds, ss))
         if ds > 1:
             if self._multiscale_recordings is None:

@@ -23,19 +23,21 @@ export default class TimeseriesWidget extends Component {
     componentDidMount() {
         this.y_scale_factor = this.props.y_scale_factor;
 
-        // this happens when the timeseries model receives new data
-        this.props.timeseriesModel.onDataSegmentSet((ds_factor, t1, t2) => {
-            let trange = this.timeRange();
-            if (!trange) return;
-            if ((t1 <= trange[1]) && (t2 >= trange[0])) {
-                // if the new chunk is in range of what we are viewing, we repaint
-                this._repaint();
-            }
-        });
+        if (this.props.timeseriesModel) {
+            // this happens when the timeseries model receives new data
+            this.props.timeseriesModel.onDataSegmentSet((ds_factor, t1, t2) => {
+                let trange = this.timeRange();
+                if (!trange) return;
+                if ((t1 <= trange[1]) && (t2 >= trange[0])) {
+                    // if the new chunk is in range of what we are viewing, we repaint
+                    this._repaint();
+                }
+            });
 
-        this.updateDownsampleFactor();
+            this.updateDownsampleFactor();
 
-        this.updatePanels();
+            this.updatePanels();
+        }
     }
     componentDidUpdate(prevProps, prevState) {
         this.updateDownsampleFactor();
@@ -112,7 +114,7 @@ export default class TimeseriesWidget extends Component {
             this.setState({leftPanelMode: null});
         }
         else {
-            this.setState({leftPanelMode: 'select_electrodes'});
+            this.setState({leftPanelMode: mode});
         }
     }
     _handleTimeRangeChanged = (tr) => {
@@ -217,6 +219,27 @@ export default class TimeseriesWidget extends Component {
         });
     }
     render() {
+        let leftPanels = [
+            {
+                key: 'select-electrodes',
+                title: "Select electrodes",
+                icon: <SelectElectrodesIcon />,
+                render: () => (
+                    <SelectElectrodes
+                        num_channels={this.props.num_channels}
+                        locations={this.props.channel_locations}
+                        labels={this.props.channel_ids}
+                        selectedElectrodeIds={this.state.selectedElectrodeIds}
+                        onChange={this._handleSelectedElectrodeIdsChanged}
+                        prefs={this.state.selectElectrodesPrefs}
+                        onPrefsChange={(prefs) => {this.setState({selectElectrodesPrefs: prefs})}}
+                    />
+                )
+            }
+        ];
+        for (let lp of (this.props.leftPanels || [])) {
+            leftPanels.push(lp);
+        }
         let actions = [
             {
                 callback: () => {this._zoomAmplitude(1.15)},
@@ -232,32 +255,26 @@ export default class TimeseriesWidget extends Component {
             },
             {
                 type: 'divider'
-            },
-            {
-                callback: () => {this._toggleLeftPanelMode('select_electrodes')},
-                title: 'Select electrodes',
-                icon: <SelectElectrodesIcon />,
-                selected: (this.state.leftPanelMode === 'select_electrodes')
             }
         ];
+        leftPanels.forEach((lp) => {
+            actions.push({
+                callback: () => {this._toggleLeftPanelMode(lp.key)},
+                title: lp.title,
+                icon: lp.icon,
+                selected: (this.state.leftPanelMode === lp.key)
+            })
+        });
 
         let { num_channels, timeseriesModel } = this.props;
         if (!num_channels) {
             return <span>Loading.</span>;
         }
         let leftPanel=undefined;
-        if (this.state.leftPanelMode === 'select_electrodes') {
-            leftPanel = (
-                <SelectElectrodes
-                    num_channels={this.props.num_channels}
-                    locations={this.props.channel_locations}
-                    labels={this.props.channel_ids}
-                    selectedElectrodeIds={this.state.selectedElectrodeIds}
-                    onChange={this._handleSelectedElectrodeIdsChanged}
-                    prefs={this.state.selectElectrodesPrefs}
-                    onPrefsChange={(prefs) => {this.setState({selectElectrodesPrefs: prefs})}}
-                />
-            );
+        for (let lp of leftPanels) {
+            if (this.state.leftPanelMode === lp.key) {
+                leftPanel = lp.render();
+            }
         }
         return (
             <TimeWidget
@@ -266,9 +283,9 @@ export default class TimeseriesWidget extends Component {
                 width={this.props.width}
                 height={this.props.height}
                 registerRepainter={(repaintFunc) => {this._repainter=repaintFunc}}
-                samplerate={timeseriesModel.getSampleRate()}
+                samplerate={timeseriesModel ? timeseriesModel.getSampleRate() : 0}
                 maxTimeSpan={1e6 / num_channels}
-                numTimepoints={timeseriesModel.numTimepoints()}
+                numTimepoints={timeseriesModel ? timeseriesModel.numTimepoints() : 0}
                 currentTime={this.state.currentTime}
                 timeRange={this.state.timeRange}
                 onCurrentTimeChanged={this._handleCurrentTimeChanged}
