@@ -4,6 +4,7 @@ import Plotly from './plotly.patched.min.js';
 import createPlotlyComponent from 'react-plotly.js/factory';
 const Plot = createPlotlyComponent(Plotly);
 
+
 export default Plot;
 
 export class LightPlot extends CanvasWidget {

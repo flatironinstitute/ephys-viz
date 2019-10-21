@@ -128,9 +128,19 @@ export class CanvasWidgetLayer {
         }
     }
     setCoordXRange(min, max) {
+        if (max === undefined) {
+            let tmp = min;
+            min = tmp[0];
+            max = tmp[1];
+        }
         this._coordXRange = [min, max];
     }
     setCoordYRange(min, max) {
+        if (max === undefined) {
+            let tmp = min;
+            min = tmp[0];
+            max = tmp[1];
+        }
         this._coordYRange = [min, max];
     }
     setPreserveAspectRatio(val) {

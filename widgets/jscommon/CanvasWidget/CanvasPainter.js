@@ -32,6 +32,26 @@ export function CanvasPainter(context2d, canvasLayer) {
     this.clear = function() {
         return _clearRect(0, 0, canvasLayer.width(), canvasLayer.height());
     }
+    this.ctxSave = function() {
+        ctx.save();
+    }
+    this.ctxRestore = function() {
+        ctx.restore();
+    }
+    this.ctxTranslate = function(dx, dy) {
+        if (dy === undefined) {
+            let tmp = dx;
+            dx = tmp[0];
+            dy = tmp[1];
+        }
+        ctx.translate(dx, dy);
+    }
+    this.coordsToPix = function(x, y) {
+        return coordsToPix(x, y);
+    }
+    this.ctxRotate = function(theta) {
+        ctx.rotate(theta);
+    }
     this.clearRect = function (x, y, W, H) {
         this.fillRect(x, y, W, H, {color: 'transparent'});
         return;
@@ -101,9 +121,18 @@ export function CanvasPainter(context2d, canvasLayer) {
         ppath.lineTo(x2, y2);
         that.drawPath(ppath);
     };
-    this.drawText = function (rect, alignment, txt) {
+    this.drawText = function (rect, alignment, txt, opts) {
         let rect2 = transformRect(rect);
         return _drawText(rect2, alignment, txt);
+    }
+    this.createImageData = function(W, H) {
+        return ctx.getImageData(W, H);
+    }
+    this.putImageData = function(imagedata, x, y) {
+        ctx.putImageData(imagedata, x, y);
+    }
+    this.drawImage = function(image, dx, dy) {
+        ctx.drawImage(image, dx, dy);
     }
     function _drawText(rect, alignment, txt) {
         var x, y, textAlign, textBaseline;
@@ -120,7 +149,7 @@ export function CanvasPainter(context2d, canvasLayer) {
             textAlign = 'right';
         }
         else {
-            console.error('Missing horizontal alignment in drawText');
+            console.error('Missing horizontal alignment in drawText: AlignLeft, AlignCenter, or AlignRight');
         }
 
         if (alignment.AlignTop) {
@@ -136,7 +165,7 @@ export function CanvasPainter(context2d, canvasLayer) {
             textBaseline = 'middle';
         }
         else {
-            console.error('Missing vertical alignment in drawText');
+            console.error('Missing vertical alignment in drawText: AlignTop, AlignBottom, or AlignVCenter');
         }
 
         ctx.font = m_font['pixel-size'] + 'px ' + m_font.family;
@@ -235,29 +264,43 @@ export function CanvasPainter(context2d, canvasLayer) {
         return [Math.min(pt1[0], pt2[0]), Math.min(pt1[1], pt2[1]), Math.abs(pt2[0] - pt1[0]), Math.abs(pt2[1] - pt1[1])];
     }
     function transformXY(x, y) {
+        if (y === undefined) {
+            let tmp = x;
+            x = tmp[0];
+            y = tmp[1];
+        }
         const margins = canvasLayer.margins();
         if (m_use_coords) {
-            const xr = canvasLayer.coordXRange();
-            const yr = canvasLayer.coordYRange();
-            let W = canvasLayer.width() - margins[0] - margins[1];
-            let H = canvasLayer.height() - margins[2] - margins[3];
-            // const xextent = xr[1] - xr[0];
-            // const yextent = yr[1] - yr[0];
-            // if (canvasLayer.preserveAspectRatio()) {
-            //     if ((W * yextent > H * xextent) && (yextent)) {
-            //         W = H * xextent / yextent;
-            //     }
-            //     else if ((H * xextent > W * yextent) && (xextent)) {
-            //         H = W * yextent / xextent;
-            //     }
-            // }
-            const xpct = (x - xr[0]) / (xr[1] - xr[0]);
-            const ypct = 1 - (y - yr[0]) / (yr[1] - yr[0]);
-            return [margins[0] + W * xpct, margins[2] + H * ypct];
+            return coordsToPix(x, y);
         }
         else {
             return [margins[0] + x, margins[2] + y];
         }
+    }
+    function coordsToPix(x, y) {
+        if (y === undefined) {
+            let tmp = x;
+            x = tmp[0];
+            y = tmp[1];
+        }
+        const margins = canvasLayer.margins();
+        const xr = canvasLayer.coordXRange();
+        const yr = canvasLayer.coordYRange();
+        let W = canvasLayer.width() - margins[0] - margins[1];
+        let H = canvasLayer.height() - margins[2] - margins[3];
+        // const xextent = xr[1] - xr[0];
+        // const yextent = yr[1] - yr[0];
+        // if (canvasLayer.preserveAspectRatio()) {
+        //     if ((W * yextent > H * xextent) && (yextent)) {
+        //         W = H * xextent / yextent;
+        //     }
+        //     else if ((H * xextent > W * yextent) && (xextent)) {
+        //         H = W * yextent / xextent;
+        //     }
+        // }
+        const xpct = (x - xr[0]) / (xr[1] - xr[0]);
+        const ypct = 1 - (y - yr[0]) / (yr[1] - yr[0]);
+        return [margins[0] + W * xpct, margins[2] + H * ypct];
     }
 }
 
