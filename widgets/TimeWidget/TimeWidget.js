@@ -80,7 +80,6 @@ export default class TimeWidget extends Component {
         // // highlight selected
         // for (let panel of this.props.panels) {
         //     if (panel.selected()) {
-        //         console.log('---- selected', panel.label());
         //         this._mainLayer.setMargins(50, 15, panel._yRange[0], this._mainLayer.height() - panel._yRange[1]);
         //         this._mainLayer.setCoordXRange(0, 1);
         //         this._mainLayer.setCoordYRange(0, 1);
@@ -121,7 +120,6 @@ export default class TimeWidget extends Component {
 
             //this._mainLayer.setCoordYRange(a, b);
             this._mainLayer.setCoordYRange(panel._coordYRange[0], panel._coordYRange[1]);
-            // console.log('--- paint panel', panel, a, b, this._timeRange[0], this._timeRange[1]);
             panel.paint(painter, clone(this._timeRange));
             this._paintPanelIndex++;
 

@@ -1,5 +1,5 @@
 {
-    "widget": {
+    "widget1": {
         "type": "NWBFile",
         "key": "nwb-file",
         "props": {
@@ -31,7 +31,7 @@
             "download_from": "spikeforest.public"
         }
     },
-    "widget4": {
+    "widget": {
         "type": "TimeseriesView",
         "key": "LFP",
         "props": {

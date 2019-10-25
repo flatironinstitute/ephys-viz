@@ -29,28 +29,29 @@ class TimeseriesViewFO extends Component {
         };
     }
     render() {
-        let leftPanels = [
-            {
-                key: 'filter-options',
-                title: "Filter options",
-                icon: <FilterOptsIcon />,
-                render: () => (
-                    <FilterOpts
-                        filterOpts={this.state.filterOpts}
-                        onChange={(newOpts) => {this.setState({filterOpts: newOpts})}}
-                    />
-                )
-            }
-        ];
+        // let leftPanels = [
+        //     {
+        //         key: 'filter-options',
+        //         title: "Filter options",
+        //         icon: <FilterOptsIcon />,
+        //         render: () => (
+        //             <FilterOpts
+        //                 filterOpts={this.state.filterOpts}
+        //                 onChange={(newOpts) => {this.setState({filterOpts: newOpts})}}
+        //             />
+        //         )
+        //     }
+        // ];
+        let leftPanels = [];
+        // let fo = {type: 'none', freq_min: 300, freq_max: 6000, freq_wid: 1000};
         return (
-            <AutoDetermineWidth>
-                <TimeseriesViewInner
-                    {...this.props}
-                    key={keyFromObject(this.state.filterOpts)}
-                    filterOpts={this.state.filterOpts}
-                    leftPanels={leftPanels}
-                />
-            </AutoDetermineWidth>
+            <TimeseriesViewInner
+                {...this.props}
+                key={keyFromObject(this.state.filterOpts)}
+                filterOpts={this.state.filterOpts}
+                // filterOpts={fo}
+                leftPanels={leftPanels}
+            />
         );
     }
 }
@@ -61,7 +62,6 @@ function keyFromObject(obj) {
 
 class TimeseriesViewInner extends Component {
     constructor(props) {
-        console.log('---- TimeseriesViewInner constructor');
         super(props)
         this.state = {
             // javascript state
@@ -80,13 +80,12 @@ class TimeseriesViewInner extends Component {
             status_message: '',
 
             // other
-            timeseriesModelSet: false // to trigger re-render
+            timeseriesModelSet: 0 // to trigger re-render
         }
         this.timeseriesModel = null;
     }
 
     componentDidMount() {
-        console.log('--- creating new python interface');
         this.pythonInterface = new PythonInterface(this, config);
         this.pythonInterface.onMessage((msg) => {
             if (msg.command == 'setSegment') {
@@ -96,7 +95,6 @@ class TimeseriesViewInner extends Component {
             }
         })
         let recording = this.props.recording;
-        console.log('---', this.props.filterOpts);
         if (this.props.filterOpts.type === 'bandpass_filter') {
             recording = {
                 recording: recording,
@@ -116,7 +114,6 @@ class TimeseriesViewInner extends Component {
         this.updateData();
     }
     componentWillUnmount() {
-        console.log('--- stopping python interface');
         this.pythonInterface.stop();
     }
 
@@ -141,7 +138,7 @@ class TimeseriesViewInner extends Component {
                 });
             });
             this.setState({
-                timeseriesModelSet: true
+                timeseriesModelSet: this.state.timeseriesModelSet + 1
             });
         }
     }
