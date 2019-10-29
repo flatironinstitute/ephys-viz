@@ -11,7 +11,7 @@
             "download_from": "spikeforest.public"
         }
     },
-    "widget2": {
+    "widget": {
         "type": "TimeseriesView",
         "key": "TimeseriesView",
         "props": {
@@ -19,7 +19,9 @@
             "recording": {
                 "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
                 "samplerate": 30000,
-                "download_from": "spikeforest.public"
+                "kachery_config": {
+                    "download": true
+                }
             }
         }
     },
@@ -31,7 +33,7 @@
             "download_from": "spikeforest.public"
         }
     },
-    "widget": {
+    "widget4": {
         "type": "TimeseriesView",
         "key": "LFP",
         "props": {

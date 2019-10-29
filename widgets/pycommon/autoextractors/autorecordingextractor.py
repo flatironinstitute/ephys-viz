@@ -1,9 +1,10 @@
-from mountaintools import client as mt
-from mountaintools import MountainClient
+import kachery as ka
 from .bandpass_filter import bandpass_filter
 import h5py
 import spikeextractors as se
 import numpy as np
+import hashlib
+import json
 from .mdaextractors import MdaRecordingExtractor
 from ...pycommon.load_nwb_item import load_nwb_item
 
@@ -16,7 +17,6 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             self.copy_channel_properties(recording=self._recording)
         else:
             self._recording = None
-            self._client = MountainClient()
 
             # filters
             if ('recording' in arg) and ('filters' in arg):
@@ -24,34 +24,23 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                 self._recording = self._apply_filters(recording1, arg['filters'])
                 return
 
-            if 'download_from' in arg:
-                self._client.configDownloadFrom(arg['download_from'])
-            if 'path' in arg:
-                path = arg['path']
-                if self._client.isFile(path):
-                    file_path = self._client.realizeFile(path=path)
-                    if not file_path:
-                        raise Exception('Unable to realize file: {}'.format(path))
-                    self._init_from_file(file_path, original_path=path, kwargs=arg)
-                else:
-                    raise Exception('Not a file: {}'.format(path))
+            if 'kachery_config' in arg:
+                ka.set_config(**arg['kachery_config'])
+            path = arg.get('path', '')
+            if 'nwb_path' in arg:
+                self._recording = NwbElectricalSeriesRecordingExtractor(path=path, nwb_path=arg['nwb_path'])
+            elif path.endswith('.mda'):
+                if 'samplerate' not in arg:
+                    raise Exception('Missing argument: samplerate')
+                samplerate = arg['samplerate']
+                self._recording = MdaRecordingExtractor(timeseries_path=path, samplerate=samplerate)
+                hash0 = _sha1_of_object(dict(
+                    timeseries_sha1=ka.get_file_info(path, algorithm='sha1')['sha1'],
+                    samplerate=samplerate
+                ))
+                setattr(self, 'hash', hash0)
             else:
                 raise Exception('Unable to initialize recording extractor')
-    def _init_from_file(self, path: str, *, original_path: str, kwargs: dict):
-        if 'nwb_path' in kwargs:
-            self._recording = NwbElectricalSeriesRecordingExtractor(path=path, nwb_path=kwargs['nwb_path'])
-        elif original_path.endswith('.mda'):
-            if 'samplerate' not in kwargs:
-                raise Exception('Missing argument: samplerate')
-            samplerate = kwargs['samplerate']
-            self._recording = MdaRecordingExtractor(timeseries_path=path, samplerate=samplerate)
-            hash0 = self._client.sha1OfObject(dict(
-                timeseries_path=self._client.computeFileSha1(path),
-                samplerate=samplerate
-            ))
-            setattr(self, 'hash', hash0)
-        else:
-            raise Exception('Unsupported format for {}'.format(original_path))
     
     def _apply_filters(self, recording, filters):
         ret = recording
@@ -126,13 +115,12 @@ class NwbElectricalSeriesRecordingExtractor(se.RecordingExtractor):
             return X['data'][start_frame:end_frame, :][:, channel_ids].T
 
 def _samplehash(recording):
-    from mountaintools import client as mt
     obj = {
         'channels': tuple(recording.get_channel_ids()),
         'frames': recording.get_num_frames(),
         'data': _samplehash_helper(recording)
     }
-    return mt.sha1OfObject(obj)
+    return _sha1_of_object(obj)
 
 
 def _samplehash_helper(recording):
@@ -144,3 +132,13 @@ def _samplehash_helper(recording):
         t = recording.get_traces(start_frame=i, end_frame=i + 100)
         h = hash((hash(bytes(t)), hash(h)))
     return h
+
+def _sha1_of_string(txt: str) -> str:
+    hh = hashlib.sha1(txt.encode('utf-8'))
+    ret = hh.hexdigest()
+    return ret
+
+
+def _sha1_of_object(obj: object) -> str:
+    txt = json.dumps(obj, sort_keys=True, separators=(',', ':'))
+    return _sha1_of_string(txt)

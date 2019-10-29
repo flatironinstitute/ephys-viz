@@ -1,15 +1,15 @@
 from spikeextractors import RecordingExtractor
 from spikeextractors import SortingExtractor
 
+import kachery as ka
 import json
 import numpy as np
 from .mdaio import DiskReadMda, readmda, writemda32, writemda64, writemda, appendmda
 import os
-from mountaintools import client as mt
 
 
 class MdaRecordingExtractor(RecordingExtractor):
-    def __init__(self, *, recording_directory=None, timeseries_path=None, download=True, samplerate=None, geom=None, geom_path=None, params_path=None):
+    def __init__(self, *, recording_directory=None, timeseries_path=None, download=False, samplerate=None, geom=None, geom_path=None, params_path=None):
         RecordingExtractor.__init__(self)
         if recording_directory:
             timeseries_path = recording_directory + '/raw.mda'
@@ -17,7 +17,7 @@ class MdaRecordingExtractor(RecordingExtractor):
             params_path = recording_directory + '/params.json'
         self._timeseries_path = timeseries_path
         if params_path:
-            self._dataset_params = read_dataset_params(params_path)
+            self._dataset_params = ka.load_object(params_path)
             self._samplerate = self._dataset_params['samplerate']
         else:
             self._dataset_params = dict(
@@ -26,12 +26,13 @@ class MdaRecordingExtractor(RecordingExtractor):
             self._samplerate = samplerate
             
         if download:
-            path0 = mt.realizeFile(path=self._timeseries_path)
+            path0 = ka.load_file(path=self._timeseries_path)
             if not path0:
                 raise Exception('Unable to realize file: ' + self._timeseries_path)
             self._timeseries_path = path0
 
-        X = DiskReadMda(self._timeseries_path)
+        self._timeseries = DiskReadMda(self._timeseries_path)
+        X = self._timeseries
         if geom:
             self._geom = geom
         elif geom_path:
@@ -60,15 +61,13 @@ class MdaRecordingExtractor(RecordingExtractor):
         return self._samplerate
 
     def get_traces(self, channel_ids=None, start_frame=None, end_frame=None):
-        if not mt.isLocalPath(self._timeseries_path):
-            raise Exception('Cannot get traces -- timeseries file is not downloaded')
         if start_frame is None:
             start_frame = 0
         if end_frame is None:
             end_frame = self.get_num_frames()
         if channel_ids is None:
             channel_ids = self.get_channel_ids()
-        X = DiskReadMda(self._timeseries_path)
+        X = self._timeseries
         recordings = X.readChunk(i1=0, i2=start_frame, N1=X.N1(), N2=end_frame - start_frame)
         recordings = recordings[channel_ids, :]
         return recordings
@@ -104,18 +103,9 @@ class MdaRecordingExtractor(RecordingExtractor):
 class MdaSortingExtractor(SortingExtractor):
     def __init__(self, firings_file, samplerate):
         SortingExtractor.__init__(self)
-        if is_kbucket_url(firings_file):
-            download_needed = is_url(mt.findFile(path=firings_file))
-        else:
-            download_needed = is_url(firings_file)
-        if download_needed:
-            print('Downloading file: ' + firings_file)
-            self._firings_path = mt.realizeFile(path=firings_file)
-            print('Done.')
-        else:
-            self._firings_path = mt.realizeFile(path=firings_file)
+        self._firings_path = ka.load_file(firings_file)
         if not self._firings_path:
-            raise Exception('Unable to realize firings file: ' + firings_file)
+            raise Exception('Unable to load firings file: ' + firings_file)
 
         self._firings = readmda(self._firings_path)
         self._sampling_frequency = samplerate
@@ -139,7 +129,7 @@ class MdaSortingExtractor(SortingExtractor):
 
     def hash(self):
         from mountaintools import client as mt
-        return mt.computeFileSha1(self._firings_path)
+        return ka.get_file_info(self._firings_path, algorithm='sha1')['sha1']
 
     @staticmethod
     def write_sorting(sorting, save_path):
@@ -183,16 +173,6 @@ def is_url(path):
     return path.startswith('http://') or path.startswith('https://') or path.startswith(
         'kbucket://') or path.startswith('sha1://') or path.startswith('sha1dir://')
 
-
-def read_dataset_params(dsdir, params_fname):
-    fname1 = dsdir + '/' + params_fname
-    fname2 = mt.realizeFile(path=fname1)
-    if not fname2:
-        raise Exception('Unable to find file: ' + fname1)
-    if not os.path.exists(fname2):
-        raise Exception('Dataset parameter file does not exist: ' + fname2)
-    with open(fname2) as f:
-        return json.load(f)
 
 def write_recording_blocks(recording, save_path, params=dict(), raw_fname='raw.mda', params_fname='params.json',
         _preserve_dtype=False):

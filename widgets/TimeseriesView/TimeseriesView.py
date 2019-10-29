@@ -19,7 +19,7 @@ class TimeseriesView:
         super().__init__()
         self._recording = None
         self._multiscale_recordings = None
-        self._segment_size_times_num_channels = 100000
+        self._segment_size_times_num_channels = 1000000
         self._segment_size = None
 
     def javascript_state_changed(self, prev_state, state):

@@ -4,6 +4,8 @@ import os
 import requests
 import tempfile
 import traceback
+import kachery as ka
+import io
 
 
 class MdaHeader:
@@ -125,28 +127,22 @@ class DiskReadMda:
             return np.reshape(X, (N1, N2, N3), order='F')
 
     def _read_chunk_1d(self, i, N):
-        offset = self._header.header_size + self._header.num_bytes_per_entry * i
-        if is_url(self._path):
-            tmp_fname = _download_bytes_to_tmpfile(self._path, offset, offset + self._header.num_bytes_per_entry * N)
-            try:
-                ret = self._read_chunk_1d_helper(tmp_fname, N, offset=0)
-            except:
-                ret = None
-            # os.remove(tmp_fname)
-            return ret
-        return self._read_chunk_1d_helper(self._path, N, offset=offset)
+        start_byte = self._header.header_size + self._header.num_bytes_per_entry * i
+        end_byte = start_byte + self._header.num_bytes_per_entry * N
+        bytes0 = ka.load_bytes(self._path, start=start_byte, end=end_byte)
+        return np.frombuffer(bytes0, dtype=self._header.dt, count=N)
 
-    def _read_chunk_1d_helper(self, path0, N, *, offset):
-        f = open(path0, "rb")
-        try:
-            f.seek(offset)
-            ret = np.fromfile(f, dtype=self._header.dt, count=N)
-            f.close()
-            return ret
-        except Exception as e:  # catch *all* exceptions
-            print(e)
-            f.close()
-            return None
+    # def _read_chunk_1d_helper(self, path0, N, *, offset):
+    #     f = open(path0, "rb")
+    #     try:
+    #         f.seek(offset)
+    #         ret = np.fromfile(f, dtype=self._header.dt, count=N)
+    #         f.close()
+    #         return ret
+    #     except Exception as e:  # catch *all* exceptions
+    #         print(e)
+    #         f.close()
+    #         return None
 
 
 def is_url(path):
@@ -154,31 +150,9 @@ def is_url(path):
     return path.startswith('http://') or path.startswith('https://') or path.startswith(
         'kbucket://') or path.startswith('sha1://') or path.startswith('sha1dir://')
 
-
-def _download_bytes_to_tmpfile(url, start, end):
-    headers = {"Range": "bytes={}-{}".format(start, end - 1)}
-    r = requests.get(url, headers=headers, stream=True)
-    _, tmp_fname = tempfile.mkstemp()
-    with open(tmp_fname, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-    return tmp_fname
-
-
 def _read_header(path):
-    if is_url(path):
-        tmp_fname = _download_bytes_to_tmpfile(path, 0, 200)
-        if not tmp_fname:
-            raise Exception('Problem downloading bytes from ' + path)
-        try:
-            ret = _read_header(tmp_fname)
-        except:
-            ret = None
-        os.remove(tmp_fname)
-        return ret
-
-    f = open(path, "rb")
+    bytes0 = ka.load_bytes(path, start=0, end=200)
+    f = io.BytesIO(bytes0)
     try:
         dt_code = _read_int32(f)
         _ = _read_int32(f)  # num bytes per entry
@@ -300,6 +274,7 @@ def _write_header(path, H, rewrite=False):
 def readmda(path):
     if (file_extension(path) == '.npy'):
         return readnpy(path)
+    path = ka.load_file(path)
     H = _read_header(path)
     if (H is None):
         print("Problem reading header of: {}".format(path))
