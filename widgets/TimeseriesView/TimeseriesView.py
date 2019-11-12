@@ -6,7 +6,7 @@ import numpy as np
 import io
 import base64
 import time
-from spikeforest import mdaio
+from ..pycommon.mdaio import writemda32
 # from spikeforest import EfficientAccessRecordingExtractor
 from ..pycommon.autoextractors import AutoRecordingExtractor
 from .examples import examples
@@ -129,7 +129,7 @@ class TimeseriesView:
 
 def _mda32_to_base64(X):
     f = io.BytesIO()
-    mdaio.writemda32(X, f)
+    writemda32(X, f)
     return base64.b64encode(f.getvalue()).decode('utf-8')
 
 def _extract_data_segment(*, recording, segment_num, segment_size):

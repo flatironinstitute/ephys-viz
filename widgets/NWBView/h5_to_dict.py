@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 from mountaintools import client as mt
-from spikeforest import mdaio
+from ..pycommon.mdaio import writenpy
 import tempfile
 import shutil
 import mlprocessors as mlpr
@@ -109,7 +109,7 @@ def _handle_ndarray(x, *, opts, name, snapshot=False):
         if snapshot:
             with TemporaryDirectory() as f:
                 fname = '{}/{}.npy'.format(f, name)
-                mdaio.writenpy(x, fname, dtype=npy_dtype_to_string(x.dtype))
+                writenpy(x, fname, dtype=npy_dtype_to_string(x.dtype))
                 return mt.createSnapshot(fname, upload_to=opts.get('upload_to', None))
         else:
             if (x.size > 10000):
