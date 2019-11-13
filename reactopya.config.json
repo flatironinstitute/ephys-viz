@@ -14,7 +14,8 @@
             "vtk",
             "imageio",
             "imageio-ffmpeg",
-            "spikeextractors"
+            "spikeextractors",
+            "h5_to_json"
         ]
     },
     "additional_jupyter_imports": [

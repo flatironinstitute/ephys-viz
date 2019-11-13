@@ -5,6 +5,7 @@ import spikeextractors as se
 import numpy as np
 import hashlib
 import json
+import h5_to_json as h5j
 from .mdaextractors import MdaRecordingExtractor
 from ...pycommon.load_nwb_item import load_nwb_item
 
@@ -12,6 +13,8 @@ class AutoRecordingExtractor(se.RecordingExtractor):
     def __init__(self, arg):
         super().__init__()
         self._hash = None
+        if isinstance(arg, str):
+            arg = dict(path=arg)
         if isinstance(arg, se.RecordingExtractor):
             self._recording = arg
             self.copy_channel_properties(recording=self._recording)
@@ -39,8 +42,12 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                     samplerate=samplerate
                 ))
                 setattr(self, 'hash', hash0)
+            elif path.endswith('.nwb.json'):
+                self._recording = NwbJsonRecordingExtractor(file_path=path)
+                hash0 = ka.get_file_info(path)['sha1']
+                setattr(self, 'hash', hash0)
             else:
-                raise Exception('Unable to initialize recording extractor')
+                raise Exception('Unable to initialize recording extractor.')
     
     def _apply_filters(self, recording, filters):
         ret = recording
@@ -82,6 +89,39 @@ class AutoRecordingExtractor(se.RecordingExtractor):
 
     def get_traces(self, **kwargs):
         return self._recording.get_traces(**kwargs)
+
+class NwbJsonRecordingExtractor(se.RecordingExtractor):
+    extractor_name = 'NwbJsonRecordingExtractor'
+    is_writable = False
+    def __init__(self, file_path):
+        se.RecordingExtractor.__init__(self)
+        X = ka.load_object(file_path)
+        X = h5j.hierarchy(X)
+        self._timeseries = h5j.get_value(X['root']['acquisition']['ElectricalSeries']['_datasets']['data'], use_kachery=True, lazy=True)
+        self._sampling_frequency = 30000 # hard-coded for now -- TODO: need to get this from the file
+        self._geom = None # TODO: need to get this from the file
+        if self._geom is not None:
+            for m in range(self._timeseries.shape[0]):
+                self.set_channel_property(m, 'location', self._geom[m, :])
+
+    def get_channel_ids(self):
+        return list(range(self._timeseries.shape[1]))
+
+    def get_num_frames(self):
+        return self._timeseries.shape[0]
+
+    def get_sampling_frequency(self):
+        return self._sampling_frequency
+
+    def get_traces(self, channel_ids=None, start_frame=None, end_frame=None):
+        if start_frame is None:
+            start_frame = 0
+        if end_frame is None:
+            end_frame = self.get_num_frames()
+        if channel_ids is None:
+            channel_ids = self.get_channel_ids()
+        recordings = self._timeseries[start_frame:end_frame, :][:, channel_ids].T
+        return recordings
 
 class NwbElectricalSeriesRecordingExtractor(se.RecordingExtractor):
     def __init__(self, *, path, nwb_path):
