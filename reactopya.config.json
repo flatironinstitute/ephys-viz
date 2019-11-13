@@ -13,7 +13,8 @@
             "scipy",
             "vtk",
             "imageio",
-            "imageio-ffmpeg"
+            "imageio-ffmpeg",
+            "spikeextractors"
         ]
     },
     "additional_jupyter_imports": [
