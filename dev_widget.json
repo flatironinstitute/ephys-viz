@@ -17,8 +17,7 @@
         "props": {
             "title": "Timeseries view",
             "recording": {
-                "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
-                "samplerate": 30000,
+                "path": "sha1dir://5426bea8dd11a15c73626bb679fc5a8227bc3d42.paired_kampff.2014_11_25_PAIR_3_0",
                 "kachery_config": {
                     "preset": "default_readonly"
                 }

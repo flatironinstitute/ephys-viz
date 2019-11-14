@@ -17,7 +17,6 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             arg = dict(path=arg)
         if isinstance(arg, se.RecordingExtractor):
             self._recording = arg
-            self.copy_channel_properties(recording=self._recording)
         else:
             self._recording = None
 
@@ -46,8 +45,11 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                 self._recording = NwbJsonRecordingExtractor(file_path=path)
                 hash0 = ka.get_file_info(path)['sha1']
                 setattr(self, 'hash', hash0)
+            elif ka.get_file_info(path + '/raw.mda'):
+                self._recording = MdaRecordingExtractor(recording_directory=path)
             else:
                 raise Exception('Unable to initialize recording extractor.')
+        self.copy_channel_properties(recording=self._recording)
     
     def _apply_filters(self, recording, filters):
         ret = recording

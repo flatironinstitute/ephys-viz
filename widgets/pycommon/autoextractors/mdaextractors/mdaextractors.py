@@ -36,7 +36,8 @@ class MdaRecordingExtractor(RecordingExtractor):
         if geom:
             self._geom = geom
         elif geom_path:
-            self._geom = np.genfromtxt(geom_path, delimiter=',')
+            geom_path2 = ka.load_file(geom_path)
+            self._geom = np.genfromtxt(geom_path2, delimiter=',')
         else:
             self._geom = np.zeros((X.N1(), 2))
         
