@@ -44,7 +44,7 @@ class TimeseriesView:
             for m in range(traces0.shape[0]):
                 traces0[m, :] = traces0[m, :] + y_offsets[m]
             vv = np.percentile(np.abs(traces0), 90)
-            y_scale_factor = 1 / (8 * vv) if vv > 0 else 1
+            y_scale_factor = 1 / (2 * vv) if vv > 0 else 1
             self._segment_size = int(np.ceil(self._segment_size_times_num_channels / self._recording.get_num_channels()))
             try:
                 channel_locations = self._recording.get_channel_locations()

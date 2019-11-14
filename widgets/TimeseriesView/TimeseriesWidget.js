@@ -9,7 +9,7 @@ export default class TimeseriesWidget extends Component {
         super(props);
         this.state = {
             panels: [],
-            timeRange: [0, 1000],
+            timeRange: [0, 30000],
             currentTime: null,
             leftPanelMode: null,
             selectedElectrodeIds: {},

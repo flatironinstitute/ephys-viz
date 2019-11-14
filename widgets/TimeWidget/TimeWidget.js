@@ -26,7 +26,7 @@ export default class TimeWidget extends Component {
         this._paintPanelIndex = 0;
         this._paintPanelCode = 0;
         this._statusText = '';
-        this._timeRange = [0, 1000];
+        this._timeRange = [0, 10000];
         this._currentTime = null;
 
         this._timeAxisLayer = new CanvasWidgetLayer(this.paintTimeAxisLayer);
