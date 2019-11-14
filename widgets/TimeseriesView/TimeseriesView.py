@@ -78,7 +78,6 @@ class TimeseriesView:
     def on_message(self, msg):
         
         if msg['command'] == 'requestSegment':
-            print('--- requestSegment', msg)
             ds = msg['ds_factor']
             ss = msg['segment_num']
             data0 = self._load_data(ds, ss)
@@ -89,7 +88,6 @@ class TimeseriesView:
                 segment_num=ss,
                 data=data0_base64
             ))
-            print('---- done')
 
     def _load_data(self, ds, ss):
         if not self._recording:

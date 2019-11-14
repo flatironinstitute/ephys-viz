@@ -65,6 +65,7 @@ export default class TimeWidget extends Component {
         this.updateLayout();
     }
     paintMainLayer = (painter) => {
+        let timer = new Date();
         this._paintPanelIndex = 0;
         this._paintPanelCode++;
         painter.useCoords();

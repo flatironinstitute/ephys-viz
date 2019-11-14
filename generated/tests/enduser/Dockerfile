@@ -44,6 +44,6 @@ RUN apt-get install -y locales && locale-gen en_US.UTF-8
 
 #########################################
 ### Install ephys_viz
-RUN pip install ephys_viz==0.9.0
+RUN pip install ephys_viz==0.9.1
 
 CMD echo "See instructions.txt on how to run this container"

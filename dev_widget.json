@@ -20,9 +20,11 @@
                 "path": "sha1dir://2db55b618779899e8b35fd15ef4831a98b3e2733.synth_magland.datasets_noise10_K10_C4.001_synth_20sec/raw.mda",
                 "samplerate": 30000,
                 "kachery_config": {
-                    "download": true
+                    "preset": "default_readonly"
                 }
-            }
+            },
+            "maxWidth": 1400,
+            "maxHeight": 800
         }
     },
     "widget3": {

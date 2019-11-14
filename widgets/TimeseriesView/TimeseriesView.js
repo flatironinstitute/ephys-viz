@@ -147,6 +147,8 @@ class TimeseriesViewInner extends Component {
             let leftPanels = [];
             for (let lp of this.props.leftPanels)
                 leftPanels.push(lp);
+            let width = Math.min(this.props.width, this.props.maxWidth || 99999);
+            let height = Math.min(this.props.width || 800, this.props.maxHeight || 99999);
             return (
                 <div>
                     <TimeseriesWidget
@@ -157,8 +159,8 @@ class TimeseriesViewInner extends Component {
                         num_timepoints={this.state.num_timepoints}
                         y_offsets={this.state.y_offsets}
                         y_scale_factor={this.state.y_scale_factor * (this.props.initial_y_scale_factor || 1)}
-                        width={this.props.width}
-                        height={this.props.height || 800}
+                        width={width}
+                        height={height}
                         leftPanels={leftPanels}
                     />
                 </div>
