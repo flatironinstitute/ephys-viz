@@ -15,7 +15,8 @@
             "imageio",
             "imageio-ffmpeg",
             "spikeextractors",
-            "h5_to_json"
+            "h5_to_json",
+            "fsspec"
         ]
     },
     "additional_jupyter_imports": [
