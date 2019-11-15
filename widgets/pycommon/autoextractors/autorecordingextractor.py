@@ -45,6 +45,12 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                 self._recording = NwbJsonRecordingExtractor(file_path=path)
                 hash0 = ka.get_file_info(path)['sha1']
                 setattr(self, 'hash', hash0)
+            elif path.endswith('.json') and (not path.endswith('.nwb.json')):
+                obj = ka.load_object(path)
+                if ('raw' in obj) and ('params' in obj) and ('geom' in obj):
+                    self._recording = MdaRecordingExtractor(timeseries_path=obj['raw'], samplerate=obj['params']['samplerate'], geom=np.array(obj['geom']))
+                else:
+                    raise Exception('Problem initializing recording extractor')
             elif ka.get_file_info(path + '/raw.mda'):
                 self._recording = MdaRecordingExtractor(recording_directory=path)
             else:

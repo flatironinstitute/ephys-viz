@@ -15,11 +15,13 @@
             "imageio",
             "imageio-ffmpeg",
             "spikeextractors",
-            "h5_to_json"
+            "h5_to_json",
+            "h5py"
         ]
     },
-    "additional_jupyter_imports": [
-        "from .widgets.jupyter import *"
+    "additional_imports": [
+        "from .widgets.jupyter import *",
+        "from .widgets.pycommon import AutoRecordingExtractor, AutoSortingExtractor"
     ],
     "adjust_webpack_rules": [
         "var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;",

@@ -152,6 +152,10 @@ def is_url(path):
 
 def _read_header(path):
     bytes0 = ka.load_bytes(path, start=0, end=200)
+    if bytes0 is None:
+        ka.set_config(preset='default_readonly')
+        print(ka.get_file_info(path))
+        raise Exception('Unable to load header bytes from {}'.format(path))
     f = io.BytesIO(bytes0)
     try:
         dt_code = _read_int32(f)

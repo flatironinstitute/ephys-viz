@@ -11,13 +11,28 @@
             "download_from": "spikeforest.public"
         }
     },
-    "widget": {
+    "widget2": {
         "type": "TimeseriesView",
         "key": "TimeseriesView",
         "props": {
             "title": "Timeseries view",
             "recording": {
                 "path": "sha1dir://5426bea8dd11a15c73626bb679fc5a8227bc3d42.paired_kampff.2014_11_25_PAIR_3_0",
+                "kachery_config": {
+                    "preset": "default_readonly"
+                }
+            },
+            "maxWidth": 1400,
+            "maxHeight": 800
+        }
+    },
+    "widget": {
+        "type": "TimeseriesView",
+        "key": "TimeseriesView",
+        "props": {
+            "title": "Timeseries view",
+            "recording": {
+                "path": "sha1://71f052d5c5e909154c443344316172bafadb327e/PAIRED_KAMPFF/paired_kampff/c16.json",
                 "kachery_config": {
                     "preset": "default_readonly"
                 }

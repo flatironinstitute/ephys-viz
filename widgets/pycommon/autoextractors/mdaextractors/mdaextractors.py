@@ -32,8 +32,10 @@ class MdaRecordingExtractor(RecordingExtractor):
             self._timeseries_path = path0
 
         self._timeseries = DiskReadMda(self._timeseries_path)
+        if self._timeseries is None:
+            raise Exception('Unable to load timeseries: {}'.format(self._timeseries_path))
         X = self._timeseries
-        if geom:
+        if geom is not None:
             self._geom = geom
         elif geom_path:
             geom_path2 = ka.load_file(geom_path)
