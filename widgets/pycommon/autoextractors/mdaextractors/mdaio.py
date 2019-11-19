@@ -95,7 +95,6 @@ class DiskReadMda:
         return self._header.num_bytes_per_entry
 
     def readChunk(self, i1=-1, i2=-1, i3=-1, N1=1, N2=1, N3=1):
-        # print("Reading chunk {} {} {} {} {} {}".format(i1,i2,i3,N1,N2,N3))
         if (i2 < 0):
             if self._npy_mode:
                 A = np.load(self._path, mmap_mode='r')
@@ -129,7 +128,7 @@ class DiskReadMda:
     def _read_chunk_1d(self, i, N):
         start_byte = self._header.header_size + self._header.num_bytes_per_entry * i
         end_byte = start_byte + self._header.num_bytes_per_entry * N
-        bytes0 = ka.load_bytes(self._path, start=start_byte, end=end_byte)
+        bytes0 = ka.load_bytes(self._path, start=int(start_byte), end=int(end_byte))
         return np.frombuffer(bytes0, dtype=self._header.dt, count=N)
 
     # def _read_chunk_1d_helper(self, path0, N, *, offset):
@@ -153,7 +152,7 @@ def is_url(path):
 def _read_header(path):
     bytes0 = ka.load_bytes(path, start=0, end=200)
     if bytes0 is None:
-        ka.set_config(preset='default_readonly')
+        ka.set_config(fr='default_readonly')
         print(ka.get_file_info(path))
         raise Exception('Unable to load header bytes from {}'.format(path))
     f = io.BytesIO(bytes0)

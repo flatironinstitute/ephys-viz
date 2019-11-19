@@ -3,9 +3,8 @@ import { PythonInterface } from 'reactopya';
 const config = require('./SpikeAmplitudePlot.json');
 import TimeWidget, { PainterPath } from '../TimeWidget/TimeWidget';
 import AutoDetermineWidth from '../jscommon/AutoDetermineWidth';
-import UnitSelector from '../jscommon/UnitSelector';
-import { SelectUnits } from '..';
-import { FaCommentsDollar } from 'react-icons/fa';
+import { TimeWidgetPanel } from '../TimeWidget/TimeWidget';
+import SelectUnits from '../SelectUnits/SelectUnits';
 
 export default class SpikeAmplitudePlot extends Component {
     static title = 'Spike amplitude plot'
@@ -14,18 +13,186 @@ export default class SpikeAmplitudePlot extends Component {
         if (!this.props.unit_ids) {
             return <SpikeAmplitudePlotSelectUnitIds {...this.props} />;
         }
-        let height = this.props.height || 500;
         return (
             <AutoDetermineWidth>
-                <SpikeAmplitudePlotInner {...this.props} height={height} />
+                <SpikeAmplitudePlotInner {...this.props} />
             </AutoDetermineWidth>
         );
     }
 }
 
+class SpikeAmplitudeDataModel {
+    constructor(pythonInterface) {
+        this._pythonInterface = pythonInterface;
+        this._blockSize = 30000 * 10;
+        this._blocks = {};
+        this._requestedBlocks = {};
+        this._updateHandlers = [];
+
+        this._pythonInterface.onMessage((msg) => {
+            if (msg.name == 'amplitudeData') {
+                this._handleMessage(msg);
+            }
+        });
+    }
+    requestData(unit_id, t1, t2) {
+        let times = [];
+        let amplitudes = [];
+        let b1 = Math.floor(t1 / this._blockSize);
+        let b2 = Math.floor(t2 / this._blockSize);
+        for (let bb = b1; bb <= b2; bb++) {
+            let x = this._requestBlock(unit_id, bb);
+            if (x) {
+                for (let i = 0; i < x.times.length; i++) {
+                    let t0 = x.times[i];
+                    if ((t1 <= t0) && (t0 <= t2)) {
+                        times.push(x.times[i]);
+                        amplitudes.push(x.amplitudes[i]);
+                    }
+                }
+            }
+        }
+        return {
+            times: times,
+            amplitudes: amplitudes
+        }
+    }
+    onUpdate(handler) {
+        this._updateHandlers.push(handler);
+    }
+    _handleMessage(msg) {
+        if (msg.blockSize != this._blockSize)
+            return;
+        let unit_id = msg.unit_id;
+        let blockNum = msg.blockNum;
+        let times = msg.times;
+        let amplitudes = msg.amplitudes;
+        if (!this._blocks[unit_id])
+            this._blocks[unit_id] = {};
+        this._blocks[unit_id][blockNum] = {
+            times: times,
+            amplitudes: amplitudes
+        };
+        for (let handler of this._updateHandlers) {
+            handler();
+        }
+    }
+    _requestBlock(unit_id, bnum) {
+        if ((this._blocks[unit_id]) && (this._blocks[unit_id][bnum])) {
+            return this._blocks[unit_id][bnum];
+        }
+        if ((this._requestedBlocks[unit_id]) && (this._requestedBlocks[unit_id][bnum])) {
+            return;
+        }
+        let msg = {
+            name: 'requestAmplitudeData',
+            unit_id: unit_id,
+            blockNum: bnum,
+            blockSize: this._blockSize
+        };
+        this._pythonInterface.sendMessage(msg);
+        if (!this._requestedBlocks[unit_id]) this._requestedBlocks[unit_id] = {};
+        this._requestedBlocks[unit_id][bnum] = true;
+    }
+}
+
+class SpikeAmplitudePlotInner extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            // javascript state
+            sorting: null,
+            recording: null,
+            
+            // python state
+            num_timepoints: null,
+            status: '',
+            status_message: ''
+        }
+        this._initializedTimeRange = false;
+        this._repainter = null;
+
+        this._mainPanel = new TimeWidgetPanel(
+            (painter, timeRange) => {this.paintUnits(painter, timeRange)},
+            {label: ''}
+        );
+    }
+    componentDidMount() {
+        this.pythonInterface = new PythonInterface(this, config);
+        this.pythonInterface.start();
+        this._dataModel = new SpikeAmplitudeDataModel(this.pythonInterface);
+        this._dataModel.onUpdate(this._repaint);
+        this.pythonInterface.setState({
+            sorting: this.props.sorting,
+            recording: this.props.recording,
+        });
+    }
+    componentDidUpdate(prevProps, prevState) {        
+    }
+    componentWillUnmount() {
+        this.pythonInterface.stop();
+    }
+    paintUnits = (painter, trange) => {
+        if (!this.props.unit_ids) return;
+        let minAmp = -10;
+        let maxAmp = 10;
+        this._mainPanel.setCoordYRange(minAmp, maxAmp);
+        for (let unit_id of this.props.unit_ids) {
+            let data0 = this._dataModel.requestData(unit_id, trange[0], trange[1]);
+            let times0 = data0.times;
+            let amps0 = data0.amplitudes;
+            painter.setPen({color: _color_for_unit_id(unit_id)});
+            for (let i in times0) {
+                let t = times0[i];
+                if ((trange[0] <= t) && (t <= trange[1])) {
+                    let amp = amps0[i];
+                    if ((minAmp <= amp) && (amp <= maxAmp))
+                        painter.drawMarker(t, amp, 2, 'circle');
+                }
+            }
+        }
+    }
+    _repaint = () => {
+        this._repainter && this._repainter();
+    }
+    render() {
+        if (this.state.status === 'finished') {
+            let panels = [this._mainPanel];
+
+            let width = Math.min(this.props.width, this.props.maxWidth || 99999);
+            let height = Math.min(this.props.height || 600, this.props.maxHeight || 99999);
+            
+            return (
+                <TimeWidget
+                    panels={panels}
+                    actions={[]}
+                    width={this.props.width}
+                    height={this.props.height}
+                    registerRepainter={(repaintFunc) => {this._repainter=repaintFunc}}
+                    samplerate={30000} // fix this
+                    maxTimeSpan={null}
+                    numTimepoints={this.state.num_timepoints}
+                    width={width}
+                    height={height}
+                    // currentTime={this.state.currentTime}
+                    // timeRange={this.state.timeRange}
+                    // onCurrentTimeChanged={this._handleCurrentTimeChanged}
+                    // onTimeRangeChanged={this._handleTimeRangeChanged}
+                    // leftPanel={leftPanel}
+                />
+            )
+        }
+        else {
+            return (
+                <RespectStatus {...this.state} />
+            )
+        }
+    }
+}
+
 class SpikeAmplitudePlotSelectUnitIds extends Component {
     state = {
-        unit_ids: []
+        unit_ids: null
     };
     _handleSelectedUnitsChanged = (selectedUnits) => {
         let unit_ids = [];
@@ -36,166 +203,28 @@ class SpikeAmplitudePlotSelectUnitIds extends Component {
         });
     }
     render() {
-        let height = this.props.height || 500;
+        let width = Math.min(this.props.width, this.props.maxWidth || 99999);
+        let height = Math.min(this.props.height || 600, this.props.maxHeight || 99999);
         let selectUnitsHeight = 100;
         return (
             <React.Fragment>
-                <SpikeAmplitudePlot
-                    {...this.props} height={height-selectUnitsHeight} unit_ids={this.state.unit_ids}
-                />
+                {
+                    this.state.unit_ids ? (
+                        <SpikeAmplitudePlot
+                            {...this.props} width={width} height={height-selectUnitsHeight} unit_ids={this.state.unit_ids}
+                        />
+                    ) : <span />
+                }
                 <SelectUnits
                     sorting={this.props.sorting}
                     reactopyaParent={this}
                     reactopyaChildId="SelectUnits"
                     onSelectedUnitsChanged={this._handleSelectedUnitsChanged}
+                    width={width}
                     height={selectUnitsHeight}
                 />
             </React.Fragment>
         )
-    }
-}
-
-class SpikeAmplitudePlotInner extends TimeWidget {
-    constructor(props) {
-        super(props);
-        this.state = {
-            // javascript state
-            sorting: null,
-            recording: null,
-            unit_ids: null,
-            
-            // python state
-            num_timepoints: null,
-            spike_trains: null,
-            spike_amplitudes: null,
-            status: '',
-            status_message: ''
-        }
-        this.retrievedSpikeTrains = {};
-        this.retrievedSpikeAmplitudes = {};
-        this._ampRange = [null, null];
-        this._initializedTimeRange = false;
-    }
-    componentDidMount() {
-        this.pythonInterface = new PythonInterface(this, config);
-        this.pythonInterface.start();
-        this.pythonInterface.setState({
-            sorting: this.props.sorting,
-            recording: this.props.recording,
-            unit_ids: this._determineUnitIdsToCompute()
-        });
-        this.initializeTimeWidget();
-        this._mainPanel = this.addPanel(this.paintMainPanel, {label: null});
-        this._updateAmpRange();
-    }
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.spike_trains) {
-            for (let id in this.state.spike_trains) {
-                this.retrievedSpikeTrains[id] = this.state.spike_trains[id];
-                this.retrievedSpikeAmplitudes[id] = this.state.spike_amplitudes[id];
-            }
-        }
-        const unit_ids_to_compute = this._determineUnitIdsToCompute();
-        if (unit_ids_to_compute.length > 0) {
-            this.pythonInterface.setState({
-                unit_ids: unit_ids_to_compute
-            });
-        }
-        if (
-            (this.props.width !== prevProps.width) ||
-            (this.props.height !== prevProps.height) ||
-            (this.state.spike_trains !== prevState.spike_trains) ||
-            (this.state.spike_amplitudes !== prevState.spike_amplitudes)
-        ) {
-            this._updateAmpRange();
-            this.updateTimeWidget();
-        }
-    }
-    componentWillUnmount() {
-        this.pythonInterface.stop();
-    }
-    _determineUnitIdsToCompute() {
-        let unit_ids = [];
-        for (let unit_id of this.props.unit_ids) {
-            let needed = (!this.retrievedSpikeTrains[unit_id]);
-            if (needed) {
-                unit_ids.push(unit_id);
-            }
-        }
-        return unit_ids;
-    }
-    paintMainPanel = (painter) => {
-        if (this.state.status !== 'finished') return;
-        if (!this._initializedTimeRange) {
-            this.setTimeRange([0, this.state.num_timepoints]);
-            this._initializedTimeRange = true;
-        }
-        let trange = this.timeRange();
-        for (let unit_id of this.props.unit_ids) {
-            let times0 = this.retrievedSpikeTrains[unit_id];
-            let amps0 = this.retrievedSpikeAmplitudes[unit_id];
-            if ((times0) && (amps0)) {
-                painter.setPen({color: _color_for_unit_id(unit_id)});
-                for (let i in times0) {
-                    let t = times0[i];
-                    if ((trange[0] <= t) && (t <= trange[1])) {
-                        let amp = amps0[i];
-                        if ((this._ampRange[0] <= amp) && (amp <= this._ampRange[1]))
-                        painter.drawMarker(t, amp, 2, 'circle');
-                    }
-                }
-            }
-        }
-    }
-    _updateAmpRange() {
-        if (this.state.status !== 'finished') return;
-        let min = 0, max = 0;
-        for (let unit_id of this.props.unit_ids) {
-            let amps = this.retrievedSpikeAmplitudes[unit_id];
-            if (amps) {
-                for (let a of amps) {
-                    if (a < min) min = a;
-                    if (a > max) max = a;
-                }
-            }
-        }
-        if ((this._ampRange[0] === min) && (this._ampRange[1] === max))
-            return;
-        this._ampRange = [min, max];
-        let panel = this._mainPanel;
-        panel.setCoordYRange(this._ampRange[0], this._ampRange[1]);
-        this.repaint();
-    }
-    render() {
-        if (this.state.status === 'finished') {
-            return this.renderTimeWidget();
-        }
-        else {
-            return (
-                <RespectStatus {...this.state} width={this.props.width} height={this.props.height} />
-            )
-        }
-    }
-}
-
-class RespectStatus extends Component {
-    state = {}
-    render() {
-        let style0 = {
-            position: 'relative',
-            width: this.props.width,
-            height: this.props.height
-        };
-        switch (this.props.status) {
-            case 'running':
-                return <div style={style0}>Running: {this.props.status_message}</div>
-            case 'error':
-                return <div style={style0}>Error: {this.props.status_message}</div>
-            case 'finished':
-                return this.props.children;
-            default:
-                return <div style={style0}>Unknown status: {this.props.status}</div>
-        }
     }
 }
 
@@ -205,4 +234,20 @@ function _color_for_unit_id(unit_id) {
     const colors = colors_str.split(', ');
     const index = Number(unit_id);
     return colors[index % colors.length];
+}
+
+class RespectStatus extends Component {
+    state = {}
+    render() {
+        switch (this.props.status) {
+            case 'running':
+                return <div>Running: {this.props.status_message}</div>
+            case 'error':
+                return <div>Error: {this.props.status_message}</div>
+            case 'finished':
+                return this.props.children;
+            default:
+                return <div>Unknown status: {this.props.status}</div>
+        }
+    }
 }

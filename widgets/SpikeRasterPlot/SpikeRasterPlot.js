@@ -9,10 +9,9 @@ export default class SpikeRasterPlot extends Component {
     static title = 'Spike raster plot'
     static reactopyaConfig = config;
     render() {
-        let height = this.props.height || 500;
         return (
             <AutoDetermineWidth>
-                <SpikeRasterPlotInner {...this.props} height={height} />
+                <SpikeRasterPlotInner {...this.props} />
             </AutoDetermineWidth>
         );
     }
@@ -94,6 +93,9 @@ class SpikeRasterPlotInner extends Component {
     render() {
         if (this.state.status === 'finished') {
             const { panels } = this.state;
+
+            let width = Math.min(this.props.width, this.props.maxWidth || 99999);
+            let height = Math.min(this.props.height || 600, this.props.maxHeight || 99999);
             
             return (
                 <TimeWidget
@@ -105,6 +107,8 @@ class SpikeRasterPlotInner extends Component {
                     samplerate={30000} // fix this
                     maxTimeSpan={null}
                     numTimepoints={this.state.num_timepoints}
+                    width={width}
+                    height={height}
                     // currentTime={this.state.currentTime}
                     // timeRange={this.state.timeRange}
                     // onCurrentTimeChanged={this._handleCurrentTimeChanged}

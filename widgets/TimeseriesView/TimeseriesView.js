@@ -148,7 +148,7 @@ class TimeseriesViewInner extends Component {
             for (let lp of this.props.leftPanels)
                 leftPanels.push(lp);
             let width = Math.min(this.props.width, this.props.maxWidth || 99999);
-            let height = Math.min(this.props.width || 800, this.props.maxHeight || 99999);
+            let height = Math.min(this.props.height || 800, this.props.maxHeight || 99999);
             return (
                 <div>
                     <TimeseriesWidget

@@ -48,6 +48,12 @@ class MdaRecordingExtractor(RecordingExtractor):
             #    'Incompatible dimensions between geom.csv and timeseries file {} <> {}'.format(self._geom.shape[0], X.N1()))
             print('WARNING: Incompatible dimensions between geom.csv and timeseries file {} <> {}'.format(self._geom.shape[0], X.N1()))
             self._geom = np.zeros((X.N1(), 2))
+        
+        self._hash = ka.get_object_hash(dict(
+            timeseries=ka.get_file_hash(self._timeseries_path),
+            samplerate=self._samplerate,
+            geom=_json_serialize(self._geom)
+        ))
 
         self._num_channels = X.N1()
         self._num_timepoints = X.N2()
@@ -74,6 +80,9 @@ class MdaRecordingExtractor(RecordingExtractor):
         recordings = X.readChunk(i1=0, i2=start_frame, N1=X.N1(), N2=end_frame - start_frame)
         recordings = recordings[channel_ids, :]
         return recordings
+    
+    def hash(self):
+        return self._hash
 
     @staticmethod
     def write_recording(recording, save_path, params=dict(), raw_fname='raw.mda', params_fname='params.json', 
@@ -131,8 +140,10 @@ class MdaSortingExtractor(SortingExtractor):
         return self._sampling_frequency
 
     def hash(self):
-        from mountaintools import client as mt
-        return ka.get_file_info(self._firings_path, algorithm='sha1')['sha1']
+        return ka.get_object_hash(dict(
+            firings=ka.get_file_hash(self._firings_path),
+            samplerate=self._sampling_frequency
+        ))
 
     @staticmethod
     def write_sorting(sorting, save_path):
@@ -218,3 +229,46 @@ def write_recording_blocks(recording, save_path, params=dict(), raw_fname='raw.m
         json.dump(params, f)
     np.savetxt(save_path + '/geom.csv', geom, delimiter=',')
 
+def _listify_ndarray(x):
+    if x.ndim == 1:
+        if np.issubdtype(x.dtype, np.integer):
+            return [int(val) for val in x]
+        else:
+            return [float(val) for val in x]
+    elif x.ndim == 2:
+        ret = []
+        for j in range(x.shape[1]):
+            ret.append(_listify_ndarray(x[:, j]))
+        return ret
+    elif x.ndim == 3:
+        ret = []
+        for j in range(x.shape[2]):
+            ret.append(_listify_ndarray(x[:, :, j]))
+        return ret
+    elif x.ndim == 4:
+        ret = []
+        for j in range(x.shape[3]):
+            ret.append(_listify_ndarray(x[:, :, :, j]))
+        return ret
+    else:
+        raise Exception('Cannot listify ndarray with {} dims.'.format(x.ndim))
+
+def _json_serialize(x):
+    if isinstance(x, np.ndarray):
+        return _listify_ndarray(x)
+    elif isinstance(x, np.integer):
+        return int(x)
+    elif isinstance(x, np.floating):
+        return float(x)
+    elif type(x) == dict:
+        ret = dict()
+        for key, val in x.items():
+            ret[key] = _json_serialize(val)
+        return ret
+    elif type(x) == list:
+        ret = []
+        for i, val in enumerate(x):
+            ret.append(_json_serialize(val))
+        return ret
+    else:
+        return x

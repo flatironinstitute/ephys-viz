@@ -29,6 +29,7 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             if 'kachery_config' in arg:
                 ka.set_config(**arg['kachery_config'])
             path = arg.get('path', '')
+            print(arg)
             if 'nwb_path' in arg:
                 self._recording = NwbElectricalSeriesRecordingExtractor(path=path, nwb_path=arg['nwb_path'])
             elif path.endswith('.mda'):

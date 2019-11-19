@@ -60,8 +60,8 @@ class AccordionInner extends Component {
         let { panels } = this.props;
         return (
             <Accordion2
-                allowMultipleExpanded={false}
-                allowZeroExpanded={true}
+                allowMultipleExpanded={this.props.allowMultipleExpanded !== undefined ? this.props.allowMultipleExpanded : false}
+                allowZeroExpanded={this.props.allowZeroExpanded !== undefined ? this.props.allowZeroExpanded : true}
                 preExpanded={[]}
                 onChange={(expandedList) => {this._handleChange(expandedList)}}
                 onSelect={(index, lastIndex, event) => {this._handleSelect(index);}}

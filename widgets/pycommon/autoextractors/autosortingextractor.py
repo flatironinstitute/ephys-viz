@@ -1,4 +1,4 @@
-from mountaintools import MountainClient
+import kachery as ka
 import spikeextractors as se
 import h5py
 import numpy as np
@@ -14,13 +14,12 @@ class AutoSortingExtractor(se.SortingExtractor):
             self.copy_unit_properties(sorting=self._sorting)
         else:
             self._sorting = None
-            self._client = MountainClient()
-            if 'download_from' in arg:
-                self._client.configDownloadFrom(arg['download_from'])
+            if 'kachery_config' in arg:
+                ka.set_config(**arg['kachery_config'])
             if 'path' in arg:
                 path = arg['path']
-                if self._client.isFile(path):
-                    file_path = self._client.realizeFile(path=path)
+                if ka.get_file_info(path):
+                    file_path = ka.load_file(path)
                     if not file_path:
                         raise Exception('Unable to realize file: {}'.format(path))
                     self._init_from_file(file_path, original_path=path, kwargs=arg)
@@ -32,15 +31,14 @@ class AutoSortingExtractor(se.SortingExtractor):
         if 'nwb_path' in kwargs:
             self._sorting = NwbSortingExtractor(path=path, nwb_path=kwargs['nwb_path'])
         elif original_path.endswith('.mda'):
-            if 'samplerate' not in kwargs:
-                raise Exception('Missing argument: samplerate')
-            samplerate = kwargs['samplerate']
+            if 'paramsPath' in kwargs:
+                params = ka.load_object(kwargs['paramsPath'])
+                samplerate = params['samplerate']
+            elif 'samplerate' in kwargs:
+                samplerate = kwargs['samplerate']
+            else:
+                raise Exception('Missing argument: samplerate or paramsPath')
             self._sorting = MdaSortingExtractor(firings_file=path, samplerate=samplerate)
-            hash0 = self._client.sha1OfObject(dict(
-                firings_path=self._client.computeFileSha1(path),
-                samplerate=samplerate
-            ))
-            setattr(self, 'hash', hash0)
         else:
             raise Exception('Unsupported format for {}'.format(original_path))
         
@@ -53,7 +51,8 @@ class AutoSortingExtractor(se.SortingExtractor):
                 else:
                     self._hash = self._sorting.hash()
             else:
-                self._hash = _samplehash(self._sorting)
+                self._hash = None
+                # self._hash = _samplehash(self._sorting)
         return self._hash
 
     def get_unit_ids(self):
@@ -98,19 +97,19 @@ class NwbSortingExtractor(se.SortingExtractor):
         # need to fix this
         return 30000
 
-def _samplehash(sorting):
-    from mountaintools import client as mt
-    obj = {
-        'unit_ids': sorting.get_unit_ids(),
-        'sampling_frequency': sorting.get_sampling_frequency(),
-        'data': _samplehash_helper(sorting)
-    }
-    return mt.sha1OfObject(obj)
+# def _samplehash(sorting):
+#     from mountaintools import client as mt
+#     obj = {
+#         'unit_ids': sorting.get_unit_ids(),
+#         'sampling_frequency': sorting.get_sampling_frequency(),
+#         'data': _samplehash_helper(sorting)
+#     }
+#     return mt.sha1OfObject(obj)
 
 
-def _samplehash_helper(sorting):
-    h = 0
-    for id in sorting.get_unit_ids():
-        st = sorting.get_unit_spike_train(unit_id=id)
-        h = hash((hash(bytes(st)), hash(h)))
-    return h
+# def _samplehash_helper(sorting):
+#     h = 0
+#     for id in sorting.get_unit_ids():
+#         st = sorting.get_unit_spike_train(unit_id=id)
+#         h = hash((hash(bytes(st)), hash(h)))
+#     return h

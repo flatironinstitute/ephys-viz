@@ -138,7 +138,7 @@ export default class TimeseriesWidget extends Component {
         let trange = timeRange;
         if (!trange) return;
         let y_offset = this.props.y_offsets[m];
-        painter.setPen({color: 'black'});
+        painter.setPen({color: 'black', width: 1});
         // painter.drawLine(trange[0], 0, trange[1], 0);
 
         let y_scale_factor = this.y_scale_factor;
@@ -173,29 +173,44 @@ export default class TimeseriesWidget extends Component {
         // }
 
         if (downsample_factor == 1) {
+            let penDown = false;
             for (let tt = t1; tt < t2; tt++) {
                 let val = data0[tt - t1];
-                let val2 = (val + y_offset) * y_scale_factor;
                 if (!isNaN(val)) {
-                    pp.lineTo(tt, val2);
+                    let val2 = (val + y_offset) * y_scale_factor;
+                    if (penDown) {
+                        pp.lineTo(tt, val2);    
+                    }
+                    else {
+                        pp.moveTo(tt, val2);
+                        penDown = true;
+                    }
                 }
                 else {
-                    pp.moveTo(tt, val2);
+                    penDown = false;
                 }
             }
         }
         else {
+            let penDown = false;
             for (let tt = t1b; tt < t2b; tt++) {
                 let val_min = data0[(tt - t1b) * 2];
                 let val_max = data0[(tt - t1b) * 2 + 1];
                 if ((!isNaN(val_min)) && (!isNaN(val_max))) {
                     let val2_min = (val_min + y_offset) * y_scale_factor;
                     let val2_max = (val_max + y_offset) * y_scale_factor;
-                    pp.lineTo(tt * downsample_factor, val2_min);
-                    pp.lineTo(tt * downsample_factor, val2_max);
+                    if (penDown) {
+                        pp.lineTo(tt * downsample_factor, val2_min);
+                        pp.lineTo(tt * downsample_factor, val2_max);
+                    }
+                    else {
+                        pp.moveTo(tt * downsample_factor, val2_min);
+                        pp.lineTo(tt * downsample_factor, val2_max);
+                        penDown = true;
+                    }
                 }
                 else {
-                    pp.moveTo(tt * downsample_factor, 0);
+                    penDown = false;
                 }
             }
         }
@@ -203,7 +218,8 @@ export default class TimeseriesWidget extends Component {
             painter.setPen({ 'color': 'yellow', width: 6 });
             painter.drawPath(pp);
         }
-        painter.setPen({ 'color': this.channel_colors[m % this.channel_colors.length], width: 2 });
+        // Note that using width=2 here had some bad side-effects on the rendering - and I think it's the browser's fault
+        painter.setPen({ 'color': this.channel_colors[m % this.channel_colors.length], width: 1 });
         painter.drawPath(pp);
     }
     _zoomAmplitude = (factor) => {
