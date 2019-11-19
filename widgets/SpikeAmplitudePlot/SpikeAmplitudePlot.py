@@ -10,6 +10,7 @@ from ..pycommon.autoextractors import AutoSortingExtractor
 class SpikeAmplitudePlot:
     def __init__(self):
         super().__init__()
+        self._amplitude_range = [0, 0]
 
     def javascript_state_changed(self, prev_state, state):
         self._set_status('running', 'Running SpikeAmplitudePlot')
@@ -39,6 +40,8 @@ class SpikeAmplitudePlot:
         self._set_state(
             # unit_ids = self._sorting.get_unit_ids(),
             num_timepoints=self._recording.get_num_frames(),
+            num_channels=self._recording.get_num_channels(),
+            samplerate=self._recording.get_sampling_frequency(),
             status='finished',
             status_message='finished'
         )
@@ -63,6 +66,17 @@ class SpikeAmplitudePlot:
                 times=times0,
                 amplitudes=amplitudes0
             ))
+
+            arange_new = [
+                np.min([self._amplitude_range[0], np.min(amplitudes0)]),
+                np.max([self._amplitude_range[1], np.max(amplitudes0)])
+            ]
+            if arange_new[0] != self._amplitude_range[0] or arange_new[1] != self._amplitude_range[1]:
+                self._amplitude_range = arange_new
+                self.send_message(dict(
+                    name='amplitudeRange',
+                    amplitude_range=self._amplitude_range
+                ))
 
     def _set_state(self, **kwargs):
         self.set_state(kwargs)

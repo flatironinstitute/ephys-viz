@@ -85,7 +85,7 @@ export default class Recording extends Component {
         let panels = [
             {key: 'timeseries', label: 'Timeseries', render: this._renderTimeseries},
             {key: 'spikeraster', label: 'Spike Raster Plot', render: this._renderSpikeRasterPlot},
-            {key: 'spikeamplitude', label: 'Spike Amplitudes', render: this._renderSpikeAmplitudePlot},
+            {key: 'spikeamplitude', label: 'Spike Amplitudes (WIP)', render: this._renderSpikeAmplitudePlot},
             {key: 'autocorrelograms', label: 'Autocorrelograms', render: this._renderAutocorrelograms}
         ];
         return (

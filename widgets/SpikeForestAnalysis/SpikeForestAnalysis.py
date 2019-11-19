@@ -16,6 +16,9 @@ class SpikeForestAnalysis:
         obj = ka.load_object(path=path, fr='default_readonly')
         if not obj:
             self._set_error('Unable to load object: {}'.format(path))
+
+        # For now don't load the bulk of the object
+        obj['StudyAnalysisResults'] = []
         
         self._set_state(
             object=obj

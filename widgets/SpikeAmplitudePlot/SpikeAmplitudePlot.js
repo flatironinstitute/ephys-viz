@@ -28,12 +28,19 @@ class SpikeAmplitudeDataModel {
         this._blocks = {};
         this._requestedBlocks = {};
         this._updateHandlers = [];
+        this._amplitudeRange = [0, 0];
 
         this._pythonInterface.onMessage((msg) => {
             if (msg.name == 'amplitudeData') {
                 this._handleMessage(msg);
             }
+            else if (msg.name == 'amplitudeRange') {
+                this._amplitudeRange = msg.amplitude_range
+            }
         });
+    }
+    amplitudeRange() {
+        return this._amplitudeRange;
     }
     requestData(unit_id, t1, t2) {
         let times = [];
@@ -106,6 +113,8 @@ class SpikeAmplitudePlotInner extends Component {
             
             // python state
             num_timepoints: null,
+            num_channels: null,
+            samplerate: null,
             status: '',
             status_message: ''
         }
@@ -128,14 +137,19 @@ class SpikeAmplitudePlotInner extends Component {
         });
     }
     componentDidUpdate(prevProps, prevState) {        
+        if (this.props.unit_ids !== prevProps.unit_ids) {
+            this._repaint();
+        }
     }
     componentWillUnmount() {
         this.pythonInterface.stop();
     }
     paintUnits = (painter, trange) => {
         if (!this.props.unit_ids) return;
-        let minAmp = -10;
-        let maxAmp = 10;
+        let amplitudeRange = this._dataModel.amplitudeRange();
+        let minAmp = amplitudeRange[0];
+        let maxAmp = amplitudeRange[1];
+        if (maxAmp == minAmp) maxAmp = minAmp + 1;
         this._mainPanel.setCoordYRange(minAmp, maxAmp);
         for (let unit_id of this.props.unit_ids) {
             let data0 = this._dataModel.requestData(unit_id, trange[0], trange[1]);
@@ -169,8 +183,8 @@ class SpikeAmplitudePlotInner extends Component {
                     width={this.props.width}
                     height={this.props.height}
                     registerRepainter={(repaintFunc) => {this._repainter=repaintFunc}}
-                    samplerate={30000} // fix this
-                    maxTimeSpan={null}
+                    samplerate={this.state.samplerate}
+                    maxTimeSpan={1e7 / this.state.num_channels}
                     numTimepoints={this.state.num_timepoints}
                     width={width}
                     height={height}
