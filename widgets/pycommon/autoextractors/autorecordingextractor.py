@@ -10,7 +10,7 @@ from .mdaextractors import MdaRecordingExtractor
 from ...pycommon.load_nwb_item import load_nwb_item
 
 class AutoRecordingExtractor(se.RecordingExtractor):
-    def __init__(self, arg):
+    def __init__(self, arg, download=False):
         super().__init__()
         self._hash = None
         if isinstance(arg, str):
@@ -29,14 +29,13 @@ class AutoRecordingExtractor(se.RecordingExtractor):
             if 'kachery_config' in arg:
                 ka.set_config(**arg['kachery_config'])
             path = arg.get('path', '')
-            print(arg)
             if 'nwb_path' in arg:
                 self._recording = NwbElectricalSeriesRecordingExtractor(path=path, nwb_path=arg['nwb_path'])
             elif path.endswith('.mda'):
                 if 'samplerate' not in arg:
                     raise Exception('Missing argument: samplerate')
                 samplerate = arg['samplerate']
-                self._recording = MdaRecordingExtractor(timeseries_path=path, samplerate=samplerate)
+                self._recording = MdaRecordingExtractor(timeseries_path=path, samplerate=samplerate, download=download)
                 hash0 = _sha1_of_object(dict(
                     timeseries_sha1=ka.get_file_info(path, algorithm='sha1')['sha1'],
                     samplerate=samplerate
@@ -53,7 +52,7 @@ class AutoRecordingExtractor(se.RecordingExtractor):
                 else:
                     raise Exception('Problem initializing recording extractor')
             elif ka.get_file_info(path + '/raw.mda'):
-                self._recording = MdaRecordingExtractor(recording_directory=path)
+                self._recording = MdaRecordingExtractor(recording_directory=path, download=download)
             else:
                 raise Exception('Unable to initialize recording extractor.')
         self.copy_channel_properties(recording=self._recording)
