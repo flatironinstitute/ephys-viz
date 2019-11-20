@@ -190,7 +190,6 @@ class AnalysisWidget extends Component {
                 {...this.handlerProps}
             />
         );
-        return <pre>{JSON.stringify(data)}</pre>
     }
     _renderStudySet(data) {
         const { object } = this.props;
