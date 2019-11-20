@@ -101,8 +101,6 @@ class SpikeRasterPlotInner extends Component {
                 <TimeWidget
                     panels={panels}
                     actions={[]}
-                    width={this.props.width}
-                    height={this.props.height}
                     registerRepainter={(repaintFunc) => {this._repainter=repaintFunc}}
                     samplerate={30000} // fix this
                     maxTimeSpan={null}

@@ -156,7 +156,9 @@ class AnalysisWidget extends Component {
     _renderHome() {
         const { object } = this.props;
         let panels = [];
-        panels.push({key: 'Stats', label: 'Stats', object: object})
+        if (object.SortingResults) {
+            panels.push({key: 'Stats', label: 'Stats', object: object})
+        }
         for (let key in object) {
             if (key !== 'mode') {
                 panels.push({

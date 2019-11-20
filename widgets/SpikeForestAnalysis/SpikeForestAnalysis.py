@@ -18,7 +18,8 @@ class SpikeForestAnalysis:
             self._set_error('Unable to load object: {}'.format(path))
 
         # For now don't load the bulk of the object
-        obj['StudyAnalysisResults'] = []
+        if 'StudyAnalysisResults' in obj:
+            del obj['StudyAnalysisResults']
         
         self._set_state(
             object=obj
